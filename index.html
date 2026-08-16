@@ -468,7 +468,7 @@
       // ==========================================
       // 🗣️ 3. 聆聽對話 API (排隊逐句發送版)
       // ==========================================
-      async function playListeningAudio() {
+      async function playListeningAudio(isSlow) { 
         if(!currentListeningScript) return showSysMsg("⚠️ No script data found", true);
         var scriptArr = []; try { scriptArr = JSON.parse(currentListeningScript); } catch(e) { scriptArr = [{ role: "Log", text_en: currentListeningScript }]; }
         var listenBtn = document.getElementById('listen-btn');
@@ -513,6 +513,10 @@
                 if (playIdx < validResults.length) {
                     showSysMsg("🗣️ " + validResults[playIdx].role + " speaking...", false);
                     elevenPlayer.src = validResults[playIdx].url; 
+                    
+                    // 🚀 2. 魔法代碼：喺準備播嗰刻，根據 isSlow 決定語速 (0.7倍速聽對話會自然啲)
+                    elevenPlayer.playbackRate = isSlow ? 0.7 : 1.0; 
+                    
                     elevenPlayer.onended = function(){ playIdx++; playNext(); }; 
                     elevenPlayer.play();
                 } else { 
@@ -721,9 +725,12 @@
         else if (currentMissionType === 'listening') {
             currentBadge = q.Type || "AUDIO LOG"; displayQ = q.Question; targetCurrentAnswer = String(q.Answer).trim();
             currentListeningScript = ""; for(var k in q){ if(typeof q[k]==='string' && q[k].indexOf('"role"')>-1){ currentListeningScript=q[k]; break; } }
-            if(!currentListeningScript) currentListeningScript = String(q.DialogueData||q.Transcript||"");
             document.getElementById('qAudioContainer').style.display="block";
-            document.getElementById('listen-btn').onclick = playListeningAudio; 
+            document.getElementById('qAudioContainer').innerHTML = 
+                '<div class="audio-matrix">' +
+                '<button class="voice-btn" id="listen-btn" onclick="playListeningAudio(false)">🔊 PLAY AUDIO</button>' +
+                '<button class="voice-btn" onclick="playListeningAudio(true)">🐢 PLAY (SLOW)</button>' +
+                '</div>';
             if (currentBadge.toUpperCase() === 'TFNG' || currentBadge.toUpperCase() === 'T/F/NG') { instructionText = "Choose True, False, or Not Given."; renderMode = "MCQ"; } else { instructionText = "Listen and solve."; if(String(q.Distractors||"").length>0) renderMode = "MCQ"; }
         }
         document.getElementById('qTypeBadge').innerText = currentBadge;
