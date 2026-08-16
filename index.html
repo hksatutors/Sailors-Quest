@@ -44,10 +44,19 @@
         #bgmSelect { max-width: 80px; font-size: 10px; }
       }
 
-      /* 🚀 左下角浮水印 */
+      /* 🚀 左下角浮水印 (加入高對比深色陰影) */
       #footerWatermark {
-        position: fixed; bottom: 10px; left: 10px; font-size: 10px; color: rgba(255, 255, 255, 0.25);
-        font-family: 'Arial', sans-serif; letter-spacing: 0.5px; pointer-events: none; z-index: 9000;
+        position: fixed; 
+        bottom: 10px; 
+        left: 10px; 
+        font-size: 11px; /* 稍微放大少少 */
+        color: rgba(255, 255, 255, 0.6); /* 提高白字清晰度 */
+        font-family: 'Arial', sans-serif; 
+        letter-spacing: 0.5px; 
+        pointer-events: none; 
+        z-index: 9000;
+        /* 🚀 魔法代碼：加上兩層黑色陰影，保證喺極光背景都清晰可見 */
+        text-shadow: 1px 1px 3px rgba(0,0,0,1), 0 0 5px rgba(0,0,0,0.8); 
       }
 
       /* 介面與背景 */
