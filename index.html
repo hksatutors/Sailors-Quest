@@ -362,7 +362,7 @@
 
     <script>
       // ==========================================
-      // 🚀 全域設定與中轉 API 網址 (統一經 Cloudflare 處理)
+      // 🚀 1. 全域設定與中轉 API 網址 (統一經 Cloudflare 處理)
       // ==========================================
       const API_URL = "https://noah-api-proxy.hksatutors.workers.dev/";
 
@@ -428,7 +428,8 @@
         duckBGM(); msg.onend = unduckBGM; window.speechSynthesis.speak(msg);
       }
 
-      // 🗣️ 單字語音 API (加入詳細錯誤擷取)
+      // ==========================================
+      // 🗣️ 2. 單字語音 API (防崩潰安全版)
       // ==========================================
       function playAudioLogic(text, isSlow, forceTTS) {
         if (!text) return;
@@ -439,7 +440,7 @@
             method: 'POST', headers: { 'Content-Type': 'text/plain' },
             body: JSON.stringify({ action: 'tts', text: text, voiceId: VOICE_POOL.Female[0] })
         })
-        .then(res => res.text()) // 🚀 先接住純文字，防 HTML 崩潰
+        .then(res => res.text()) 
         .then(textData => {
             try {
                 var data = JSON.parse(textData);
@@ -453,13 +454,13 @@
             }
         })
         .catch(err => { 
-            console.error("🔊 TTS 連線總崩潰:", err); 
+            console.error("🔊 TTS 連線崩潰:", err); 
             unduckBGM(); playVoice(text, 1.0); 
         });
       }
 
       // ==========================================
-      // 🗣️ 聆聽對話 API (🚀 核心升級：排隊逐句發送，防止塞爆 GAS)
+      // 🗣️ 3. 聆聽對話 API (排隊逐句發送版)
       // ==========================================
       async function playListeningAudio() {
         if(!currentListeningScript) return showSysMsg("⚠️ No script data found", true);
@@ -472,7 +473,6 @@
         var validResults = [];
 
         try {
-            // 🚀 放棄 Promise.all，改為 await 逐句排隊發送
             for (let i = 0; i < scriptArr.length; i++) {
                 var line = scriptArr[i];
                 var txt = String(line.text_en || line.text || line.dialogue || line.content || "");
@@ -486,7 +486,6 @@
                     method: 'POST', headers: { 'Content-Type': 'text/plain' },
                     body: JSON.stringify({ action: 'tts', text: txt, voiceId: roleVoices[line.role] })
                 });
-                
                 const textData = await res.text();
                 
                 try {
@@ -497,13 +496,12 @@
                         console.error("⚠️ 句子轉換失敗:", data.message);
                     }
                 } catch (parseErr) {
-                    console.error("❌ 句子解析 JSON 失敗，伺服器吐出:", textData);
+                    console.error("❌ 句子解析 JSON 失敗:", textData);
                 }
             }
 
             if(validResults.length === 0) throw new Error("所有句子轉換失敗");
 
-            // 🚀 播放排隊完成嘅音檔
             var playIdx = 0;
             function playNext() {
                 if (playIdx < validResults.length) {
@@ -518,13 +516,16 @@
             playNext();
 
         } catch (err) {
-            console.error("🚨 聆聽對話 API 總崩潰:", err);
+            console.error("🚨 聆聽對話 API 崩潰:", err);
             unduckBGM(); listenBtn.disabled = false; showSysMsg("⚠️ Connection failed, using fallback", true); 
             var fullText = scriptArr.map(function(l){ return String(l.text_en || l.text || l.dialogue || l.content || ""); }).join(". ");
             playVoice(fullText, 1.0);
         }
       }
 
+      // ==========================================
+      // 🚀 4. 系統介面與登入邏輯
+      // ==========================================
       function unlockSystemMedia() {
         document.querySelectorAll('.bg-vid').forEach(function(vid) { vid.play().catch(function(){}); });
         elevenPlayer.load(); sePlayer.load();
@@ -557,7 +558,6 @@
         document.getElementById('bgmController').style.display = (screenId === 'loginScreen') ? 'none' : 'flex';
       }
 
-      // 登入流程 (已轉用 fetch API)
       function attemptLogin() {
         var id = String(document.getElementById('inputId').value).trim(), pin = String(document.getElementById('inputPin').value).trim();
         if(!id || !pin) return showSysMsg("⚠️ Please enter ID and PIN", true);
@@ -572,30 +572,22 @@
             method: 'POST', headers: { 'Content-Type': 'text/plain' },
             body: JSON.stringify({ action: 'loginUser', id: id, pin: pin, mood: document.getElementById('inputMood').value })
         })
-        .then(response => response.text()) // 🚀 唔好直接轉 JSON，先當純文字接住
-        .then(textData => {
-            console.log("🔥 伺服器原始回應:", textData); // 印出嚟睇吓係乜鬼！
-            
-            // 嘗試手動轉換為 JSON
-            try {
-                var res = JSON.parse(textData);
-                
-                document.getElementById('loadingOverlay').style.display = 'none';
-                if(res && res.success) { 
-                    try { localStorage.setItem('noah_id', id); localStorage.setItem('noah_pin', pin); } catch(e) {}
-                    playSFX('login_success'); currentUserData = res.data; updateUI(); 
-                    navTo('dashboardScreen'); isMissionActive = false; if(isBgmPlaying) bgmPlayer.volume = 0.3; 
-                } else { 
-                    try { localStorage.removeItem('noah_id'); localStorage.removeItem('noah_pin'); } catch(e) {}
-                    playSFX('login_fail'); showSysMsg("⚠️ 登入失敗: " + (res.message || "未知錯誤"), true); 
-                    if(isBgmPlaying) { toggleBGM(); } 
-                }
-            } catch(e) {
-                // 如果轉換 JSON 失敗，代表收到 HTML 或者 Error
-                document.getElementById('loadingOverlay').style.display = 'none';
-                showSysMsg("⚠️ 伺服器回應異常，請檢查 F12 主控台", true);
-                console.error("❌ 無法解析 JSON，原始資料為:", textData);
+        .then(response => response.json())
+        .then(res => {
+            document.getElementById('loadingOverlay').style.display = 'none';
+            if(res && res.success) { 
+                try { localStorage.setItem('noah_id', id); localStorage.setItem('noah_pin', pin); } catch(e) {}
+                playSFX('login_success'); currentUserData = res.data; updateUI(); 
+                navTo('dashboardScreen'); isMissionActive = false; if(isBgmPlaying) bgmPlayer.volume = 0.3; 
+            } else { 
+                try { localStorage.removeItem('noah_id'); localStorage.removeItem('noah_pin'); } catch(e) {}
+                playSFX('login_fail'); showSysMsg("⚠️ Login Failed. Check ID or PIN.", true); 
+                if(isBgmPlaying) { toggleBGM(); } 
             }
+        }).catch(err => {
+            document.getElementById('loadingOverlay').style.display = 'none'; 
+            showSysMsg("⚠️ Server Error", true);
+            console.error("Login API 崩潰:", err);
         });
       }
 
@@ -631,7 +623,7 @@
       }
 
       // ==========================================
-      // 🚀 將所有 google.script.run 轉為 Fetch API
+      // 🚀 5. 任務核心邏輯
       // ==========================================
       function executeMission() {
         playSFX('click');
@@ -642,10 +634,8 @@
         fetch(API_URL, {
             method: 'POST', headers: { 'Content-Type': 'text/plain' },
             body: JSON.stringify({
-                action: 'fetchMissionData',
-                studentId: currentUserData.studentId,
-                pool: currentMissionType.startsWith('vocab') ? 'Vocab_Pool' : (currentMissionType==='grammar'?'Grammar_Pool':'Listening_Pool'),
-                count: count
+                action: 'fetchMissionData', studentId: currentUserData.studentId,
+                pool: currentMissionType.startsWith('vocab') ? 'Vocab_Pool' : (currentMissionType==='grammar'?'Grammar_Pool':'Listening_Pool'), count: count
             })
         })
         .then(res => res.json())
@@ -670,7 +660,6 @@
         });
       }
 
-      // (renderQuestion, checkAnswer, nextQuestion 函數內部無 API 呼叫，直接複製保留)
       function renderQuestion() {
         if (currentIdx >= missionQueue.length) return finishMission();
         var q = missionQueue[currentIdx];
@@ -912,7 +901,7 @@
       }
 
       // ==========================================
-      // 🚀 登入紀錄及跨網域通訊監聽器 (整合版)
+      // 🚀 6. 登入紀錄及跨網域通訊監聽器
       // ==========================================
       window.addEventListener("load", function() {
           var savedId = localStorage.getItem('noah_id');
