@@ -429,11 +429,10 @@
       }
 
       // ==========================================
-      // 🗣️ 2. 單字語音 API (防崩潰安全版)
+      // 🗣️ 單字語音 API (支援 ElevenLabs 完美慢速播放)
       // ==========================================
-      function playAudioLogic(text, isSlow, forceTTS) {
+      function playAudioLogic(text, isSlow) {
         if (!text) return;
-        if (isSlow || forceTTS) return playVoice(text, isSlow ? 0.6 : 1.0);
         
         duckBGM();
         fetch(API_URL, {
@@ -446,7 +445,12 @@
                 var data = JSON.parse(textData);
                 if (data.success && data.audioBase64) {
                     elevenPlayer.src = data.audioBase64;
-                    elevenPlayer.onended = unduckBGM; elevenPlayer.play();
+                    
+                    // 🚀 魔法代碼：前端控制語速 (0.6倍速 / 1.0正常速度)
+                    elevenPlayer.playbackRate = isSlow ? 0.6 : 1.0; 
+                    
+                    elevenPlayer.onended = unduckBGM; 
+                    elevenPlayer.play();
                 } else throw "API 回傳失敗: " + data.message;
             } catch(e) {
                 console.error("❌ 單字語音 JSON 解析失敗，伺服器吐出:", textData);
@@ -455,10 +459,12 @@
         })
         .catch(err => { 
             console.error("🔊 TTS 連線崩潰:", err); 
-            unduckBGM(); playVoice(text, 1.0); 
+            unduckBGM(); 
+            // 如果跌落 Google 備用發聲，都一樣支援慢速
+            playVoice(text, isSlow ? 0.6 : 1.0); 
         });
       }
-
+      
       // ==========================================
       // 🗣️ 3. 聆聽對話 API (排隊逐句發送版)
       // ==========================================
