@@ -529,21 +529,30 @@
             method: 'POST', headers: { 'Content-Type': 'text/plain' },
             body: JSON.stringify({ action: 'loginUser', id: id, pin: pin, mood: document.getElementById('inputMood').value })
         })
-        .then(response => response.json())
-        .then(res => {
-            document.getElementById('loadingOverlay').style.display = 'none';
-            if(res && res.success) { 
-                try { localStorage.setItem('noah_id', id); localStorage.setItem('noah_pin', pin); } catch(e) {}
-                playSFX('login_success'); currentUserData = res.data; updateUI(); 
-                navTo('dashboardScreen'); isMissionActive = false; if(isBgmPlaying) bgmPlayer.volume = 0.3; 
-            } else { 
-                try { localStorage.removeItem('noah_id'); localStorage.removeItem('noah_pin'); } catch(e) {}
-                playSFX('login_fail'); showSysMsg("⚠️ Login Failed. Check ID or PIN.", true); 
-                if(isBgmPlaying) { toggleBGM(); } 
+        .then(response => response.text()) // 🚀 唔好直接轉 JSON，先當純文字接住
+        .then(textData => {
+            console.log("🔥 伺服器原始回應:", textData); // 印出嚟睇吓係乜鬼！
+            
+            // 嘗試手動轉換為 JSON
+            try {
+                var res = JSON.parse(textData);
+                
+                document.getElementById('loadingOverlay').style.display = 'none';
+                if(res && res.success) { 
+                    try { localStorage.setItem('noah_id', id); localStorage.setItem('noah_pin', pin); } catch(e) {}
+                    playSFX('login_success'); currentUserData = res.data; updateUI(); 
+                    navTo('dashboardScreen'); isMissionActive = false; if(isBgmPlaying) bgmPlayer.volume = 0.3; 
+                } else { 
+                    try { localStorage.removeItem('noah_id'); localStorage.removeItem('noah_pin'); } catch(e) {}
+                    playSFX('login_fail'); showSysMsg("⚠️ 登入失敗: " + (res.message || "未知錯誤"), true); 
+                    if(isBgmPlaying) { toggleBGM(); } 
+                }
+            } catch(e) {
+                // 如果轉換 JSON 失敗，代表收到 HTML 或者 Error
+                document.getElementById('loadingOverlay').style.display = 'none';
+                showSysMsg("⚠️ 伺服器回應異常，請檢查 F12 主控台", true);
+                console.error("❌ 無法解析 JSON，原始資料為:", textData);
             }
-        }).catch(err => {
-            document.getElementById('loadingOverlay').style.display = 'none'; 
-            showSysMsg("⚠️ Server Error", true);
         });
       }
 
