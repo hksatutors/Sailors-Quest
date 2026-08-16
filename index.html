@@ -1,0 +1,894 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <link rel="apple-touch-icon" href="https://drive.google.com/file/d/1yuSVHkFLdjNg82VwzRVWDY0BcqRM_Cui/view?usp=sharing">
+    <link rel="icon" href="https://drive.google.com/file/d/1yuSVHkFLdjNg82VwzRVWDY0BcqRM_Cui/view?usp=sharing">
+    <base target="_top">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>⚓ Sailors' Quest</title>
+    <style>
+      /* =========================================
+         ⚓ Sailors' Quest (V17.0 API 安全隔離與全響應版)
+         ========================================= */
+      :root {
+        --noah-cyan: #00e5ff; --noah-dark: #0a0f16; --text-main: #ecf0f1; 
+        --text-dim: #7f8c8d; --accent-red: #ff3366; --accent-green: #2ecc71; --accent-gold: #f1c40f;
+      }
+      * { box-sizing: border-box; }
+
+      html { margin: 0; padding: 0; height: 100%; width: 100%; }
+      body { 
+        margin: 0; padding: 45px 0 0 0; box-sizing: border-box; height: 100%; width: 100%;
+        font-family: 'Segoe UI', sans-serif; background: transparent; color: var(--text-main); 
+        display: flex; justify-content: center; align-items: center; overflow: hidden; font-size: 18px;
+      }
+      
+      /* 🚀 系統狀態列 */
+      #systemHeader {
+        position: fixed; top: 0; left: 0; width: 100%; height: 45px; 
+        background-color: rgba(10, 15, 30, 0.85); border-bottom: 1px solid #00f3ff; 
+        box-shadow: 0 0 10px rgba(0, 243, 255, 0.3); display: flex; align-items: center; 
+        justify-content: space-between; padding: 0 15px; box-sizing: border-box; 
+        z-index: 9999; backdrop-filter: blur(4px); 
+      }
+      .brand-container { display: flex; align-items: baseline; }
+      .brand-title { color: #ffffff; font-weight: bold; font-size: 15px; letter-spacing: 1px; margin-right: 5px; font-family: 'Arial', sans-serif; }
+      .system-name { color: #00f3ff; font-size: 12px; letter-spacing: 1px; border-left: 1px solid rgba(255, 255, 255, 0.3); padding-left: 5px; font-family: 'Courier New', monospace; }
+      
+      #bgmController { display: flex; align-items: center; flex-shrink: 0; }
+      #bgmSelect { background: rgba(10, 15, 30, 0.8); color: #00f3ff; border: 1px solid rgba(0, 243, 255, 0.4); border-radius: 4px; font-size: 12px; outline: none; padding: 2px; font-family: 'Courier New', monospace; max-width: 120px; text-overflow: ellipsis; white-space: nowrap; overflow: hidden; }
+
+      @media (max-width: 400px) {
+        .brand-title { font-size: 13px; margin-right: 3px; }
+        .system-name { font-size: 10px; padding-left: 3px; }
+        #bgmSelect { max-width: 80px; font-size: 10px; }
+      }
+
+      /* 🚀 左下角浮水印 */
+      #footerWatermark {
+        position: fixed; bottom: 10px; left: 10px; font-size: 10px; color: rgba(255, 255, 255, 0.25);
+        font-family: 'Arial', sans-serif; letter-spacing: 0.5px; pointer-events: none; z-index: 9000;
+      }
+
+      /* 介面與背景 */
+      .bg-fallback { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; z-index: -20; background: radial-gradient(circle at center, #0a1f33 0%, #02050a 100%); }
+      .bg-video-layer { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; z-index: -10; overflow: hidden; }
+      .bg-vid { position: absolute; top: 0; left: 0; width: 100%; height: 100%; object-fit: cover; opacity: 0; transition: opacity 1s ease-in-out; }
+      .bg-vid.active-bg { opacity: 0.8; }
+      
+      #system-unlock-screen { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: #02050a; z-index: 20000; display: flex; flex-direction: column; justify-content: center; align-items: center; transition: opacity 0.8s ease-out; }
+      .unlock-btn { background: transparent; border: 2px solid var(--noah-cyan); color: var(--noah-cyan); padding: 20px 40px; font-size: 20px; font-weight: bold; border-radius: 12px; cursor: pointer; letter-spacing: 2px; text-transform: uppercase; box-shadow: 0 0 20px rgba(0,229,255,0.2); transition: 0.3s; animation: pulse 2s infinite; }
+      .unlock-btn:hover { background: var(--noah-cyan); color: #000; box-shadow: 0 0 40px rgba(0,229,255,0.6); transform: scale(1.05); }
+      @keyframes pulse { 0% { box-shadow: 0 0 10px rgba(0,229,255,0.2); } 50% { box-shadow: 0 0 30px rgba(0,229,255,0.6); } 100% { box-shadow: 0 0 10px rgba(0,229,255,0.2); } }
+      
+      #app-container { background: rgba(10, 15, 22, 0.85); backdrop-filter: blur(20px); border: 1px solid rgba(0, 229, 255, 0.15); border-top: 4px solid var(--noah-cyan); border-radius: 28px; padding: 30px; width: 95%; max-width: 460px; box-shadow: 0 30px 60px rgba(0,0,0,0.8); position: relative; z-index: 10; max-height: 90vh; overflow-y: auto; opacity: 0; transition: opacity 1s ease-in; }
+      #app-container.visible { opacity: 1; }
+      .screen { display: none; opacity: 0; text-align: center; }
+      .screen.active { display: block; animation: screenIn 0.5s forwards; }
+      @keyframes screenIn { from { opacity: 0; transform: scale(0.95); } to { opacity: 1; transform: scale(1); } }
+      
+      h1 { color: var(--noah-cyan); margin: 0; font-size: 40px; letter-spacing: 4px; font-weight: 900; }
+      .brand-subtitle { font-size: 15px; color: var(--text-dim); margin-bottom: 30px; letter-spacing: 2px; }
+      
+      .input-field { width: 100%; padding: 18px; background: rgba(0,0,0,0.5); border: 1px solid #444; color: white; border-radius: 12px; font-size: 18px; margin-bottom: 10px; }
+      .inline-input { background: rgba(0, 0, 0, 0.6); border: none; border-bottom: 2px solid var(--noah-cyan); color: var(--accent-gold); font-size: 20px; font-weight: 900; font-family: monospace; text-align: center; width: 100px; min-width: 60px; padding: 2px 8px; outline: none; transition: 0.3s; margin: 0 5px; border-radius: 4px 4px 0 0; }
+      .inline-input:focus { border-bottom: 2px solid var(--accent-gold); background: rgba(0, 229, 255, 0.15); width: 140px; }
+
+      .primary-btn { width: 100%; padding: 18px; border-radius: 12px; font-size: 18px; font-weight: bold; cursor: pointer; border: none; transition: 0.3s; margin-top: 15px; letter-spacing: 1px; }
+      .primary-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+      .btn-cyan { background: linear-gradient(135deg, rgba(0, 229, 255, 0.15), transparent); border: 1px solid var(--noah-cyan); color: var(--noah-cyan); }
+      .btn-cyan:hover:not(:disabled) { background: var(--noah-cyan); color: #000; box-shadow: 0 5px 20px rgba(0,229,255,0.4); transform: translateY(-2px); }
+      
+      .mission-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin: 20px 0; }
+      .mission-card { background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); border-radius: 16px; padding: 15px 5px; cursor: pointer; transition: 0.3s; display: flex; flex-direction: column; align-items: center; gap: 8px; }
+      .mission-card:hover { border-color: var(--noah-cyan); transform: translateY(-3px); box-shadow: 0 5px 15px rgba(0,229,255,0.3); }
+      .mission-card span { font-size: 42px; } 
+      .mission-card .label { font-size: 16px; font-weight: bold; text-align: center; margin-top: 5px; } 
+      .bg-vocab { background: linear-gradient(135deg, rgba(31,97,141,0.6), rgba(41,128,185,0.6)); }
+      .bg-grammar { background: linear-gradient(135deg, rgba(91,44,111,0.6), rgba(142,68,173,0.6)); }
+      .bg-listening { background: linear-gradient(135deg, rgba(17,120,100,0.6), rgba(26,188,156,0.6)); }
+
+      .squad-view { display: flex; justify-content: center; align-items: flex-end; gap: 15px; height: 260px; margin-bottom: 25px; }
+      .op-frame { background: rgba(0,0,0,0.4); border: 1px solid #333; border-radius: 12px; position: relative; overflow: hidden; display: flex; align-items: center; justify-content: center; flex: 1; }
+      .op-frame.leader { border: 2px solid var(--noah-cyan); height: 250px; box-shadow: 0 0 20px rgba(0,229,255,0.3); }
+      .op-frame.member { height: 200px; opacity: 0.7; }
+      .op-placeholder { width: 100%; height: 100%; background-color: #050a0f; background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="%23ffffff" opacity="0.1"><path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/></svg>'); background-size: 60%; background-repeat: no-repeat; background-position: center 30%; }
+      
+      .q-image-box { width: 100%; height: 200px; border-radius: 12px; border: 1px solid var(--noah-cyan); margin-bottom: 20px; overflow: hidden; background: #000; position: relative; display: flex; justify-content: center; align-items: center;}
+      .q-image-box img { width: 100%; height: 100%; object-fit: cover; opacity: 0; transition: 0.5s; position: absolute; top:0; left:0;}
+      .q-image-box img.loaded { opacity: 1; }
+      .q-badge { position: absolute; top: 10px; left: 10px; background: rgba(0,0,0,0.7); border: 1px solid var(--noah-cyan); color: var(--noah-cyan); padding: 4px 8px; border-radius: 6px; font-size: 14px; font-weight: bold; z-index: 2; }
+      
+      .options-grid { display: grid; gap: 10px; width: 100%; }
+      .option-btn { background: rgba(255,255,255,0.05); border: 1px solid #444; color: #fff; padding: 18px; border-radius: 10px; text-align: left; cursor: pointer; transition: 0.2s; font-size: 18px; }
+      .option-btn.correct { background: var(--accent-green) !important; color: #000; font-weight: bold; border-color: #fff; }
+      .option-btn.wrong { background: var(--accent-red) !important; color: #fff; border-color: #fff; animation: shake 0.3s; }
+      @keyframes shake { 0%,100%{transform:translateX(0);} 25%{transform:translateX(-5px);} 75%{transform:translateX(5px);} }
+      
+      .word-chips-container { display: flex; flex-wrap: wrap; gap: 10px; justify-content: center; margin-top: 20px; padding: 15px; background: rgba(0,0,0,0.3); border-radius: 12px; width: 100%; }
+      .chip { background: #2c3e50; border: 1px solid #555; padding: 10px 15px; border-radius: 10px; cursor: pointer; font-size: 18px; font-weight: bold; }
+      .chip.used { opacity: 0.3; pointer-events: none; }
+      .answer-slots { display: flex; flex-wrap: wrap; gap: 10px; min-height: 60px; border-bottom: 2px solid var(--noah-cyan); margin-bottom: 20px; padding: 5px; width: 100%; }
+      
+      #feedback-panel { position: fixed; bottom: 30px; left: 50%; width: 95%; max-width: 460px; background: rgba(20, 25, 30, 0.98); backdrop-filter: blur(15px); padding: 25px; border: 2px solid var(--noah-cyan); border-radius: 24px; transform: translate(-50%, 150%); transition: 0.4s cubic-bezier(0.2, 0.8, 0.2, 1); z-index: 100; text-align: left; box-shadow: 0 15px 40px rgba(0,0,0,0.8); max-height: 80vh; overflow-y: auto; }
+      #feedback-panel.active { transform: translate(-50%, 0); }
+      #feedback-panel.correct { border-color: var(--accent-green); }
+      #feedback-panel.wrong { border-color: var(--accent-red); }
+      #feedback-panel.warning { border-color: var(--accent-gold); }
+      
+      .audio-matrix { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 15px; }
+      .voice-btn { background: rgba(0,229,255,0.1); border: 1px solid var(--noah-cyan); color: var(--noah-cyan); padding: 10px; border-radius: 8px; font-size: 13px; cursor: pointer; font-weight: bold; text-align: center; }
+      
+      #sysMsgBox { position: fixed; top: 20px; left: 50%; transform: translateX(-50%); z-index: 99999; font-size:14px; font-weight:bold; text-align:center; display:none; background:rgba(0,0,0,0.9); padding:12px 20px; border-left:4px solid; border-radius:8px; box-shadow: 0 5px 15px rgba(0,0,0,0.5); width: 90%; max-width: 400px; }
+
+      #loadingOverlay { display: none; position: fixed; top:0; left:0; width:100vw; height:100vh; background: rgba(0,0,0,0.85); z-index: 9999; flex-direction: column; justify-content: center; align-items: center; color: var(--noah-cyan); }
+      .spinner { border: 4px solid rgba(0,229,255,0.1); border-top: 4px solid var(--noah-cyan); border-radius: 50%; width: 50px; height: 50px; animation: spin 1s linear infinite; margin-bottom: 20px; }
+      @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+
+      .reward-box { width:70px; height:70px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:20px; font-weight:bold; animation: popIn 0.8s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
+      @keyframes popIn { 0% { transform: scale(0); opacity: 0; } 100% { transform: scale(1); opacity: 1; } }
+
+      #leaderboardScreen { padding: 5px; }
+      .lb-tabs { display: flex; gap: 8px; margin-bottom: 15px; }
+      .tab-btn { flex: 1; padding: 12px 5px; border-radius: 10px; border: 1px solid var(--noah-cyan); background: rgba(0,0,0,0.5); color: var(--noah-cyan); cursor: pointer; font-weight: bold; font-size: 13px; transition: 0.3s; }
+      .tab-btn.active { background: var(--noah-cyan); color: #000; box-shadow: 0 0 15px rgba(0,229,255,0.4); }
+
+      #rankUpOverlay { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: radial-gradient(circle, rgba(0,30,50,0.9) 0%, rgba(0,5,15,0.95) 100%); z-index: 30000; display: none; flex-direction: column; justify-content: center; align-items: center; backdrop-filter: blur(15px); animation: fadeIn 0.5s forwards; overflow: hidden; }
+      .energy-ring { position: absolute; width: 280px; height: 280px; border-radius: 50%; box-shadow: 0 0 80px var(--noah-cyan), inset 0 0 30px var(--noah-cyan); border: 2px dashed rgba(0, 229, 255, 0.4); animation: spinRing 20s linear infinite; z-index: -1; }
+      .energy-ring::before { content: ""; position: absolute; top: -15px; left: -15px; right: -15px; bottom: -15px; border-radius: 50%; border: 1px solid rgba(255, 215, 0, 0.3); animation: spinRingReverse 15s linear infinite; }
+      @keyframes spinRing { 100% { transform: rotate(360deg); } }
+      @keyframes spinRingReverse { 100% { transform: rotate(-360deg); } }
+
+      .rank-card { position: relative; background: linear-gradient(135deg, rgba(0, 229, 255, 0.15), rgba(0, 0, 0, 0.7)); border: 2px solid rgba(0, 229, 255, 0.6); padding: 50px 60px; border-radius: 25px; text-align: center; box-shadow: 0 20px 50px rgba(0,0,0,0.8), 0 0 40px rgba(0, 229, 255, 0.4); backdrop-filter: blur(8px); transform: scale(0.1) translateY(0); animation: rankBounce 0.8s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards, floatCard 4s ease-in-out infinite alternate 0.8s; overflow: hidden; }
+      .rank-card::after { content: ""; position: absolute; top: -50%; left: -60%; width: 25%; height: 200%; background: linear-gradient(to right, rgba(255,255,255,0) 0%, rgba(255,255,255,0.5) 50%, rgba(255,255,255,0) 100%); transform: rotate(30deg); animation: cardSweep 3.5s infinite 1s; }
+      @keyframes cardSweep { 0% { left: -60%; } 30%, 100% { left: 150%; } }
+
+      #newRankIcon { font-size: 90px; margin-bottom: 15px; filter: drop-shadow(0 0 25px rgba(255, 215, 0, 0.85)); animation: iconPulse 2s infinite alternate; }
+      @keyframes iconPulse { 0% { transform: scale(1); filter: drop-shadow(0 0 10px rgba(255, 215, 0, 0.4)); } 100% { transform: scale(1.1); filter: drop-shadow(0 0 35px rgba(255, 215, 0, 1)); } }
+      @keyframes rankBounce { to { transform: scale(1) translateY(0); } }
+      @keyframes floatCard { 0% { transform: scale(1) translateY(0px); } 100% { transform: scale(1) translateY(-12px); } }
+
+      .promotion-title { color: var(--accent-gold); font-size: 28px; font-weight: 900; letter-spacing: 8px; margin-bottom: 35px; text-shadow: 0 0 10px rgba(255,215,0,0.6), 0 0 20px rgba(255,215,0,0.3); animation: neonPulse 1.5s infinite alternate; }
+      @keyframes neonPulse { 0% { opacity: 0.8; text-shadow: 0 0 5px rgba(255,215,0,0.4); } 100% { opacity: 1; text-shadow: 0 0 15px rgba(255,215,0,0.8), 0 0 30px rgba(255,215,0,0.5); } }
+      @keyframes pulseFade { 0% { opacity: 0.3; } 100% { opacity: 1; } }
+      
+      .lb-list { background: rgba(0,0,0,0.4); border: 1px solid rgba(0,229,255,0.2); border-radius: 16px; overflow: hidden; max-height: 50vh; overflow-y: auto; margin-bottom: 20px; }
+      .lb-row { display: grid; grid-template-columns: 45px 1fr 90px; padding: 14px 10px; border-bottom: 1px solid rgba(255,255,255,0.05); align-items: center; font-size: 15px; }
+      .lb-row.is-me { background: rgba(0, 229, 255, 0.15); border-left: 4px solid var(--noah-cyan); }
+      .lb-rank { font-weight: 900; color: var(--accent-gold); font-family: monospace; font-size: 18px; text-align: center; }
+      .lb-name { text-align: left; padding-left: 5px; color: #fff; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+      .lb-exp { text-align: right; color: var(--noah-cyan); font-weight: bold; font-size: 14px; }
+
+      @media (max-width: 480px) {
+        #app-container { padding: 20px 15px; }
+        h1 { font-size: 32px; }
+        .q-image-box { height: 160px; }
+      }
+    </style>
+  </head>
+  <body>
+
+    <!-- 🚀 1. 置頂系統狀態列 -->
+    <div id="systemHeader">
+        <div class="brand-container">
+            <span class="brand-title">Sailors' Quest</span>
+            <span class="system-name">N.O.A.H.</span>
+        </div>
+        <div id="bgmController">
+            <button id="bgmShuffleBtn" onclick="shuffleBGM()" style="background:none; border:none; font-size:16px; cursor:pointer; color:#00f3ff; margin-right:2px;" title="切換神經頻段">🔀</button>
+            <button id="bgmToggleBtn" onclick="toggleBGM()" style="background:none; border:none; font-size:18px; cursor:pointer; color:#00f3ff; margin-right:5px;">🔊</button>
+            <select id="bgmSelect" onchange="changeBGMTrack()"></select>
+        </div>
+    </div>
+    
+    <!-- 🚀 2. 左下角品牌浮水印 -->
+    <div id="footerWatermark">by Sailing Adventure Education Centre</div>
+    
+    <div id="sysMsgBox"></div>
+
+    <div id="system-unlock-screen">
+      <div style="text-align: center; margin-bottom: 40px;">
+        <h1 style="font-size: 50px; text-shadow: 0 0 20px rgba(0,229,255,0.5); margin-bottom: 5px;">N.O.A.H.</h1>
+        <div style="color: var(--accent-gold); font-size: 24px; font-weight: bold; letter-spacing: 4px; margin-bottom: 5px;">Sailors' Quest</div>
+        <div style="color: var(--text-dim); letter-spacing: 5px; font-family: monospace; font-size: 12px;">NEURAL OPERATIONS & ANALYSIS HUB</div>
+      </div>
+      <button class="unlock-btn" onclick="unlockSystemMedia()">🧭 INITIATE NEURAL LINK</button>
+    </div>
+
+    <div class="bg-video-layer">
+      <video id="vid-login" class="bg-vid active-bg" autoplay loop muted playsinline><source src="https://pub-2a6f35ae1aea46f3a4762ecf8c1a6eae.r2.dev/Background/Login.mp4" type="video/mp4"></video>
+      <video id="vid-dashboard" class="bg-vid" autoplay loop muted playsinline><source src="https://pub-2a6f35ae1aea46f3a4762ecf8c1a6eae.r2.dev/Background/Main_Menu.mp4" type="video/mp4"></video>
+      <video id="vid-vocab_basic" class="bg-vid" autoplay loop muted playsinline><source src="https://pub-2a6f35ae1aea46f3a4762ecf8c1a6eae.r2.dev/Background/Vocab_basic.mp4" type="video/mp4"></video>
+      <video id="vid-vocab_adv" class="bg-vid" autoplay loop muted playsinline><source src="https://pub-2a6f35ae1aea46f3a4762ecf8c1a6eae.r2.dev/Background/Vocab_advanced.mp4" type="video/mp4"></video>
+      <video id="vid-grammar" class="bg-vid" autoplay loop muted playsinline><source src="https://pub-2a6f35ae1aea46f3a4762ecf8c1a6eae.r2.dev/Background/Academy.mp4" type="video/mp4"></video>
+      <video id="vid-listening" class="bg-vid" autoplay loop muted playsinline><source src="https://pub-2a6f35ae1aea46f3a4762ecf8c1a6eae.r2.dev/Background/Memory_Terminal.mp4" type="video/mp4"></video>
+      <video id="vid-briefingRoom" class="bg-vid" autoplay loop muted playsinline><source src="https://pub-2a6f35ae1aea46f3a4762ecf8c1a6eae.r2.dev/Background/Briefing_room.mp4" type="video/mp4"></video>
+      <video id="vid-finishScreen" class="bg-vid" autoplay loop muted playsinline><source src="https://pub-2a6f35ae1aea46f3a4762ecf8c1a6eae.r2.dev/Background/Reward_Scene.mp4" type="video/mp4"></video>
+    </div>
+    
+    <audio id="se-player"></audio>
+    <audio id="bgm-player" loop></audio>
+    <audio id="eleven-player"></audio>
+
+    <div id="loadingOverlay">
+       <div class="spinner"></div>
+       <div id="loadingText" style="font-family: monospace; letter-spacing: 2px; font-size: 18px;">NEURAL LINKING...</div>
+    </div>
+
+    <div id="app-container">
+      <div id="loginScreen" class="screen active">
+        <h1 style="margin-bottom: 5px;">N.O.A.H.</h1>
+        <div style="color: var(--accent-gold); font-size: 20px; font-weight: bold; letter-spacing: 2px; margin-bottom: 2px;">Sailors' Quest</div>
+        <div class="brand-subtitle" style="font-size: 11px; margin-bottom: 25px;">NEURAL OPERATIONS & ANALYSIS HUB</div>
+        <input type="text" id="inputId" class="input-field" placeholder="🆔 幹員編號 (CAPTAIN ID)">
+        <input type="password" id="inputPin" class="input-field" placeholder="🔑 密鑰 (PIN CODE)">
+        <select id="inputMood" class="input-field">
+            <option value="好有鬥志">🤩 好有鬥志 (挑戰 15 題)</option>
+            <option value="正正常常" selected>🙂 正正常常 (標準 10 題)</option>
+            <option value="攰到抽筋">😮‍💨 攰到抽筋 (輕鬆 8 題)</option>
+            <option value="壓力爆煲">🤯 壓力爆煲 (極限 5 題)</option>
+        </select>
+        <button class="primary-btn btn-cyan" onclick="attemptLogin()">同步開始 / SYNC START</button>
+      </div>
+
+      <div id="dashboardScreen" class="screen">
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
+          <div style="text-align:left;">
+            <div id="dashGreeting" style="font-size:24px; font-weight:bold; color:var(--noah-cyan);">隊長，歡迎歸隊</div>
+            <div id="dashRank" style="font-size:14px; color:var(--text-dim); margin-top:4px;">RANK: 候補學員</div>
+          </div>
+          <button style="background:rgba(0,0,0,0.5); border:1px solid #444; color:#888; padding:8px 12px; border-radius:8px;" onclick="logout()">🚪 登出</button>
+        </div>
+        <div style="display:flex; gap:10px; margin-bottom:20px;">
+          <div style="flex:1; background:rgba(0,0,0,0.5); padding:10px; border-radius:12px; border:1px solid #333;">
+            <div style="font-size:14px; color:#7f8c8d;">💰 信用點</div>
+            <div id="dashCoins" style="font-size:28px; font-weight:900; color:var(--noah-cyan);">0</div>
+          </div>
+          <div style="flex:1; background:rgba(0,0,0,0.5); padding:10px; border-radius:12px; border:1px solid #333;">
+            <div style="font-size:14px; color:#7f8c8d;">✨ 總 EXP</div>
+            <div id="dashExp" style="font-size:28px; font-weight:900; color:var(--accent-gold);">0</div>
+          </div>
+        </div>
+        <div class="mission-grid" style="grid-template-columns: repeat(2, 1fr); margin-bottom: 10px;">
+          <div class="mission-card bg-vocab" onclick="showBriefing('vocab_basic')"><span>📡</span><div class="label">偵察任務</div><div style="font-size:10px; color:#aaa; margin-top:2px;">[ 基礎生字記憶 ]</div></div>
+          <div class="mission-card" style="background: linear-gradient(135deg, rgba(192,57,43,0.6), rgba(142,68,173,0.6)); border-color: var(--accent-red);" onclick="showBriefing('vocab_adv')"><span>⚡</span><div class="label">駭客潛行</div><div style="font-size:10px; color:#aaa; margin-top:2px;">[ 進階生字應用 ]</div></div>
+        </div>
+        <div class="mission-grid" style="grid-template-columns: repeat(2, 1fr);">
+          <div class="mission-card bg-grammar" onclick="showBriefing('grammar')"><span>🏛️</span><div class="label">戰術學院</div><div style="font-size:10px; color:#aaa; margin-top:2px;">[ 文法解難 ]</div></div>
+          <div class="mission-card bg-listening" onclick="showBriefing('listening')"><span>💾</span><div class="label">記憶終端</div><div style="font-size:10px; color:#aaa; margin-top:2px;">[ 聆聽訓練 ]</div></div>
+        </div>
+        <div style="display:flex; gap:10px; flex-direction:column;">
+          <button class="primary-btn btn-cyan" style="margin-top:0;" onclick="navTo('briefingRoom')">🛡️ 作戰會議室</button>
+          <button class="primary-btn" style="margin-top:0; background:rgba(241,196,15,0.1); border:1px solid var(--accent-gold); color:var(--accent-gold);" onclick="openLeaderboard('weekly')">📊 戰績排行榜</button>
+        </div>
+      </div>
+
+      <div id="briefingRoom" class="screen">
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px; border-bottom:1px solid #333; padding-bottom:10px;">
+          <div id="roomGreeting" style="font-weight:bold; color:var(--noah-cyan);">隊長</div>
+          <div style="color:var(--accent-gold); font-weight:bold;">💰 <span id="roomCoins">0</span></div>
+        </div>
+        <div class="squad-view">
+          <div class="op-frame member"><div class="op-placeholder"></div></div>
+          <div class="op-frame leader"><div class="op-placeholder"></div></div>
+          <div class="op-frame member"><div class="op-placeholder"></div></div>
+        </div>
+        <button class="primary-btn" style="background:rgba(0,0,0,0.5); border:1px solid #555;" onclick="alert('小隊編成系統連線中...')">[ 小隊編成 ]</button>
+        <button class="primary-btn" style="background:rgba(0,0,0,0.5); border:1px solid var(--accent-gold); color:var(--accent-gold);" onclick="alert('招募系統連線中...')">[ 幹員招募 ]</button>
+        <button class="primary-btn" style="background:transparent; color:#888;" onclick="navTo('dashboardScreen')">⬅ 返回大廳</button>
+      </div>
+
+      <div id="preMissionScreen" class="screen">
+        <h1 style="font-size:28px;">MISSION BRIEFING</h1>
+        <h3 id="briefingTitle" style="color:var(--text-dim); margin-bottom:20px;">Operation</h3>
+        <div style="background:rgba(0,0,0,0.5); border-left:4px solid var(--noah-cyan); padding:20px; text-align:left; margin-bottom:30px; border-radius:12px;">
+          <strong style="color:var(--noah-cyan);">📋 Objectives:</strong>
+          <div id="briefingDesc" style="margin-top:10px; font-size:15px; line-height:1.8;">Loading...</div>
+        </div>
+        <button class="primary-btn btn-cyan" onclick="executeMission()">EXECUTE</button>
+        <button class="primary-btn" style="background:transparent; border:2px solid #fff; color:#fff; margin-top:10px;" onclick="navTo('dashboardScreen')">ABORT</button>
+      </div>
+
+      <div id="missionScreen" class="screen">
+        <div style="display:flex; justify-content:space-between; margin-bottom:15px; font-family:monospace;">
+          <div id="missionProgress" style="color:var(--noah-cyan);">SYNC: 1/10</div>
+          <div id="missionTimer" style="color:var(--accent-gold);">00:00</div>
+        </div>
+        <div class="q-image-box">
+          <div class="q-badge" id="qTypeBadge">INTEL</div>
+          <img id="qImage" src="">
+        </div>
+        <div id="qInstruction" style="font-size:15px; color:var(--accent-gold); font-style:italic; text-align:left; margin-bottom:8px;"></div>
+        <div id="qText" style="font-size:19px; font-weight:bold; text-align:left; margin-bottom:20px; line-height:1.4;">ANALYZING...</div>
+        <div id="qAudioContainer" style="display:none; margin-bottom:15px;">
+           <button class="primary-btn" id="listen-btn" style="margin-top:0; background:rgba(0,229,255,0.1); color:var(--noah-cyan); border:1px solid var(--noah-cyan);">🔊 PLAY AUDIO</button>
+        </div>
+        <div id="answerArea"></div>
+        <button id="submitBtn" class="primary-btn btn-cyan" style="display:none;" onclick="checkAnswer()">SUBMIT DATA</button>
+      </div>
+
+      <div id="finishScreen" class="screen">
+        <h1 style="color:var(--accent-gold); font-size:40px; margin-top:20px;">MISSION CLEAR</h1>
+        <div id="finishAccuracy" style="font-size:20px; color:var(--noah-cyan); margin-bottom:30px;">ACCURACY: 100%</div>
+        <div style="display:flex; justify-content:center; gap:25px; margin-bottom:40px;">
+            <div style="text-align:center;"><div class="reward-box" id="rewardCoins" style="border:3px solid var(--noah-cyan);">0</div><div style="margin-top:8px; font-size:14px; color:#aaa;">CREDITS</div></div>
+            <div style="text-align:center;"><div class="reward-box" id="rewardExp" style="border:3px solid var(--accent-gold); color:var(--accent-gold);">0</div><div style="margin-top:8px; font-size:14px; color:#aaa;">EXP</div></div>
+        </div>
+        <button class="primary-btn btn-cyan" onclick="openLeaderboard('weekly')">📊 NEURAL RANKING (排行榜)</button>
+        <button class="primary-btn" style="background:transparent; border:2px solid #555; color:#888; margin-top:10px;" onclick="navTo('dashboardScreen')">⬅ RETURN TO BASE (返回大廳)</button>
+      </div>
+
+      <div id="leaderboardScreen" class="screen">
+        <h1 style="font-size:26px; margin-bottom:5px; letter-spacing:2px;">NEURAL RANKING</h1>
+        <div style="color:var(--text-dim); font-size:12px; margin-bottom:20px; letter-spacing:1px;">實時神經網絡同步數據</div>
+        <div class="lb-tabs">
+          <button id="tab-weekly" class="tab-btn active" onclick="switchLB('weekly')">🗓️ 本週排行</button>
+          <button id="tab-rank" class="tab-btn" onclick="switchLB('rank')">🎖️ 同階排行</button>
+        </div>
+        <div id="leaderboardContainer" class="lb-list"></div>
+        <button class="primary-btn btn-cyan" onclick="navTo('dashboardScreen')">返回大廳</button>
+      </div>
+
+    </div>
+
+    <div id="rankUpOverlay" onclick="this.style.display='none'">
+      <div class="energy-ring"></div>
+      <div class="promotion-title">RANK PROMOTED</div>
+      <div class="rank-card">
+        <div id="newRankIcon"></div>
+        <div id="newRankName" style="font-size: 34px; font-weight: 900; color: #ffffff; letter-spacing: 4px; text-shadow: 0 0 15px var(--noah-cyan);"></div>
+      </div>
+      <div style="color: var(--noah-cyan); margin-top: 45px; font-size: 14px; font-weight: bold; letter-spacing: 3px; animation: pulseFade 1.2s infinite alternate;">
+        [ TAP ANYWHERE TO CONTINUE ]
+      </div>
+    </div>
+
+    <div id="feedback-panel">
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px;">
+        <h2 id="feedbackTitle" style="margin:0; font-size:20px;">INTEL SECURED</h2>
+        <button id="feedbackNextBtn" class="primary-btn btn-cyan" style="width:auto; margin:0; padding:8px 25px;" onclick="nextQuestion()">NEXT ➡️</button>
+      </div>
+      <div id="feedbackContent" style="font-size:16px;"></div>
+    </div>
+
+    <script>
+      // ==========================================
+      // 🚀 全域設定與中轉 API 網址 (統一經 Cloudflare 處理)
+      // ==========================================
+      const API_URL = "https://noah-api-proxy.hksatutors.workers.dev/";
+
+      var VOICE_POOL = {
+          "Male": ["L0Dsvb3SLTyegXwtm47J", "DYkrAHD8iwork3YSUBbs", "Bj9UqZbhQsanLzgalpEG", "oR4uRy4fHDUGGISL0Rev", "0SpgpJ4D3MpHCiWdyTg3", "rU18Fk3uSDhmg5Xh41o4"],
+          "Female": ["aMSt68OGf4xUZAnLpTU8", "flHkNRp1BlvT73UL6gyz", "weA4Q36twV5kwSaTEL0Q", "piI8Kku0DcvcL6TTSeQt", "lcMyyd2HUfFzxdCaC4Ta", "uYXf8XasLslADfZ2MB4u"]
+      };
+
+      var MEDIA = {
+        videos: { loginScreen: "vid-login", dashboardScreen: "vid-dashboard", vocab_basic: "vid-vocab_basic", vocab_adv: "vid-vocab_adv", grammar: "vid-grammar", listening: "vid-listening", briefingRoom: "vid-briefingRoom", finishScreen: "vid-finishScreen" },
+        bgm: [
+          {name:"電子の海", url:"https://pub-2a6f35ae1aea46f3a4762ecf8c1a6eae.r2.dev/Bgm/電子の海.mp3", type:"night"},
+          {name:"Silent Walk", url:"https://pub-2a6f35ae1aea46f3a4762ecf8c1a6eae.r2.dev/Bgm/Silent_walk.mp3", type:"night"},
+          {name:"Color the Sky", url:"https://pub-2a6f35ae1aea46f3a4762ecf8c1a6eae.r2.dev/Bgm/Color_the_sky.mp3", type:"night"},
+          {name:"Banshac", url:"https://pub-2a6f35ae1aea46f3a4762ecf8c1a6eae.r2.dev/Bgm/Banshac.mp3", type:"night"},
+          {name:"Realize", url:"https://pub-2a6f35ae1aea46f3a4762ecf8c1a6eae.r2.dev/Bgm/Realize.mp3", type:"night"},
+          {name:"YumeUmi", url:"https://pub-2a6f35ae1aea46f3a4762ecf8c1a6eae.r2.dev/Bgm/YumeUmi.mp3", type:"night"},
+          {name:"Beyond The Noise", url:"https://pub-2a6f35ae1aea46f3a4762ecf8c1a6eae.r2.dev/Bgm/Beyond_The_Noise.mp3", type:"night"},
+          {name:"まてまえまて", url:"https://pub-2a6f35ae1aea46f3a4762ecf8c1a6eae.r2.dev/Bgm/まてまえまて.mp3", type:"day"},
+          {name:"のら猫と商店街", url:"https://pub-2a6f35ae1aea46f3a4762ecf8c1a6eae.r2.dev/Bgm/のら猫と商店街.mp3", type:"day"},
+          {name:"深層同調", url:"https://pub-2a6f35ae1aea46f3a4762ecf8c1a6eae.r2.dev/Bgm/深層同調.mp3", type:"day"},
+          {name:"Falling Lights", url:"https://pub-2a6f35ae1aea46f3a4762ecf8c1a6eae.r2.dev/Bgm/Falling_lights.mp3", type:"day"},
+          {name:"Jack-In", url:"https://pub-2a6f35ae1aea46f3a4762ecf8c1a6eae.r2.dev/Bgm/Jack-In.mp3", type:"day"},
+          {name:"Hack and Crack", url:"https://pub-2a6f35ae1aea46f3a4762ecf8c1a6eae.r2.dev/Bgm/Hack_and_Crack.mp3", type:"day"},
+          {name:"Open Your Network", url:"https://pub-2a6f35ae1aea46f3a4762ecf8c1a6eae.r2.dev/Bgm/Open_Your_Network.mp3", type:"day"}
+        ],
+        sfx: { 
+          login_success: "https://pub-2a6f35ae1aea46f3a4762ecf8c1a6eae.r2.dev/SFX/login_success.mp3", login_fail: "https://pub-2a6f35ae1aea46f3a4762ecf8c1a6eae.r2.dev/SFX/login_fail.mp3", click: "https://pub-2a6f35ae1aea46f3a4762ecf8c1a6eae.r2.dev/SFX/click.mp3", vocab: "https://pub-2a6f35ae1aea46f3a4762ecf8c1a6eae.r2.dev/SFX/vocab.mp3", grammar: "https://pub-2a6f35ae1aea46f3a4762ecf8c1a6eae.r2.dev/SFX/grammar.mp3", listening: "https://pub-2a6f35ae1aea46f3a4762ecf8c1a6eae.r2.dev/SFX/listening.mp3", submit: "https://pub-2a6f35ae1aea46f3a4762ecf8c1a6eae.r2.dev/SFX/submit_answer.mp3", correct: "https://pub-2a6f35ae1aea46f3a4762ecf8c1a6eae.r2.dev/SFX/correct.mp3", wrong: "https://pub-2a6f35ae1aea46f3a4762ecf8c1a6eae.r2.dev/SFX/wrong.mp3", next: "https://pub-2a6f35ae1aea46f3a4762ecf8c1a6eae.r2.dev/SFX/nextquestion.mp3", clear: "https://pub-2a6f35ae1aea46f3a4762ecf8c1a6eae.r2.dev/SFX/clear.mp3", rank_up: "https://pub-2a6f35ae1aea46f3a4762ecf8c1a6eae.r2.dev/SFX/rank_up.mp3", promotion: "https://pub-2a6f35ae1aea46f3a4762ecf8c1a6eae.r2.dev/SFX/promotion.mp3"
+        }
+      };
+
+      var currentUserData = null, isBgmPlaying = false, missionQueue = [], currentIdx = 0;
+      var currentMissionType = "", missionResults = [], wrongAttempts = 0, timerVal = 0, timerInterval;
+      var targetCurrentAnswer = "", currentListeningScript = "", isQuestionLocked = false, currentBadge = ""; 
+      var currentLBData = null, isMissionActive = false;
+      var bgmPlayer = document.getElementById('bgm-player'), sePlayer = document.getElementById('se-player'), elevenPlayer = document.getElementById('eleven-player');
+      var bgmSelect = document.getElementById('bgmSelect'), sysMsgBox = document.getElementById('sysMsgBox');
+
+      MEDIA.bgm.forEach(function(t, idx) { var opt = document.createElement('option'); opt.value = idx; opt.text = "🎧 " + t.name; bgmSelect.appendChild(opt); });
+      function shuffleBGM() { bgmSelect.selectedIndex = Math.floor(Math.random() * MEDIA.bgm.length); changeBGMTrack(); }
+      function changeBGMTrack() { bgmPlayer.src = MEDIA.bgm[bgmSelect.value].url; if(isBgmPlaying) bgmPlayer.play(); }
+      function toggleBGM() { 
+        isBgmPlaying = !isBgmPlaying;
+        var btn = document.getElementById('bgmToggleBtn');
+        if(isBgmPlaying) { bgmPlayer.volume = isMissionActive ? 0.05 : 0.3; bgmPlayer.play(); btn.innerText = "🔊"; } 
+        else { bgmPlayer.pause(); btn.innerText = "🔇"; } 
+      }
+      function duckBGM() { if(isBgmPlaying) bgmPlayer.volume = 0.02; }
+      function unduckBGM() { if(isBgmPlaying) bgmPlayer.volume = isMissionActive ? 0.05 : 0.3; }
+
+      function showSysMsg(msg, isError) { 
+          sysMsgBox.style.display = "block";
+          sysMsgBox.style.color = isError ? "var(--accent-red)" : "var(--accent-gold)"; 
+          sysMsgBox.style.borderColor = isError ? "var(--accent-red)" : "var(--accent-gold)"; 
+          sysMsgBox.innerText = msg;
+          if(!isError) setTimeout(function(){ sysMsgBox.style.display = "none"; }, 4000); 
+      }
+      function playSFX(key) { if(MEDIA.sfx[key]) { sePlayer.src = MEDIA.sfx[key]; sePlayer.volume = 0.6; sePlayer.play(); } }
+
+      function playVoice(text, rate) {
+        window.speechSynthesis.cancel();
+        var msg = new SpeechSynthesisUtterance(text); msg.lang = 'en-US'; msg.rate = rate || 1.0;
+        duckBGM(); msg.onend = unduckBGM; window.speechSynthesis.speak(msg);
+      }
+
+      // ==========================================
+      // 🗣️ 資安重構：呼叫 API 代替直接暴露 Key
+      // ==========================================
+      function playAudioLogic(text, isSlow, forceTTS) {
+        if (!text) return;
+        if (isSlow || forceTTS) return playVoice(text, isSlow ? 0.6 : 1.0);
+        
+        duckBGM();
+        fetch(API_URL, {
+            method: 'POST', headers: { 'Content-Type': 'text/plain' },
+            body: JSON.stringify({ action: 'tts', text: text, voiceId: VOICE_POOL.Female[0] })
+        })
+        .then(res => res.json())
+        .then(data => {
+            if (data.success && data.audioBase64) {
+                elevenPlayer.src = data.audioBase64;
+                elevenPlayer.onended = unduckBGM; elevenPlayer.play();
+            } else throw "fail";
+        })
+        .catch(() => { unduckBGM(); playVoice(text, 1.0); });
+      }
+
+      function playListeningAudio() {
+        if(!currentListeningScript) return showSysMsg("⚠️ No script data found", true);
+        var scriptArr = []; try { scriptArr = JSON.parse(currentListeningScript); } catch(e) { scriptArr = [{ role: "Log", text_en: currentListeningScript }]; }
+        var listenBtn = document.getElementById('listen-btn');
+        listenBtn.disabled = true; duckBGM(); showSysMsg("📡 Syncing Audio...", false);
+
+        var availableVoices = { "Male": VOICE_POOL.Male.slice().sort(function(){ return 0.5-Math.random(); }), "Female": VOICE_POOL.Female.slice().sort(function(){ return 0.5-Math.random(); }) };
+        var roleVoices = {};
+
+        var fetchPromises = scriptArr.map(function(line) {
+            var txt = String(line.text_en || line.text || line.dialogue || line.content || "");
+            var r = String(line.role || "Male").toUpperCase();
+            var g = (r.indexOf('F')>-1 || r.indexOf('WOMAN')>-1 || r.indexOf('GIRL')>-1) ? "Female" : "Male";
+            if(!roleVoices[line.role]) roleVoices[line.role] = availableVoices[g].pop() || VOICE_POOL[g][0];
+            
+            if(!txt) return Promise.resolve(null);
+            return fetch(API_URL, {
+                method: 'POST', headers: { 'Content-Type': 'text/plain' },
+                body: JSON.stringify({ action: 'tts', text: txt, voiceId: roleVoices[line.role] })
+            }).then(res => res.json())
+              .then(data => data.success ? { role: line.role, url: data.audioBase64 } : null);
+        });
+
+        Promise.all(fetchPromises).then(function(results) {
+            var validResults = results.filter(function(r){ return r !== null; }); 
+            if(validResults.length === 0) throw "No text";
+            var i = 0;
+            function playNext() {
+                if (i < validResults.length) {
+                    showSysMsg("🗣️ " + validResults[i].role + " speaking...", false);
+                    elevenPlayer.src = validResults[i].url; elevenPlayer.onended = function(){ i++; playNext(); }; elevenPlayer.play();
+                } else { unduckBGM(); listenBtn.disabled = false; showSysMsg("✅ Playback finished", false); }
+            }
+            playNext();
+        }).catch(function(){ 
+            unduckBGM(); listenBtn.disabled = false; showSysMsg("⚠️ Connection failed, using fallback", true); 
+            var fullText = scriptArr.map(function(l){ return String(l.text_en || l.text || l.dialogue || l.content || ""); }).join(". ");
+            playVoice(fullText, 1.0);
+        });
+      }
+
+      function unlockSystemMedia() {
+        document.querySelectorAll('.bg-vid').forEach(function(vid) { vid.play().catch(function(){}); });
+        elevenPlayer.load(); sePlayer.load();
+        var hour = new Date().getHours();
+        var targetType = (hour >= 18 || hour < 6) ? "night" : "day";
+        var availableIdx = [];
+        MEDIA.bgm.forEach((t, i) => { if(t.type === targetType) availableIdx.push(i); });
+        
+        bgmSelect.selectedIndex = availableIdx[Math.floor(Math.random() * availableIdx.length)];
+        bgmPlayer.src = MEDIA.bgm[bgmSelect.value].url;
+        bgmPlayer.volume = 0;
+        var bp = bgmPlayer.play();
+        if(bp) bp.then(function() { bgmPlayer.pause(); }).catch(function(){});
+        
+        playSFX('click');
+        document.getElementById('system-unlock-screen').style.opacity = '0';
+        setTimeout(() => {
+          document.getElementById('system-unlock-screen').style.display = 'none';
+          document.getElementById('app-container').classList.add('visible');
+        }, 800);
+      }
+
+      function navTo(screenId) {
+        document.querySelectorAll('.screen').forEach(function(s) { s.classList.remove('active'); });
+        document.getElementById(screenId).classList.add('active');
+        
+        var targetVidId = MEDIA.videos[screenId] || (screenId === 'missionScreen' ? MEDIA.videos[currentMissionType] : MEDIA.videos.dashboardScreen);
+        
+        document.querySelectorAll('.bg-vid').forEach(function(vid) { if (vid.id === targetVidId) vid.classList.add('active-bg'); else vid.classList.remove('active-bg'); });
+        document.getElementById('bgmController').style.display = (screenId === 'loginScreen') ? 'none' : 'flex';
+      }
+
+      // 登入流程 (已轉用 fetch API)
+      function attemptLogin() {
+        var id = String(document.getElementById('inputId').value).trim(), pin = String(document.getElementById('inputPin').value).trim();
+        if(!id || !pin) return showSysMsg("⚠️ Please enter ID and PIN", true);
+        if(!isBgmPlaying) { 
+            isBgmPlaying = true; 
+            document.getElementById('bgmToggleBtn').innerText = "🔊"; bgmPlayer.volume = 0.05; bgmPlayer.play().catch(function(){}); 
+        }
+        
+        document.getElementById('loadingOverlay').style.display = 'flex';
+        
+        fetch(API_URL, {
+            method: 'POST', headers: { 'Content-Type': 'text/plain' },
+            body: JSON.stringify({ action: 'loginUser', id: id, pin: pin, mood: document.getElementById('inputMood').value })
+        })
+        .then(response => response.json())
+        .then(res => {
+            document.getElementById('loadingOverlay').style.display = 'none';
+            if(res && res.success) { 
+                try { localStorage.setItem('noah_id', id); localStorage.setItem('noah_pin', pin); } catch(e) {}
+                playSFX('login_success'); currentUserData = res.data; updateUI(); 
+                navTo('dashboardScreen'); isMissionActive = false; if(isBgmPlaying) bgmPlayer.volume = 0.3; 
+            } else { 
+                try { localStorage.removeItem('noah_id'); localStorage.removeItem('noah_pin'); } catch(e) {}
+                playSFX('login_fail'); showSysMsg("⚠️ Login Failed. Check ID or PIN.", true); 
+                if(isBgmPlaying) { toggleBGM(); } 
+            }
+        }).catch(err => {
+            document.getElementById('loadingOverlay').style.display = 'none'; 
+            showSysMsg("⚠️ Server Error", true);
+        });
+      }
+
+      function updateUI() {
+        if(!currentUserData) return;
+        document.getElementById('dashGreeting').innerText = "隊長 " + (currentUserData.name || "Unknown") + "，歡迎歸隊";
+        document.getElementById('dashCoins').innerText = currentUserData.coins;
+        document.getElementById('dashExp').innerText = currentUserData.totalExp;
+        document.getElementById('roomCoins').innerText = currentUserData.coins;
+        document.getElementById('roomGreeting').innerText = (currentUserData.name || "隊長");
+      }
+
+      function logout() { 
+          playSFX('click');
+          localStorage.removeItem('noah_id'); localStorage.removeItem('noah_pin'); 
+          if (window.parent !== window) { window.parent.postMessage({ type: 'CLEAR_CREDENTIALS' }, '*'); }
+          if (window.AppInventor) { window.AppInventor.setWebViewString("LOGOUT"); }
+          currentUserData = null; isMissionActive = false;
+          document.getElementById('inputId').value = ""; document.getElementById('inputPin').value = "";
+          navTo('loginScreen');
+      }
+
+      function showBriefing(type) {
+        playSFX('click'); currentMissionType = type; 
+        let bTitle = "", bDesc = "";
+        if (type === 'vocab_basic') { bTitle = "🟢 偵察任務 [BASIC RECON]"; bDesc = "• Semantic Selection\n• Spelling Validation\n• Audio Recognition\n• Suffix Analysis\n\n⚠️ SYSTEM: 50% letter assist active."; } 
+        else if (type === 'vocab_adv') { bTitle = "🔴 駭客潛行 [ADVANCED HACK]"; bDesc = "• Contextual Filling\n• Root Extraction\n• Collocation Tracking\n• Voice Uplink\n\n⚠️ REWARD: 1.25x EXP & Credits"; } 
+        else if (type === 'grammar') { bTitle = "🏛️ 戰術學院 [GRAMMAR BLUEPRINT]"; bDesc = "• Unscramble\n• Fill & Match\n• Correct & Transform"; } 
+        else if (type === 'listening') { bTitle = "💾 記憶終端 [AUDIO LOGS]"; bDesc = "• Audio Logs: Intercept communications\n• TFNG: Verify intel accuracy\n• MCQ & Fill: Extract key details"; }
+        if (document.getElementById('briefingTitle')) document.getElementById('briefingTitle').innerText = bTitle;
+        if (document.getElementById('briefingDesc')) document.getElementById('briefingDesc').innerText = bDesc;
+        navTo('preMissionScreen'); 
+      }
+
+      // ==========================================
+      // 🚀 將所有 google.script.run 轉為 Fetch API
+      // ==========================================
+      function executeMission() {
+        playSFX('click');
+        var mood = document.getElementById('inputMood').value;
+        var count = (mood==="好有鬥志")?15:(mood==="攰到抽筋")?8:(mood==="壓力爆煲")?5:10;
+        document.getElementById('loadingOverlay').style.display = 'flex';
+        
+        fetch(API_URL, {
+            method: 'POST', headers: { 'Content-Type': 'text/plain' },
+            body: JSON.stringify({
+                action: 'fetchMissionData',
+                studentId: currentUserData.studentId,
+                pool: currentMissionType.startsWith('vocab') ? 'Vocab_Pool' : (currentMissionType==='grammar'?'Grammar_Pool':'Listening_Pool'),
+                count: count
+            })
+        })
+        .then(res => res.json())
+        .then(res => {
+            document.getElementById('loadingOverlay').style.display = 'none';
+            if(res && res.success) {
+                playSFX(currentMissionType.split('_')[0]); isMissionActive = true; 
+                if(isBgmPlaying) bgmPlayer.volume = 0.05;
+                missionQueue = res.missionData; currentIdx = 0; missionResults = []; timerVal = 0;
+                clearInterval(timerInterval); 
+                timerInterval = setInterval(function(){ 
+                    timerVal++; 
+                    var m=String(Math.floor(timerVal/60)).padStart(2,'0'), s=String(timerVal%60).padStart(2,'0'); 
+                    document.getElementById('missionTimer').innerText=m+":"+s; 
+                }, 1000);
+                navTo('missionScreen'); renderQuestion();
+            } else { showSysMsg("📡 無法載入任務：" + (res ? res.message : "未知錯誤"), true); }
+        })
+        .catch(err => {
+            document.getElementById('loadingOverlay').style.display = 'none';
+            showSysMsg("🚨 網絡連線崩潰", true);
+        });
+      }
+
+      // (renderQuestion, checkAnswer, nextQuestion 函數內部無 API 呼叫，直接複製保留)
+      function renderQuestion() {
+        if (currentIdx >= missionQueue.length) return finishMission();
+        var q = missionQueue[currentIdx];
+        if (!q || (!q.Vocabulary && !q.Question && !q.Answer)) { currentIdx++; return renderQuestion(); } 
+        wrongAttempts = 0; isQuestionLocked = false; sysMsgBox.style.display = "none";
+        document.getElementById('missionProgress').innerText = "SYNC: " + (currentIdx+1) + "/" + missionQueue.length;
+        var audioBtn = document.getElementById('listen-btn');
+        if (audioBtn) { audioBtn.disabled = false; audioBtn.style.pointerEvents = 'auto'; audioBtn.style.opacity = '1'; }
+        var imgEl = document.getElementById('qImage');
+        imgEl.classList.remove('loaded'); imgEl.src = q.ImageUrl || ""; imgEl.onload = function() { imgEl.classList.add('loaded'); };
+        var ansArea = document.getElementById('answerArea'); ansArea.innerHTML = "";
+        document.getElementById('submitBtn').style.display = "none"; document.getElementById('qAudioContainer').style.display = "none";
+        var displayQ = "", instructionText = "", renderMode = "INPUT"; 
+        currentBadge = "INTEL";
+        
+        if (currentMissionType.startsWith('vocab')) {
+            targetCurrentAnswer = String(q.Vocabulary || q.Answer || "").trim();
+            var exEn = ""; try { if(q.Example) exEn = JSON.parse(q.Example).en; } catch(e){}
+            var colloc = q.Collocation || "";
+            var deriv = {word: "", pos: ""}; try { if(q.Derivative) deriv = JSON.parse(q.Derivative); } catch(e){}
+            var r = 0;
+            function getMaskedWord(word) {
+                if (!word) return ""; var res = "";
+                for(var i=0; i<word.length; i++) { if (word[i] === ' ' || word[i] === '-') res += word[i]; else res += (i % 2 === 0) ? word[i] : "_"; }
+                return res.split("").join(" ");
+            }
+            if (currentMissionType === 'vocab_basic') {
+                var basicTypes = [1, 2, 5]; if (deriv.word && deriv.pos) basicTypes.push(7);
+                r = basicTypes[Math.floor(Math.random() * basicTypes.length)];
+            } else if (currentMissionType === 'vocab_adv') {
+                var advTypes = []; if (exEn) advTypes.push(0); if (q.Root) advTypes.push(3); if (colloc) advTypes.push(4); advTypes.push(6);
+                r = advTypes[Math.floor(Math.random() * advTypes.length)];
+            }
+            if (r===0) { 
+                currentBadge="CONTEXT"; instructionText="Type the appropriate word."; 
+                var match = exEn.match(/\[(.*?)\]/);
+                if (match) { targetCurrentAnswer = String(match[1]).trim(); displayQ = exEn; } else { displayQ = exEn.replace(new RegExp(targetCurrentAnswer, 'ig'), '[...]'); }
+            }
+            else if (r===1) { currentBadge="AUDIO"; instructionText="Listen and spell."; displayQ="Hint: " + getMaskedWord(targetCurrentAnswer) + " ("+(q.Part_of_Speech || q.POS)+")"; document.getElementById('qAudioContainer').style.display="block"; document.getElementById('listen-btn').onclick=function(){playAudioLogic(q.Vocabulary, false, false);}; playAudioLogic(q.Vocabulary, false, false); }
+            else if (r===2) { currentBadge="SEMANTIC"; instructionText="Choose the correct meaning."; displayQ="What is the meaning of: "+targetCurrentAnswer+"?"; targetCurrentAnswer=String(q.Meaning).trim(); renderMode="MCQ"; }
+            else if (r===3) { currentBadge="ROOT"; instructionText="Identify the root meaning."; displayQ="Root of: 「" + targetCurrentAnswer + "」"; targetCurrentAnswer=q.Root?(q.Root.match(/\(([^)]+)\)/)?q.Root.match(/\(([^)]+)\)/)[1]:q.Root):""; renderMode="MCQ"; }
+            else if (r===4) { currentBadge="COLLOCATION"; instructionText="Complete the pairing."; displayQ="Collocation:\n"+String(colloc).replace(new RegExp(targetCurrentAnswer, 'ig'), '[...]'); }
+            else if (r===5) { currentBadge="SPELLING"; instructionText="Translate into English."; displayQ="Meaning: "+q.Meaning + "\nHint: " + getMaskedWord(targetCurrentAnswer); }
+            else if (r===6) { currentBadge="VOICE UPLINK"; instructionText="Tap 🎤 on your keyboard and read the word."; displayQ="Target: 『 CLASSIFIED 』\nMeaning: "+q.Meaning; document.getElementById('qAudioContainer').style.display="block"; document.getElementById('listen-btn').onclick=function(){playAudioLogic(q.Vocabulary, false, false);}; playAudioLogic(q.Vocabulary, false, false); } 
+            else if (r===7) { currentBadge="SUFFIX ANALYSIS"; instructionText="Identify the part of speech."; displayQ="Analyze the suffix to find the part of speech for:\n「 " + deriv.word + " 」"; targetCurrentAnswer=String(deriv.pos).trim(); renderMode="MCQ"; }
+        }
+        else if (currentMissionType === 'grammar') {
+            currentBadge = q.Type || "GRAMMAR"; displayQ = q.Question; targetCurrentAnswer = String(q.Answer).trim();
+            if(q.Type==='UNSCRAMBLE'){ instructionText="Rearrange the fragments."; renderMode="UNSCRAMBLE"; }
+            else if(q.Type==='MATCH'||q.Type==='IDENTIFY'){ instructionText="Choose correctly."; renderMode="MCQ"; }
+            else { instructionText="Complete the sentence."; if(String(q.Distractors||"").length>0) renderMode="MCQ"; }
+        } 
+        else if (currentMissionType === 'listening') {
+            currentBadge = q.Type || "AUDIO LOG"; displayQ = q.Question; targetCurrentAnswer = String(q.Answer).trim();
+            currentListeningScript = ""; for(var k in q){ if(typeof q[k]==='string' && q[k].indexOf('"role"')>-1){ currentListeningScript=q[k]; break; } }
+            if(!currentListeningScript) currentListeningScript = String(q.DialogueData||q.Transcript||"");
+            document.getElementById('qAudioContainer').style.display="block";
+            document.getElementById('listen-btn').onclick = playListeningAudio; 
+            if (currentBadge.toUpperCase() === 'TFNG' || currentBadge.toUpperCase() === 'T/F/NG') { instructionText = "Choose True, False, or Not Given."; renderMode = "MCQ"; } else { instructionText = "Listen and solve."; if(String(q.Distractors||"").length>0) renderMode = "MCQ"; }
+        }
+        document.getElementById('qTypeBadge').innerText = currentBadge;
+        document.getElementById('qInstruction').innerText = instructionText;
+        var hasInlineBlank = false;
+        displayQ = displayQ.replace(/\[.*?\]/g, '...');
+        if (renderMode === "INPUT") {
+            if (displayQ.indexOf('...') !== -1 || displayQ.indexOf('___') !== -1) { displayQ = displayQ.replace(/\.\.\.+|_{3,}/g, '<input type="text" id="userIn" class="inline-input" autocomplete="off">'); hasInlineBlank = true; }
+        }
+        var qTextEl = document.getElementById('qText');
+        if (hasInlineBlank) { qTextEl.innerHTML = displayQ; ansArea.innerHTML = ""; document.getElementById('submitBtn').style.display = "block"; } else { qTextEl.innerText = displayQ; }
+        if (renderMode === "INPUT" && !hasInlineBlank) { ansArea.innerHTML = '<input type="text" id="userIn" class="input-field" placeholder="'+(currentBadge==="VOICE UPLINK"?"Tap 🎤 or type...":"Enter data...")+'" autocomplete="off">'; document.getElementById('submitBtn').style.display = "block"; }
+        if (renderMode === "INPUT") { setTimeout(function() { var uIn = document.getElementById('userIn'); if (uIn) { uIn.focus(); uIn.addEventListener("keypress", function(e) { if (e.key === "Enter") checkAnswer(); }); } }, 100); }
+        
+        if (renderMode === "UNSCRAMBLE") {
+            var sl = document.createElement('div'); sl.className="answer-slots"; sl.id="uSlots";
+            var po = document.createElement('div'); po.className="word-chips-container";
+            targetCurrentAnswer.split(" ").sort(function(){return 0.5-Math.random();}).forEach(function(w){
+                var c = document.createElement('div'); c.className="chip"; c.innerText=w;
+                c.onclick = function(){ if(c.classList.contains('used')||isQuestionLocked) return; c.classList.add('used'); playSFX('click');
+                    var s = document.createElement('div'); s.className="chip"; s.innerText=w;
+                    s.onclick = function(){ if(isQuestionLocked) return; c.classList.remove('used'); s.remove(); playSFX('click'); }; sl.appendChild(s);
+                }; po.appendChild(c);
+            });
+            ansArea.appendChild(sl); ansArea.appendChild(po); document.getElementById('submitBtn').style.display = "block";
+        }
+        else if (renderMode === "MCQ") {
+            var grid = document.createElement('div'); grid.className = "options-grid"; var dArr = [];
+            if (currentBadge.toUpperCase() === 'TFNG' || currentBadge.toUpperCase() === 'T/F/NG') { dArr = ["True", "False", "Not Given"]; }
+            else if(currentMissionType.startsWith('vocab') && currentBadge==='SEMANTIC') { dArr = missionQueue.filter(function(m){return m && String(m.Meaning).trim()!==targetCurrentAnswer && String(m.Meaning).trim()!=="";}).map(function(m){return String(m.Meaning).trim();}).slice(0,3); if(dArr.length < 3) dArr = dArr.concat(["選項 A", "選項 B", "選項 C"]).slice(0,3); }
+            else if(currentMissionType.startsWith('vocab') && currentBadge==='ROOT') { dArr = missionQueue.filter(function(m){return m && m.Root && String(m.Root).indexOf(targetCurrentAnswer)===-1;}).map(function(m){return m.Root.match(/\(([^)]+)\)/)?m.Root.match(/\(([^)]+)\)/)[1]:String(m.Root);}).slice(0,3); if(dArr.length < 3) dArr = dArr.concat(["Action", "Quality", "State"]).slice(0,3); }
+            else if(currentBadge === 'SUFFIX ANALYSIS') { var allPOS = ["Noun", "Verb", "Adjective", "Adverb", "Preposition", "Conjunction"]; dArr = allPOS.filter(function(p) { return p.toLowerCase() !== targetCurrentAnswer.toLowerCase(); }).sort(function(){return 0.5-Math.random();}).slice(0, 3); }
+            else { var rawDist = String(q.Distractors || ""); if (rawDist.indexOf('|') !== -1) dArr = rawDist.split("|").map(s => s.trim()); else if (rawDist.indexOf('/') !== -1) dArr = rawDist.split("/").map(s => s.trim()); else dArr = rawDist.split(",").map(s => s.trim()); dArr = dArr.filter(d => d !== ""); }
+            var opts = dArr.concat([targetCurrentAnswer]).filter(function(v, i, a) { if (!v) return false; var firstIdx = a.findIndex(function(e) { return String(e).toUpperCase() === String(v).toUpperCase(); }); return firstIdx === i; }).sort(function(){return 0.5-Math.random();});
+            opts.forEach(function(o){ var b = document.createElement('button'); b.className='option-btn'; b.innerText=o; b.onclick=function(e){checkAnswer(o, e.target);}; grid.appendChild(b); });
+            ansArea.appendChild(grid);
+        }
+      }
+
+      function checkAnswer(sel, btn) {
+        if (isQuestionLocked) return; var q = missionQueue[currentIdx], userAns = "";
+        if (sel !== undefined && sel !== null) { userAns = String(sel); }
+        else if (document.getElementById('userIn')) { userAns = document.getElementById('userIn').value; }
+        else if (document.getElementById('uSlots')) { var arr = []; var chi = document.getElementById('uSlots').children; for(var i=0; i<chi.length; i++) arr.push(chi[i].innerText); userAns = arr.join(currentBadge === 'UNSCRAMBLE_WORD' ? "" : " "); }
+        function cleanStr(str) { return String(str).trim().toLowerCase().replace(/\s+/g, " "); }
+        var cUser = cleanStr(userAns); var cTarget = cleanStr(targetCurrentAnswer); var correct = (cUser === cTarget);
+        if (!correct) { var rawUser = cUser.replace(/[^a-z0-9\u4e00-\u9fa5]/ig, ""); var rawTarget = cTarget.replace(/[^a-z0-9\u4e00-\u9fa5]/ig, ""); if (rawUser === rawTarget && rawTarget !== "") correct = true; }
+
+        if (!correct && wrongAttempts === 0) {
+            wrongAttempts++; playSFX('wrong'); if(btn) btn.classList.add('wrong');
+            var panelWarning = document.getElementById('feedback-panel'); panelWarning.className = 'active warning'; 
+            document.getElementById('feedbackTitle').innerText = "⚠️ NOISE DETECTED";
+            var hint = q.Explanation || "Please check the context.";
+            if(document.getElementById('userIn') && currentMissionType.startsWith('vocab')) { var ansStr = String(q.Vocabulary||targetCurrentAnswer); hint = ansStr.charAt(0) + ansStr.slice(1).replace(/[a-zA-Z]/g, ' _'); }
+            document.getElementById('feedbackContent').innerHTML = '<p>Hint: <span style="color:var(--noah-cyan); font-weight:bold; letter-spacing:2px;">'+hint+'</span></p>';
+            var nextBtn = document.getElementById('feedbackNextBtn'); nextBtn.innerText = "TRY AGAIN 🔄";
+            nextBtn.onclick = function() { panelWarning.classList.remove('active'); if(btn) btn.classList.remove('wrong'); nextBtn.innerText = "NEXT ➡️"; nextBtn.onclick = nextQuestion; };
+            return;
+        }
+
+        isQuestionLocked = true; playSFX(correct?'correct':'wrong'); if(correct && btn) btn.classList.add('correct');
+        missionResults.push({ qId: q.Question_ID||q.Word_ID, isCorrect: correct });
+        var panel = document.getElementById('feedback-panel'); panel.className = 'active ' + (correct?'correct':'wrong');
+        document.getElementById('feedbackTitle').innerText = correct ? "INTEL SECURED" : "CONNECTION LOST";
+        var nextBtnDone = document.getElementById('feedbackNextBtn'); nextBtnDone.innerText = "NEXT ➡️"; nextBtnDone.onclick = nextQuestion;
+        
+        var content = "";
+        if(currentMissionType.startsWith('vocab')) {
+            var vocWord = String(q.Vocabulary || q.Answer || "").trim(); var pos = String(q.Part_of_Speech || q.POS || "").trim(); var meaning = String(q.Meaning || "").trim();
+            content += '<div style="color:var(--noah-cyan); font-weight:900; font-size:24px; letter-spacing:1px;">' + vocWord + (pos ? ' <span style="font-size:14px; color:#888; font-weight:normal;">('+pos+')</span>' : '') + '</div>';
+            if (meaning) content += '<div style="font-size:16px; color:#ddd; margin-bottom:12px;">' + meaning + '</div>';
+            var exObj = {en:"", zh:""}; try { if(q.Example) exObj = JSON.parse(q.Example); } catch(e){}
+            if(exObj.en) content += '<div style="margin-bottom:15px; padding:12px; background:rgba(0,229,255,0.05); border-left:3px solid var(--noah-cyan); border-radius:0 8px 8px 0;"><div style="color:#fff; font-style:italic; line-height:1.4;">"'+exObj.en+'"</div><div style="color:#888; font-size:14px; margin-top:5px;">'+(exObj.zh||"")+'</div></div>';
+            content += '<div class="audio-matrix">' +
+                '<button class="voice-btn" onclick="playAudioLogic(\''+vocWord.replace(/'/g,"\\'")+'\', false, false)">🔊 WORD</button>' +
+                '<button class="voice-btn" onclick="playAudioLogic(\''+vocWord.replace(/'/g,"\\'")+'\', true, true)">🐢 WORD (SLOW)</button>' +
+                (exObj.en ? '<button class="voice-btn" onclick="playAudioLogic(\''+String(exObj.en).replace(/'/g,"\\'")+'\', false, false)">🔊 EXAMPLE</button>' : '') +
+                (exObj.en ? '<button class="voice-btn" onclick="playAudioLogic(\''+String(exObj.en).replace(/'/g,"\\'")+'\', true, true)">🐢 EXAMPLE (SLOW)</button>' : '') +
+                '</div>';
+        } else {
+            content = '<div style="color:var(--noah-cyan); font-weight:bold; font-size:20px; margin-bottom:10px;">Target: '+targetCurrentAnswer+'</div>';
+            if(currentMissionType !== 'listening') content += '<p>'+(q.Explanation||"")+'</p><p style="color:#888; font-style:italic;">'+(q.Translation||"")+'</p>';
+            if (currentMissionType === 'listening') {
+                var dialogueHTML = "";
+                try {
+                    var dArr = JSON.parse(currentListeningScript || "[]");
+                    if (Array.isArray(dArr)) {
+                        dialogueHTML = '<div style="margin-top:10px; padding:10px; background:rgba(0,0,0,0.3); border-radius:8px; font-size:14px; max-height:150px; overflow-y:auto;">';
+                        dArr.forEach(function(l) {
+                            var tEn = String(l.text_en || l.text || ""); var tZh = String(l.text_zh || l.translation || "");
+                            if(tEn) dialogueHTML += '<div style="margin-bottom:8px;"><strong style="color:var(--noah-cyan);">' + (l.role||"Log") + ':</strong> <span style="color:#eee;">' + tEn + '</span><br><span style="color:#888;">' + tZh + '</span></div>';
+                        });
+                        dialogueHTML += '</div>';
+                    }
+                } catch(e) {}
+                if(!dialogueHTML) dialogueHTML = '<div style="margin-top:10px; color:#aaa; font-size:14px;">' + (q.Translation || q.Explanation || "") + '</div>';
+                content += dialogueHTML;
+            }
+        }
+        document.getElementById('feedbackContent').innerHTML = content;
+      }
+
+      function nextQuestion() { 
+          document.getElementById('feedback-panel').classList.remove('active');
+          playSFX('next'); elevenPlayer.pause(); elevenPlayer.currentTime = 0;
+          window.speechSynthesis.cancel(); unduckBGM();
+          currentIdx++; renderQuestion(); 
+      }
+
+      function finishMission() {
+        clearInterval(timerInterval);
+        document.getElementById('loadingOverlay').style.display = 'flex'; 
+        if (missionResults.length === 0) {
+            document.getElementById('loadingOverlay').style.display = 'none'; showSysMsg("⚠️ 系統錯誤：任務數據丟失", true); return;
+        }
+
+        fetch(API_URL, {
+            method: 'POST', headers: { 'Content-Type': 'text/plain' },
+            body: JSON.stringify({ action: 'submitMissionResults', studentId: currentUserData.studentId, results: missionResults, missionType: currentMissionType })
+        })
+        .then(res => res.json())
+        .then(res => {
+            document.getElementById('loadingOverlay').style.display = 'none';
+            if(res && res.success) {
+                if(res.rankUp) {
+                    playSFX('promotion'); document.getElementById('newRankIcon').innerText = res.newRankIcon;
+                    document.getElementById('newRankName').innerText = res.newRankName; document.getElementById('rankUpOverlay').style.display = 'flex';
+                } else { playSFX('clear'); setTimeout(function(){ playSFX('rank_up'); }, 800); }
+                isMissionActive = false; if(isBgmPlaying) bgmPlayer.volume = 0.3;
+                document.getElementById('finishAccuracy').innerText = "ACCURACY: " + res.accuracy + "%";
+                document.getElementById('rewardCoins').innerText = res.earnedCoins; document.getElementById('rewardExp').innerText = res.earnedExp;
+                shuffleBGM(); navTo('finishScreen');
+                currentUserData.coins += res.earnedCoins; currentUserData.totalExp += res.earnedExp; updateUI();
+            } else {
+                showSysMsg("📡 同步失敗：" + (res.error || "未知原因"), true);
+                document.getElementById('qText').innerText = "SYNC FAILED"; document.getElementById('qInstruction').innerText = "Server rejected the data.";
+                document.getElementById('answerArea').innerHTML = '<button class="primary-btn btn-cyan" onclick="finishMission()">🔄 重新嘗試傳送 (RETRY)</button>';
+            }
+        })
+        .catch(err => { 
+            document.getElementById('loadingOverlay').style.display = 'none'; 
+            showSysMsg("🚨 網絡連線崩潰", true); 
+            document.getElementById('qText').innerText = "NETWORK ERROR"; document.getElementById('qInstruction').innerText = "Please check your connection and retry.";
+            document.getElementById('answerArea').innerHTML = '<button class="primary-btn btn-cyan" onclick="finishMission()">🔄 重新嘗試傳送 (RETRY)</button>';
+        });
+      }
+
+      function openLeaderboard(mode) {
+        playSFX('click'); document.getElementById('loadingOverlay').style.display = 'flex';
+        fetch(API_URL, {
+            method: 'POST', headers: { 'Content-Type': 'text/plain' },
+            body: JSON.stringify({ action: 'fetchLeaderboardData', studentId: currentUserData.studentId })
+        })
+        .then(res => res.json())
+        .then(res => {
+            document.getElementById('loadingOverlay').style.display = 'none';
+            currentLBData = res; navTo('leaderboardScreen'); renderLB(mode || 'weekly');
+        })
+        .catch(() => { document.getElementById('loadingOverlay').style.display = 'none'; showSysMsg("⚠️ 無法獲取排行榜數據", true); });
+      }
+
+      function switchLB(mode) {
+        playSFX('click'); document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+        document.getElementById('tab-' + mode).classList.add('active'); renderLB(mode);
+      }
+
+      function renderLB(mode) {
+        if(!currentLBData) return;
+        const container = document.getElementById('leaderboardContainer');
+        const data = (mode === 'weekly') ? currentLBData.weekly : currentLBData.sameRank;
+        const scoreKey = (mode === 'weekly') ? 'weeklyExp' : 'totalExp';
+        document.getElementById('tab-rank').innerText = "🎖️ " + (currentLBData.userRankName || "同階") + "排行";
+        let html = "";
+        if (data && data.length > 0) {
+            data.forEach((p, i) => {
+              let isMe = (p.id === currentUserData.studentId); let medal = (i===0)?"🥇 ":(i===1)?"🥈 ":(i===2)?"🥉 ":"";
+              html += `<div class="lb-row ${isMe ? 'is-me' : ''}"><div class="lb-rank">${medal || (i + 1)}</div><div class="lb-name">${p.name}</div><div class="lb-exp">${p[scoreKey]} EXP</div></div>`;
+            });
+        } else { html = "<div style='padding:40px; color:#555;'>📡 掃描中... 暫無數據</div>"; }
+        container.innerHTML = html;
+      }
+
+      // ==========================================
+      // 🚀 登入紀錄及跨網域通訊監聽器 (整合版)
+      // ==========================================
+      window.addEventListener("load", function() {
+          var savedId = localStorage.getItem('noah_id');
+          var savedPin = localStorage.getItem('noah_pin');
+          if(savedId && savedPin) {
+              document.getElementById('inputId').value = savedId;
+              document.getElementById('inputPin').value = savedPin;
+          }
+          if (window.AppInventor) {
+              let savedData = window.AppInventor.getWebViewString();
+              if (savedData && savedData.includes("|")) {
+                  let parts = savedData.split("|");
+                  document.getElementById('inputId').value = parts[0];
+                  document.getElementById('inputPin').value = parts[1];
+              }
+          }
+          if (window.parent !== window) {
+              window.parent.postMessage({ type: 'REQUEST_CREDENTIALS' }, '*');
+          }
+      });
+
+      window.addEventListener('message', function(event) {
+          const data = event.data;
+          if (data.type === 'CREDENTIALS_DATA') {
+              document.getElementById('inputId').value = data.studentId;
+              document.getElementById('inputPin').value = data.pin;
+          }
+      });
+    </script>
+  </body>
+</html>
