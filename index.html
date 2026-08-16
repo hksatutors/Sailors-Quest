@@ -431,6 +431,9 @@
       // ==========================================
       // 🗣️ 資安重構：呼叫 API 代替直接暴露 Key
       // ==========================================
+      function // ==========================================
+      // 🗣️ 單字語音 API (加入詳細錯誤擷取)
+      // ==========================================
       function playAudioLogic(text, isSlow, forceTTS) {
         if (!text) return;
         if (isSlow || forceTTS) return playVoice(text, isSlow ? 0.6 : 1.0);
@@ -440,17 +443,29 @@
             method: 'POST', headers: { 'Content-Type': 'text/plain' },
             body: JSON.stringify({ action: 'tts', text: text, voiceId: VOICE_POOL.Female[0] })
         })
-        .then(res => res.json())
-        .then(data => {
-            if (data.success && data.audioBase64) {
-                elevenPlayer.src = data.audioBase64;
-                elevenPlayer.onended = unduckBGM; elevenPlayer.play();
-            } else throw "fail";
+        .then(res => res.text()) // 🚀 先接住純文字，防 HTML 崩潰
+        .then(textData => {
+            try {
+                var data = JSON.parse(textData);
+                if (data.success && data.audioBase64) {
+                    elevenPlayer.src = data.audioBase64;
+                    elevenPlayer.onended = unduckBGM; elevenPlayer.play();
+                } else throw "API 回傳失敗: " + data.message;
+            } catch(e) {
+                console.error("❌ 單字語音 JSON 解析失敗，伺服器吐出:", textData);
+                throw e;
+            }
         })
-        .catch(() => { unduckBGM(); playVoice(text, 1.0); });
+        .catch(err => { 
+            console.error("🔊 TTS 連線總崩潰:", err); 
+            unduckBGM(); playVoice(text, 1.0); 
+        });
       }
 
-      function playListeningAudio() {
+      // ==========================================
+      // 🗣️ 聆聽對話 API (🚀 核心升級：排隊逐句發送，防止塞爆 GAS)
+      // ==========================================
+      async function playListeningAudio() {
         if(!currentListeningScript) return showSysMsg("⚠️ No script data found", true);
         var scriptArr = []; try { scriptArr = JSON.parse(currentListeningScript); } catch(e) { scriptArr = [{ role: "Log", text_en: currentListeningScript }]; }
         var listenBtn = document.getElementById('listen-btn');
@@ -458,37 +473,60 @@
 
         var availableVoices = { "Male": VOICE_POOL.Male.slice().sort(function(){ return 0.5-Math.random(); }), "Female": VOICE_POOL.Female.slice().sort(function(){ return 0.5-Math.random(); }) };
         var roleVoices = {};
+        var validResults = [];
 
-        var fetchPromises = scriptArr.map(function(line) {
-            var txt = String(line.text_en || line.text || line.dialogue || line.content || "");
-            var r = String(line.role || "Male").toUpperCase();
-            var g = (r.indexOf('F')>-1 || r.indexOf('WOMAN')>-1 || r.indexOf('GIRL')>-1) ? "Female" : "Male";
-            if(!roleVoices[line.role]) roleVoices[line.role] = availableVoices[g].pop() || VOICE_POOL[g][0];
-            
-            if(!txt) return Promise.resolve(null);
-            return fetch(API_URL, {
-                method: 'POST', headers: { 'Content-Type': 'text/plain' },
-                body: JSON.stringify({ action: 'tts', text: txt, voiceId: roleVoices[line.role] })
-            }).then(res => res.json())
-              .then(data => data.success ? { role: line.role, url: data.audioBase64 } : null);
-        });
+        try {
+            // 🚀 放棄 Promise.all，改為 await 逐句排隊發送
+            for (let i = 0; i < scriptArr.length; i++) {
+                var line = scriptArr[i];
+                var txt = String(line.text_en || line.text || line.dialogue || line.content || "");
+                if (!txt) continue;
 
-        Promise.all(fetchPromises).then(function(results) {
-            var validResults = results.filter(function(r){ return r !== null; }); 
-            if(validResults.length === 0) throw "No text";
-            var i = 0;
+                var r = String(line.role || "Male").toUpperCase();
+                var g = (r.indexOf('F')>-1 || r.indexOf('WOMAN')>-1 || r.indexOf('GIRL')>-1) ? "Female" : "Male";
+                if(!roleVoices[line.role]) roleVoices[line.role] = availableVoices[g].pop() || VOICE_POOL[g][0];
+
+                const res = await fetch(API_URL, {
+                    method: 'POST', headers: { 'Content-Type': 'text/plain' },
+                    body: JSON.stringify({ action: 'tts', text: txt, voiceId: roleVoices[line.role] })
+                });
+                
+                const textData = await res.text();
+                
+                try {
+                    const data = JSON.parse(textData);
+                    if (data.success && data.audioBase64) {
+                        validResults.push({ role: line.role, url: data.audioBase64 });
+                    } else {
+                        console.error("⚠️ 句子轉換失敗:", data.message);
+                    }
+                } catch (parseErr) {
+                    console.error("❌ 句子解析 JSON 失敗，伺服器吐出:", textData);
+                }
+            }
+
+            if(validResults.length === 0) throw new Error("所有句子轉換失敗");
+
+            // 🚀 播放排隊完成嘅音檔
+            var playIdx = 0;
             function playNext() {
-                if (i < validResults.length) {
-                    showSysMsg("🗣️ " + validResults[i].role + " speaking...", false);
-                    elevenPlayer.src = validResults[i].url; elevenPlayer.onended = function(){ i++; playNext(); }; elevenPlayer.play();
-                } else { unduckBGM(); listenBtn.disabled = false; showSysMsg("✅ Playback finished", false); }
+                if (playIdx < validResults.length) {
+                    showSysMsg("🗣️ " + validResults[playIdx].role + " speaking...", false);
+                    elevenPlayer.src = validResults[playIdx].url; 
+                    elevenPlayer.onended = function(){ playIdx++; playNext(); }; 
+                    elevenPlayer.play();
+                } else { 
+                    unduckBGM(); listenBtn.disabled = false; showSysMsg("✅ Playback finished", false); 
+                }
             }
             playNext();
-        }).catch(function(){ 
+
+        } catch (err) {
+            console.error("🚨 聆聽對話 API 總崩潰:", err);
             unduckBGM(); listenBtn.disabled = false; showSysMsg("⚠️ Connection failed, using fallback", true); 
             var fullText = scriptArr.map(function(l){ return String(l.text_en || l.text || l.dialogue || l.content || ""); }).join(". ");
             playVoice(fullText, 1.0);
-        });
+        }
       }
 
       function unlockSystemMedia() {
