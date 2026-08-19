@@ -248,14 +248,23 @@
           </div>
           <button style="background:rgba(0,0,0,0.5); border:1px solid #444; color:#888; padding:8px 12px; border-radius:8px;" onclick="logout()">🚪 登出</button>
         </div>
-        <div style="display:flex; gap:10px; margin-bottom:20px;">
-          <div style="flex:1; background:rgba(0,0,0,0.5); padding:10px; border-radius:12px; border:1px solid #333;">
+        <!-- 🚀 升級版 2x2 幹員數據面版 -->
+        <div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px; margin-bottom:20px;">
+          <div style="background:rgba(0,0,0,0.5); padding:10px; border-radius:12px; border:1px solid #333;">
             <div style="font-size:14px; color:#7f8c8d;">💰 信用點</div>
-            <div id="dashCoins" style="font-size:28px; font-weight:900; color:var(--noah-cyan);">0</div>
+            <div id="dashCoins" style="font-size:24px; font-weight:900; color:var(--noah-cyan);">0</div>
           </div>
-          <div style="flex:1; background:rgba(0,0,0,0.5); padding:10px; border-radius:12px; border:1px solid #333;">
+          <div style="background:rgba(0,0,0,0.5); padding:10px; border-radius:12px; border:1px solid #333;">
             <div style="font-size:14px; color:#7f8c8d;">✨ 總 EXP</div>
-            <div id="dashExp" style="font-size:28px; font-weight:900; color:var(--accent-gold);">0</div>
+            <div id="dashExp" style="font-size:24px; font-weight:900; color:var(--accent-gold);">0</div>
+          </div>
+          <div style="background:rgba(0,0,0,0.5); padding:8px; border-radius:12px; border:1px solid #333;">
+            <div style="font-size:12px; color:#7f8c8d;">🎯 總任務次數</div>
+            <div id="dashTotalMissions" style="font-size:20px; font-weight:bold; color:#fff;">0</div>
+          </div>
+          <div style="background:rgba(0,0,0,0.5); padding:8px; border-radius:12px; border:1px solid #333;">
+            <div style="font-size:12px; color:#7f8c8d;">📝 總答題數量</div>
+            <div id="dashTotalQuestions" style="font-size:20px; font-weight:bold; color:#fff;">0</div>
           </div>
         </div>
         <div class="mission-grid" style="grid-template-columns: repeat(2, 1fr); margin-bottom: 10px;">
@@ -319,10 +328,16 @@
       <div id="finishScreen" class="screen">
         <h1 style="color:var(--accent-gold); font-size:40px; margin-top:20px;">MISSION CLEAR</h1>
         <div id="finishAccuracy" style="font-size:20px; color:var(--noah-cyan); margin-bottom:30px;">ACCURACY: 100%</div>
-        <div style="display:flex; justify-content:center; gap:25px; margin-bottom:40px;">
+        <div style="display:flex; justify-content:center; gap:25px; margin-bottom:20px;">
             <div style="text-align:center;"><div class="reward-box" id="rewardCoins" style="border:3px solid var(--noah-cyan);">0</div><div style="margin-top:8px; font-size:14px; color:#aaa;">CREDITS</div></div>
             <div style="text-align:center;"><div class="reward-box" id="rewardExp" style="border:3px solid var(--accent-gold); color:var(--accent-gold);">0</div><div style="margin-top:8px; font-size:14px; color:#aaa;">EXP</div></div>
         </div>
+        
+        <!-- 🚀 新增：本週累計進度提示區 -->
+        <div id="finishWeeklyStats" style="font-size:13px; color:#aaa; margin-bottom:25px; padding:10px; background:rgba(0,229,255,0.05); border-radius:8px; border:1px dashed rgba(0,229,255,0.3); text-align:center; letter-spacing:1px;">
+          📊 系統日誌：本週累計執行 <span id="fwMissions" style="color:var(--noah-cyan); font-weight:bold; font-size:16px;">0</span> 次任務，處理 <span id="fwQuestions" style="color:var(--noah-cyan); font-weight:bold; font-size:16px;">0</span> 項數據。
+        </div>
+
         <button class="primary-btn btn-cyan" onclick="openLeaderboard('weekly')">📊 NEURAL RANKING (排行榜)</button>
         <button class="primary-btn" style="background:transparent; border:2px solid #555; color:#888; margin-top:10px;" onclick="navTo('dashboardScreen')">⬅ RETURN TO BASE (返回大廳)</button>
       </div>
@@ -608,6 +623,10 @@
         document.getElementById('dashExp').innerText = currentUserData.totalExp;
         document.getElementById('roomCoins').innerText = currentUserData.coins;
         document.getElementById('roomGreeting').innerText = (currentUserData.name || "隊長");
+        
+        // 🚀 新增：更新主畫面嘅總任務與答題數
+        document.getElementById('dashTotalMissions').innerText = currentUserData.totalMissions || 0;
+        document.getElementById('dashTotalQuestions').innerText = currentUserData.totalQuestions || 0;
       }
 
       function logout() { 
@@ -860,10 +879,26 @@
                     document.getElementById('newRankName').innerText = res.newRankName; document.getElementById('rankUpOverlay').style.display = 'flex';
                 } else { playSFX('clear'); setTimeout(function(){ playSFX('rank_up'); }, 800); }
                 isMissionActive = false; if(isBgmPlaying) bgmPlayer.volume = 0.3;
+                
                 document.getElementById('finishAccuracy').innerText = "ACCURACY: " + res.accuracy + "%";
                 document.getElementById('rewardCoins').innerText = res.earnedCoins; document.getElementById('rewardExp').innerText = res.earnedExp;
+                
+                // 🚀 新增：寫入結算畫面嘅本週累計數據
+                document.getElementById('fwMissions').innerText = res.currentWeeklyM || 0;
+                document.getElementById('fwQuestions').innerText = res.currentWeeklyQ || 0;
+                
                 shuffleBGM(); navTo('finishScreen');
-                currentUserData.coins += res.earnedCoins; currentUserData.totalExp += res.earnedExp; updateUI();
+                
+                // 順手更新 currentUserData，等返去大廳時數字會升
+                currentUserData.coins += res.earnedCoins; 
+                currentUserData.totalExp += res.earnedExp; 
+                currentUserData.totalMissions += 1; // 總任務 +1
+                // 補差額計法：用最新嘅 WeeklyQ 減去舊嘅 WeeklyQ，就係今次做咗幾多題
+                var questionsDoneThisTime = res.currentWeeklyQ - (currentUserData.weeklyQuestions || 0);
+                currentUserData.totalQuestions += questionsDoneThisTime; 
+                currentUserData.weeklyQuestions = res.currentWeeklyQ;
+                currentUserData.weeklyMissions = res.currentWeeklyM;
+                updateUI();
             } else {
                 showSysMsg("📡 同步失敗：" + (res.error || "未知原因"), true);
                 document.getElementById('qText').innerText = "SYNC FAILED"; document.getElementById('qInstruction').innerText = "Server rejected the data.";
