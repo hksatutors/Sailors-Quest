@@ -8,7 +8,7 @@
     <title>⚓ Sailors' Quest</title>
     <style>
       /* =========================================
-         ⚓ Sailors' Quest (V19.5 全息動態與神經躍遷旗艦版)
+         ⚓ Sailors' Quest (V20.0 科技冷藍與極限沉浸旗艦版)
          ========================================= */
       :root {
         --noah-cyan: #00e5ff; --noah-dark: #0a0f16; --text-main: #ecf0f1; 
@@ -126,7 +126,6 @@
       .chip.used { opacity: 0.3; pointer-events: none; }
       .answer-slots { display: flex; flex-wrap: wrap; gap: 10px; min-height: 60px; border-bottom: 2px solid var(--noah-cyan); margin-bottom: 20px; padding: 5px; width: 100%; }
       
-      /* 🚀 飄浮加分/獎勵文字 (停留 1.6 秒 + 选项區定位) */
       @keyframes floatUpScore {
         0% { transform: translate(-50%, 0) scale(0.6); opacity: 0; }
         20% { transform: translate(-50%, -15px) scale(1.15); opacity: 1; }
@@ -141,7 +140,6 @@
         white-space: nowrap;
       }
 
-      /* 🚀 多鄰國式彈力情報面板 (Spring Pop-Up) */
       @keyframes feedbackSpring {
         0% { transform: translate(-50%, 120%); opacity: 0; }
         60% { transform: translate(-50%, -10px); opacity: 1; }
@@ -192,7 +190,6 @@
       }
       #comboBadge.pop { animation: comboExplosion 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards; }
 
-      /* 🚀 街機級 S/A/B 重力蓋印徽章 (Stamp Impact) */
       @keyframes stampImpact {
         0% { transform: scale(3.5) rotate(-20deg); opacity: 0; filter: blur(6px); }
         60% { transform: scale(0.85) rotate(3deg); opacity: 1; filter: blur(0); }
@@ -243,7 +240,7 @@
       .lb-exp { text-align: right; color: var(--noah-cyan); font-weight: bold; font-size: 14px; }
 
       /* =========================================
-         🎉 多鄰國式全息同步過關動效 (Zone Cleared)
+         🎉 多鄰國式全息同步過關動效 (Zone Cleared - 科技冷藍版)
          ========================================= */
       @keyframes duoSpringPop {
         0% { transform: scale(0.3) rotate(-10deg); opacity: 0; }
@@ -254,13 +251,26 @@
       @keyframes syncRingDraw { from { stroke-dashoffset: 283; } to { stroke-dashoffset: 0; } }
       @keyframes duoFloat { 0%, 100% { transform: translateY(0px); } 50% { transform: translateY(-8px); } }
 
-      .duo-card { background: linear-gradient(135deg, rgba(10, 30, 25, 0.95), rgba(5, 15, 20, 0.98)); border: 2px solid var(--accent-green); border-radius: 28px; padding: 30px 20px; max-width: 380px; width: 90%; text-align: center; box-shadow: 0 0 50px rgba(46, 204, 113, 0.3), 0 20px 40px rgba(0,0,0,0.8); animation: duoSpringPop 0.7s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards; position: relative; z-index: 30002; }
+      /* 🚀 升級：深海冷藍科技背景與青藍光暈 */
+      .duo-card { 
+        background: linear-gradient(135deg, rgba(6, 25, 45, 0.96), rgba(2, 12, 22, 0.98)); 
+        border: 2px solid var(--noah-cyan); 
+        border-radius: 28px; 
+        padding: 30px 20px; 
+        max-width: 380px; 
+        width: 90%; 
+        text-align: center; 
+        box-shadow: 0 0 50px rgba(0, 229, 255, 0.35), 0 20px 40px rgba(0,0,0,0.85); 
+        animation: duoSpringPop 0.7s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards; 
+        position: relative; 
+        z-index: 30002; 
+      }
       .sync-meter-box { position: relative; width: 110px; height: 110px; margin: 0 auto 15px auto; display: flex; align-items: center; justify-content: center; animation: duoFloat 3s ease-in-out infinite; }
       .sync-meter-svg { transform: rotate(-90deg); width: 100%; height: 100%; }
       .sync-meter-bg { fill: none; stroke: rgba(255, 255, 255, 0.1); stroke-width: 8; }
-      .sync-meter-fill { fill: none; stroke: var(--accent-green); stroke-width: 8; stroke-dasharray: 283; stroke-dashoffset: 283; stroke-linecap: round; filter: drop-shadow(0 0 8px var(--accent-green)); }
+      .sync-meter-fill { fill: none; stroke: var(--noah-cyan); stroke-width: 8; stroke-dasharray: 283; stroke-dashoffset: 283; stroke-linecap: round; filter: drop-shadow(0 0 8px var(--noah-cyan)); }
       .sync-meter-fill.animate { animation: syncRingDraw 1.2s cubic-bezier(0.4, 0, 0.2, 1) 0.3s forwards; }
-      .sync-meter-badge { position: absolute; font-size: 42px; filter: drop-shadow(0 0 15px rgba(46, 204, 113, 0.8)); }
+      .sync-meter-badge { position: absolute; font-size: 42px; filter: drop-shadow(0 0 15px rgba(0, 229, 255, 0.8)); }
 
       /* 🚀 戰術回顧抽屜 */
       .debrief-box { margin-top: 15px; margin-bottom: 20px; width: 100%; text-align: left; }
@@ -288,7 +298,7 @@
       .sync-progress-bar-fill {
         width: 0%; height: 100%; background: linear-gradient(90deg, var(--noah-cyan), var(--accent-gold));
         border-radius: 6px; box-shadow: 0 0 10px var(--noah-cyan);
-        transition: width 1s cubic-bezier(0.2, 0.8, 0.2, 1);
+        transition: width 0.8s cubic-bezier(0.2, 0.8, 0.2, 1);
       }
     </style>
   </head>
@@ -313,11 +323,11 @@
     <div id="loginTransitionOverlay">
       <div class="sync-warp-line"></div>
       <div style="font-size:55px; margin-bottom:15px; filter:drop-shadow(0 0 20px var(--noah-cyan));">🌐</div>
-      <div style="color:var(--noah-cyan); font-size:22px; font-weight:900; letter-spacing:4px; font-family:monospace;">
-        NEURAL SYNC ESTABLISHED
+      <div id="transitionMainTitle" style="color:var(--noah-cyan); font-size:22px; font-weight:900; letter-spacing:4px; font-family:monospace;">
+        INITIALIZING NEURAL LINK...
       </div>
-      <div id="transitionGreeting" style="color:#fff; font-size:16px; font-weight:bold; margin-top:10px; letter-spacing:1px;">
-        WELCOME BACK, CAPTAIN
+      <div id="transitionGreeting" style="color:#fff; font-size:15px; font-weight:bold; margin-top:10px; letter-spacing:1px; font-family:monospace;">
+        AUTHENTICATING CREDENTIALS...
       </div>
       <div class="sync-progress-bar-bg">
         <div id="syncProgressFill" class="sync-progress-bar-fill"></div>
@@ -463,13 +473,13 @@
           🔥 MAX COMBO x10 (+30% BONUS)
         </div>
 
-        <!-- 🚀 結算黃金佈局：左邊任務評級印章，右邊經驗值與信用點數據 -->
+        <!-- 🚀 結算黃金佈局：左邊行動評級印章，右邊經驗值與信用點數據 -->
         <div style="display:flex; justify-content:center; align-items:center; gap:15px; margin: 10px 0 20px 0; background:rgba(0,0,0,0.45); border:1px solid rgba(0,229,255,0.25); border-radius:20px; padding:16px 14px;">
           <!-- 左欄：評級印章 -->
           <div style="flex: 1; display:flex; flex-direction:column; align-items:center; border-right: 1px solid rgba(255,255,255,0.1); padding-right:12px;">
             <div style="font-size:11px; color:#888; letter-spacing:2px; font-family:monospace; margin-bottom:4px;">EVALUATION</div>
             <div id="finishRankStamp" class="rank-stamp">S</div>
-            <div style="font-size:13px; font-weight:bold; color:#fff; letter-spacing:1px; margin-top:4px;">任務評級</div>
+            <div style="font-size:11px; font-weight:bold; color:#fff; letter-spacing:0.5px; margin-top:4px; text-align:center;">行動評級 (Operation Rank)</div>
           </div>
           
           <!-- 右欄：收益數據卡片 -->
@@ -494,7 +504,7 @@
         </div>
 
         <div id="finishWeeklyStats" style="font-size:13px; color:#aaa; margin-bottom:20px; padding:10px; background:rgba(0,229,255,0.05); border-radius:8px; border:1px dashed rgba(0,229,255,0.3); text-align:center; letter-spacing:1px;">
-          📟 SYSTEM LOG: Executed <span id="fwMissions" style="color:var(--noah-cyan); font-weight:bold; font-size:16px;">0</span> operations & extracted <span id="fwQuestions" style="color:var(--noah-cyan); font-weight:bold; font-size:16px;">0</span> fragments of data this week.
+          📟 SYSTEM LOG (系統紀錄): Executed <span id="fwMissions" style="color:var(--noah-cyan); font-weight:bold; font-size:16px;">0</span> operations & extracted <span id="fwQuestions" style="color:var(--noah-cyan); font-weight:bold; font-size:16px;">0</span> fragments of data this week.
         </div>
 
         <button class="primary-btn btn-cyan" onclick="openLeaderboard('weekly')">📊 NEURAL RANKING (排行榜)</button>
@@ -527,8 +537,8 @@
       </div>
     </div>
 
-    <!-- 🚀 多鄰國式：全息同步達成 (Zone Cleared) 動畫彈窗 -->
-    <div id="zoneClearedOverlay" style="position:fixed; top:0; left:0; width:100vw; height:100vh; background:rgba(2, 8, 12, 0.92); z-index:30000; display:none; flex-direction:column; justify-content:center; align-items:center; backdrop-filter:blur(16px);">
+    <!-- 🚀 多鄰國式：全息同步達成 (Zone Cleared - 科技冷藍版) -->
+    <div id="zoneClearedOverlay" style="position:fixed; top:0; left:0; width:100vw; height:100vh; background:rgba(2, 8, 14, 0.94); z-index:30000; display:none; flex-direction:column; justify-content:center; align-items:center; backdrop-filter:blur(18px);">
       <canvas id="duoConfettiCanvas" style="position:absolute; top:0; left:0; width:100%; height:100%; pointer-events:none; z-index:30001;"></canvas>
 
       <div class="duo-card">
@@ -540,19 +550,19 @@
           <div class="sync-meter-badge">🛰️</div>
         </div>
 
-        <div style="color:var(--accent-green); font-size:12px; font-weight:900; letter-spacing:4px; margin-bottom:5px; font-family:monospace;">
+        <div style="color:var(--noah-cyan); font-size:12px; font-weight:900; letter-spacing:4px; margin-bottom:5px; font-family:monospace;">
           100% SYNCHRONIZED
         </div>
         <div style="font-size:22px; font-weight:900; color:#fff; letter-spacing:1px; margin-bottom:12px;">
           今日數據解析完畢！
         </div>
 
-        <div style="background:rgba(0,0,0,0.4); border-radius:14px; padding:12px 14px; border:1px solid rgba(46,204,113,0.2); font-size:13px; color:#bdc3c7; line-height:1.6; margin-bottom:22px; text-align:left;">
+        <div style="background:rgba(0,0,0,0.45); border-radius:14px; padding:12px 14px; border:1px solid rgba(0,229,255,0.25); font-size:13px; color:#bdc3c7; line-height:1.6; margin-bottom:22px; text-align:left;">
           ✨ <strong>目標達成：</strong>隊長，你已將此區域今日所有可提取的數據碎片全部消化！<br>
-          💡 <strong>作戰建議：</strong>記憶神經需要時間沉澱，請轉戰<strong>戰術學院</strong>或<strong>記憶終端</strong>進行全方位特訓。
+          💡 <strong>作戰建議：</strong>記憶神經需要時間沉澱，請轉戰其他作戰區域進行全方位特訓。
         </div>
 
-        <button class="primary-btn btn-cyan" style="margin-top:0; border-color:var(--accent-green); color:#000; background:var(--accent-green); font-size:16px; box-shadow:0 0 25px rgba(46,204,113,0.5);" onclick="closeZoneClearedModal()">
+        <button class="primary-btn btn-cyan" style="margin-top:0; border-color:var(--noah-cyan); color:#000; background:var(--noah-cyan); font-size:16px; box-shadow:0 0 25px rgba(0,229,255,0.5);" onclick="closeZoneClearedModal()">
           🧭 轉移作戰區域 (RETURN)
         </button>
       </div>
@@ -648,7 +658,6 @@
         duckBGM(); msg.onend = unduckBGM; window.speechSynthesis.speak(msg);
       }
 
-      // 🚀 飄浮獎勵文字生成器 (鎖定選項區定位 + 停留 1.6 秒)
       function spawnFloatingText(text, isGold, targetEl) {
         var el = document.createElement('div');
         el.className = 'floating-score';
@@ -677,7 +686,6 @@
         setTimeout(function() { el.remove(); }, 1600);
       }
 
-      // 🧠 逐詞處理動態隨機 50% 遮蔽 (保留詞與詞之間的空白，首字母錨定)
       function getRandomMaskedWord(phrase) {
         if (!phrase) return "";
         var words = String(phrase).trim().split(/\s+/);
@@ -697,9 +705,6 @@
         return maskedWords.join("   ");
       }
 
-      // ==========================================
-      // 🗣️ 單字語音 API (0.9x 正常速 與 0.6x 慢速)
-      // ==========================================
       function playAudioLogic(text, isSlow) {
         if (!text) return;
         duckBGM();
@@ -727,9 +732,6 @@
         });
       }
       
-      // ==========================================
-      // 🗣️ 聆聽對話 API (Normal 1.0x / Slow 0.85x / Slower 0.7x)
-      // ==========================================
       async function playListeningAudio(speedRate) { 
         if(!currentListeningScript) return showSysMsg("⚠️ No script data found", true);
         var scriptArr = []; try { scriptArr = JSON.parse(currentListeningScript); } catch(e) { scriptArr = [{ role: "Log", text_en: currentListeningScript }]; }
@@ -788,7 +790,7 @@
       }
 
       // ==========================================
-      // 🚀 4. 系統介面與登入邏輯 (含神經躍遷過場動畫)
+      // 🚀 4. 系統介面與登入邏輯 (完全由神經躍遷過場接管)
       // ==========================================
       function unlockSystemMedia() {
         document.querySelectorAll('.bg-vid').forEach(function(vid) { vid.play().catch(function(){}); });
@@ -825,7 +827,17 @@
             document.getElementById('bgmToggleBtn').innerText = "🔊"; bgmPlayer.volume = 0.05; bgmPlayer.play().catch(function(){}); 
         }
         
-        document.getElementById('loadingOverlay').style.display = 'flex';
+        // 🚀 登入即刻呼叫全息躍遷畫面代替死板 Loading
+        var transOverlay = document.getElementById('loginTransitionOverlay');
+        var progFill = document.getElementById('syncProgressFill');
+        var titleEl = document.getElementById('transitionMainTitle');
+        var greetEl = document.getElementById('transitionGreeting');
+        
+        titleEl.innerText = "INITIALIZING NEURAL LINK...";
+        greetEl.innerText = "AUTHENTICATING CREDENTIALS...";
+        transOverlay.style.display = 'flex';
+        progFill.style.width = '0%';
+        setTimeout(function() { progFill.style.width = '45%'; }, 50);
         
         fetch(API_URL, {
             method: 'POST', headers: { 'Content-Type': 'text/plain' },
@@ -833,20 +845,14 @@
         })
         .then(response => response.json())
         .then(res => {
-            document.getElementById('loadingOverlay').style.display = 'none';
             if(res && res.success) { 
                 try { localStorage.setItem('noah_id', id); localStorage.setItem('noah_pin', pin); } catch(e) {}
                 currentUserData = res.data;
                 
-                // 🚀 觸發專屬神經網絡連接躍遷過場動畫
                 playSFX('login_success');
-                var transOverlay = document.getElementById('loginTransitionOverlay');
-                var progFill = document.getElementById('syncProgressFill');
-                document.getElementById('transitionGreeting').innerText = "WELCOME BACK, CAPTAIN " + (currentUserData.name || "OPERATIVE");
-                
-                transOverlay.style.display = 'flex';
-                progFill.style.width = '0%';
-                setTimeout(function() { progFill.style.width = '100%'; }, 50);
+                titleEl.innerText = "NEURAL SYNC ESTABLISHED";
+                greetEl.innerText = "WELCOME BACK, CAPTAIN " + (currentUserData.name || "OPERATIVE");
+                progFill.style.width = '100%';
 
                 setTimeout(function() {
                   transOverlay.style.display = 'none';
@@ -854,15 +860,17 @@
                   navTo('dashboardScreen'); 
                   isMissionActive = false; 
                   if(isBgmPlaying) bgmPlayer.volume = 0.3; 
-                }, 1200);
+                }, 850);
 
             } else { 
                 try { localStorage.removeItem('noah_id'); localStorage.removeItem('noah_pin'); } catch(e) {}
-                playSFX('login_fail'); showSysMsg("⚠️ Login Failed. Check ID or PIN.", true); 
+                transOverlay.style.display = 'none';
+                playSFX('login_fail'); 
+                showSysMsg("⚠️ Login Failed. Check ID or PIN.", true); 
                 if(isBgmPlaying) { toggleBGM(); } 
             }
         }).catch(err => {
-            document.getElementById('loadingOverlay').style.display = 'none'; 
+            transOverlay.style.display = 'none';
             showSysMsg("⚠️ Server Error", true);
         });
       }
@@ -901,7 +909,7 @@
       }
 
       // ==========================================
-      // 🎉 多鄰國式粒子噴發與彈窗控制系統
+      // 🎉 多鄰國式粒子噴發與彈窗控制系統 (科技冷藍主題)
       // ==========================================
       function triggerDuoCelebration() {
         playSFX('clear');
@@ -932,7 +940,8 @@
         canvas.height = window.innerHeight;
 
         var particles = [];
-        var colors = ['#2ecc71', '#00e5ff', '#f1c40f', '#e74c3c', '#9b59b6', '#ffffff'];
+        // 🚀 調整為冷藍與星光色系
+        var colors = ['#00e5ff', '#3498db', '#f1c40f', '#9b59b6', '#ffffff'];
 
         for (var i = 0; i < 75; i++) {
           particles.push({
@@ -1209,7 +1218,6 @@
         if (correct) { 
           playSFX('correct'); if(btn) btn.classList.add('correct'); 
           currentCombo++; 
-          // 🚀 飄浮獎勵字效：鎖定在點擊按鈕或輸入區域上方彈出
           spawnFloatingText(currentCombo >= 3 ? "🔥 COMBO x" + currentCombo + "!" : "+50 EXP ⚡", currentCombo >= 3, btn || document.getElementById('answerArea'));
         } else { 
           playSFX('wrong'); 
@@ -1345,8 +1353,9 @@
                   debriefContent.innerHTML = dHtml;
                   document.getElementById('debriefContainer').style.display = 'block';
                 } else {
-                  debriefBtnText.innerText = "🌟 PERFECT OPERATION (零失誤全掌握)";
-                  debriefContent.innerHTML = '<div style="color:var(--accent-green); text-align:center;">幹員本次任務零失誤，神經鏈接狀態極佳！</div>';
+                  // 🚀 4. PERFECT OPERATION 全英軍事日誌風格
+                  debriefBtnText.innerText = "🌟 PERFECT OPERATION (完美行動)";
+                  debriefContent.innerHTML = '<div style="color:var(--noah-cyan); font-family:monospace; font-size:13px; text-align:center; padding:5px 0;">FLAWLESS OPERATION. ALL TACTICAL OBJECTIVES SYNCHRONIZED WITH ZERO ERRORS.</div>';
                   document.getElementById('debriefContainer').style.display = 'block';
                 }
 
