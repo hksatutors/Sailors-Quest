@@ -671,6 +671,14 @@
         .then(res => {
             document.getElementById('loadingOverlay').style.display = 'none';
             if(res && res.success) {
+                // 🚀 新增：攔截「當日已清空題庫」狀態
+                if (res.allCleared || !res.missionData || res.missionData.length === 0) {
+                    playSFX('clear');
+                    alert("🎖️【區域數據解析完畢】\n\n隊長，你今日已經成功解析此區域的所有數據碎片！\n為免技能發展失衡，系統建議你前往其他副本（如戰術學院、記憶終端）進行全方位能力突破！");
+                    navTo('dashboardScreen');
+                    return;
+                }
+
                 playSFX(currentMissionType.split('_')[0]); isMissionActive = true; 
                 if(isBgmPlaying) bgmPlayer.volume = 0.05;
                 missionQueue = res.missionData; currentIdx = 0; missionResults = []; timerVal = 0;
@@ -681,7 +689,9 @@
                     document.getElementById('missionTimer').innerText=m+":"+s; 
                 }, 1000);
                 navTo('missionScreen'); renderQuestion();
-            } else { showSysMsg("📡 無法載入任務：" + (res ? res.message : "未知錯誤"), true); }
+            } else { 
+                showSysMsg("📡 無法載入任務：" + (res ? res.message : "未知錯誤"), true); 
+            }
         })
         .catch(err => {
             document.getElementById('loadingOverlay').style.display = 'none';
