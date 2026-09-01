@@ -8,7 +8,7 @@
     <title>⚓ Sailors' Quest</title>
     <style>
       /* =========================================
-         ⚓ Sailors' Quest (V19.0 全動態打擊感與手遊視覺旗艦版)
+         ⚓ Sailors' Quest (V19.5 全息動態與神經躍遷旗艦版)
          ========================================= */
       :root {
         --noah-cyan: #00e5ff; --noah-dark: #0a0f16; --text-main: #ecf0f1; 
@@ -65,7 +65,6 @@
       .screen.active { display: block; animation: screenIn 0.5s forwards; }
       @keyframes screenIn { from { opacity: 0; transform: scale(0.95); } to { opacity: 1; transform: scale(1); } }
       
-      /* 🚀 容器動態微震動 (答錯震動回饋) */
       @keyframes screenJolt {
         0% { transform: translateX(0); }
         20% { transform: translateX(-8px) rotate(-0.5deg); }
@@ -109,7 +108,6 @@
       .q-image-box img.loaded { opacity: 1; }
       .q-badge { position: absolute; top: 10px; left: 10px; background: rgba(0,0,0,0.7); border: 1px solid var(--noah-cyan); color: var(--noah-cyan); padding: 4px 8px; border-radius: 6px; font-size: 14px; font-weight: bold; z-index: 2; }
       
-      /* 🚀 選項按鈕與手遊級彈跳動畫 */
       @keyframes correctPop {
         0% { transform: scale(1); }
         40% { transform: scale(1.08); }
@@ -128,18 +126,19 @@
       .chip.used { opacity: 0.3; pointer-events: none; }
       .answer-slots { display: flex; flex-wrap: wrap; gap: 10px; min-height: 60px; border-bottom: 2px solid var(--noah-cyan); margin-bottom: 20px; padding: 5px; width: 100%; }
       
-      /* 🚀 飄浮加分/連擊動態文字 (Float Text) */
+      /* 🚀 飄浮加分/獎勵文字 (停留 1.6 秒 + 选项區定位) */
       @keyframes floatUpScore {
-        0% { transform: translate(-50%, 0) scale(0.5); opacity: 0; }
-        30% { transform: translate(-50%, -20px) scale(1.2); opacity: 1; }
-        80% { transform: translate(-50%, -50px) scale(1); opacity: 1; }
-        100% { transform: translate(-50%, -70px) scale(0.9); opacity: 0; }
+        0% { transform: translate(-50%, 0) scale(0.6); opacity: 0; }
+        20% { transform: translate(-50%, -15px) scale(1.15); opacity: 1; }
+        75% { transform: translate(-50%, -45px) scale(1); opacity: 1; }
+        100% { transform: translate(-50%, -75px) scale(0.9); opacity: 0; }
       }
       .floating-score {
-        position: fixed; left: 50%; top: 38%; z-index: 99999;
-        font-family: monospace; font-size: 26px; font-weight: 900;
-        color: var(--accent-gold); text-shadow: 0 0 15px rgba(241,196,15,0.8), 0 0 30px rgba(241,196,15,0.4);
-        pointer-events: none; animation: floatUpScore 1s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
+        position: fixed; z-index: 99999;
+        font-family: monospace; font-size: 24px; font-weight: 900;
+        color: var(--accent-gold); text-shadow: 0 0 15px rgba(241,196,15,0.9), 0 0 30px rgba(241,196,15,0.5);
+        pointer-events: none; animation: floatUpScore 1.6s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
+        white-space: nowrap;
       }
 
       /* 🚀 多鄰國式彈力情報面板 (Spring Pop-Up) */
@@ -161,7 +160,6 @@
       #feedback-panel.wrong { border-color: var(--accent-red); box-shadow: 0 0 35px rgba(255, 51, 102, 0.35); }
       #feedback-panel.warning { border-color: var(--accent-gold); box-shadow: 0 0 35px rgba(241, 196, 15, 0.35); }
       
-      /* 🚀 生字 Hint 呼吸掃描光效 */
       @keyframes radarGlow {
         0%, 100% { text-shadow: 0 0 8px rgba(241,196,15,0.4); opacity: 0.9; }
         50% { text-shadow: 0 0 20px rgba(241,196,15,1), 0 0 35px rgba(241,196,15,0.8); opacity: 1; }
@@ -171,11 +169,9 @@
         font-family: monospace; font-size: 20px; animation: radarGlow 1.8s infinite;
       }
 
-      /* 🚀 字根與衍生詞膠囊標籤 */
       .morph-tag { display: inline-flex; align-items: center; background: rgba(0, 229, 255, 0.1); border: 1px solid var(--noah-cyan); border-radius: 8px; padding: 4px 10px; font-size: 13px; font-weight: bold; margin-right: 6px; margin-bottom: 6px; color: var(--noah-cyan); }
       .morph-tag.derivative { border-color: var(--accent-gold); color: var(--accent-gold); background: rgba(241, 196, 15, 0.1); }
 
-      /* 🚀 動態 Combo 標籤 */
       @keyframes comboExplosion {
         0% { transform: scale(0.6) rotate(-10deg); }
         50% { transform: scale(1.3) rotate(5deg); }
@@ -204,16 +200,15 @@
         100% { transform: scale(1) rotate(0deg); opacity: 1; }
       }
       .rank-stamp { 
-        width: 85px; height: 85px; border-radius: 50%; border: 4px solid var(--accent-gold); 
-        display: flex; align-items: center; justify-content: center; font-size: 46px; font-weight: 900; 
-        font-family: monospace; margin: 0 auto 15px auto; color: var(--accent-gold); 
+        width: 76px; height: 76px; border-radius: 50%; border: 4px solid var(--accent-gold); 
+        display: flex; align-items: center; justify-content: center; font-size: 44px; font-weight: 900; 
+        font-family: monospace; color: var(--accent-gold); 
         box-shadow: 0 0 35px rgba(241, 196, 15, 0.6); 
         animation: stampImpact 0.65s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards; 
       }
       .rank-stamp.A { border-color: var(--noah-cyan); color: var(--noah-cyan); box-shadow: 0 0 35px rgba(0, 229, 255, 0.6); }
       .rank-stamp.B { border-color: #3498db; color: #3498db; box-shadow: 0 0 35px rgba(52, 152, 219, 0.6); }
 
-      /* 🚀 工整排版矩陣 */
       .audio-matrix-2x2 { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 12px; }
       .audio-matrix-3col { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 6px; margin-top: 12px; }
       .voice-btn { background: rgba(0,229,255,0.1); border: 1px solid var(--noah-cyan); color: var(--noah-cyan); padding: 10px 4px; border-radius: 8px; font-size: 13px; cursor: pointer; font-weight: bold; text-align: center; transition: 0.2s; }
@@ -223,9 +218,6 @@
       #loadingOverlay { display: none; position: fixed; top:0; left:0; width:100vw; height:100vh; background: rgba(0,0,0,0.85); z-index: 9999; flex-direction: column; justify-content: center; align-items: center; color: var(--noah-cyan); }
       .spinner { border: 4px solid rgba(0,229,255,0.1); border-top: 4px solid var(--noah-cyan); border-radius: 50%; width: 50px; height: 50px; animation: spin 1s linear infinite; margin-bottom: 20px; }
       @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
-
-      .reward-box { width:70px; height:70px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:20px; font-weight:bold; animation: popIn 0.8s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
-      @keyframes popIn { 0% { transform: scale(0); opacity: 0; } 100% { transform: scale(1); opacity: 1; } }
 
       #leaderboardScreen { padding: 5px; }
       .lb-tabs { display: flex; gap: 8px; margin-bottom: 15px; }
@@ -276,6 +268,28 @@
       .debrief-content { display: none; background: rgba(0,0,0,0.5); border: 1px solid #333; border-radius: 0 0 12px 12px; padding: 12px; max-height: 200px; overflow-y: auto; margin-top: -5px; border-top: none; }
       .debrief-item { border-bottom: 1px solid #333; padding-bottom: 8px; margin-bottom: 8px; font-size: 13px; }
       .debrief-item:last-child { border-bottom: none; margin-bottom: 0; padding-bottom: 0; }
+
+      /* 🚀 全新：神經網絡連接過場動畫 (Neural Sync Transition) */
+      #loginTransitionOverlay {
+        position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
+        background: radial-gradient(circle at center, rgba(0, 30, 45, 0.98) 0%, rgba(2, 5, 10, 0.99) 100%);
+        z-index: 25000; display: none; flex-direction: column; justify-content: center; align-items: center;
+        backdrop-filter: blur(20px); text-align: center;
+      }
+      .sync-warp-line {
+        position: absolute; width: 100%; height: 2px; background: linear-gradient(90deg, transparent, var(--noah-cyan), transparent);
+        opacity: 0.6; animation: warpScan 1.2s infinite linear;
+      }
+      @keyframes warpScan { 0% { top: 0%; opacity: 0; } 50% { opacity: 1; } 100% { top: 100%; opacity: 0; } }
+      .sync-progress-bar-bg {
+        width: 260px; height: 6px; background: rgba(255,255,255,0.1); border-radius: 6px;
+        overflow: hidden; margin-top: 25px; border: 1px solid rgba(0,229,255,0.3);
+      }
+      .sync-progress-bar-fill {
+        width: 0%; height: 100%; background: linear-gradient(90deg, var(--noah-cyan), var(--accent-gold));
+        border-radius: 6px; box-shadow: 0 0 10px var(--noah-cyan);
+        transition: width 1s cubic-bezier(0.2, 0.8, 0.2, 1);
+      }
     </style>
   </head>
   <body>
@@ -294,6 +308,21 @@
     
     <div id="footerWatermark">by Sailing Adventure Education Centre</div>
     <div id="sysMsgBox"></div>
+
+    <!-- 🚀 登入過場：神經網絡連接躍遷畫面 -->
+    <div id="loginTransitionOverlay">
+      <div class="sync-warp-line"></div>
+      <div style="font-size:55px; margin-bottom:15px; filter:drop-shadow(0 0 20px var(--noah-cyan));">🌐</div>
+      <div style="color:var(--noah-cyan); font-size:22px; font-weight:900; letter-spacing:4px; font-family:monospace;">
+        NEURAL SYNC ESTABLISHED
+      </div>
+      <div id="transitionGreeting" style="color:#fff; font-size:16px; font-weight:bold; margin-top:10px; letter-spacing:1px;">
+        WELCOME BACK, CAPTAIN
+      </div>
+      <div class="sync-progress-bar-bg">
+        <div id="syncProgressFill" class="sync-progress-bar-fill"></div>
+      </div>
+    </div>
 
     <div id="system-unlock-screen">
       <div style="text-align: center; margin-bottom: 40px;">
@@ -427,17 +456,33 @@
       </div>
 
       <div id="finishScreen" class="screen">
-        <div id="finishRankStamp" class="rank-stamp">S</div>
-        <h1 style="color:var(--accent-gold); font-size:36px; margin-top:0;">MISSION CLEAR</h1>
-        <div id="finishAccuracy" style="font-size:18px; color:var(--noah-cyan); margin-bottom:15px;">ACCURACY: 100%</div>
+        <h1 style="color:var(--accent-gold); font-size:36px; margin-top:0; letter-spacing:2px;">MISSION CLEAR</h1>
+        <div id="finishAccuracy" style="font-size:16px; color:var(--noah-cyan); margin-bottom:12px; font-family:monospace;">ACCURACY: 100%</div>
         
-        <div id="finishComboBanner" style="font-size:13px; color:var(--accent-gold); font-family:monospace; margin-bottom:20px; background:rgba(241,196,15,0.1); border:1px solid var(--accent-gold); border-radius:20px; padding:6px 14px; display:inline-block;">
+        <div id="finishComboBanner" style="font-size:12px; color:var(--accent-gold); font-family:monospace; margin-bottom:15px; background:rgba(241,196,15,0.1); border:1px solid var(--accent-gold); border-radius:20px; padding:4px 12px; display:inline-block;">
           🔥 MAX COMBO x10 (+30% BONUS)
         </div>
 
-        <div style="display:flex; justify-content:center; gap:25px; margin-bottom:20px;">
-            <div style="text-align:center;"><div class="reward-box" id="rewardCoins" style="border:3px solid var(--noah-cyan);">0</div><div style="margin-top:8px; font-size:14px; color:#aaa;">CREDITS</div></div>
-            <div style="text-align:center;"><div class="reward-box" id="rewardExp" style="border:3px solid var(--accent-gold); color:var(--accent-gold);">0</div><div style="margin-top:8px; font-size:14px; color:#aaa;">EXP</div></div>
+        <!-- 🚀 結算黃金佈局：左邊任務評級印章，右邊經驗值與信用點數據 -->
+        <div style="display:flex; justify-content:center; align-items:center; gap:15px; margin: 10px 0 20px 0; background:rgba(0,0,0,0.45); border:1px solid rgba(0,229,255,0.25); border-radius:20px; padding:16px 14px;">
+          <!-- 左欄：評級印章 -->
+          <div style="flex: 1; display:flex; flex-direction:column; align-items:center; border-right: 1px solid rgba(255,255,255,0.1); padding-right:12px;">
+            <div style="font-size:11px; color:#888; letter-spacing:2px; font-family:monospace; margin-bottom:4px;">EVALUATION</div>
+            <div id="finishRankStamp" class="rank-stamp">S</div>
+            <div style="font-size:13px; font-weight:bold; color:#fff; letter-spacing:1px; margin-top:4px;">任務評級</div>
+          </div>
+          
+          <!-- 右欄：收益數據卡片 -->
+          <div style="flex: 1.3; display:flex; flex-direction:column; gap:10px; align-items:stretch;">
+            <div style="display:flex; align-items:center; justify-content:space-between; background:rgba(0,229,255,0.08); border:1px solid rgba(0,229,255,0.3); border-radius:12px; padding:8px 12px;">
+              <span style="font-size:12px; color:#aaa; font-weight:bold;">💰 信用點 (Coins)</span>
+              <span id="rewardCoins" style="font-size:22px; font-weight:900; color:var(--noah-cyan); font-family:monospace;">0</span>
+            </div>
+            <div style="display:flex; align-items:center; justify-content:space-between; background:rgba(241,196,15,0.08); border:1px solid rgba(241,196,15,0.3); border-radius:12px; padding:8px 12px;">
+              <span style="font-size:12px; color:#aaa; font-weight:bold;">✨ 經驗值 (EXP)</span>
+              <span id="rewardExp" style="font-size:22px; font-weight:900; color:var(--accent-gold); font-family:monospace;">0</span>
+            </div>
+          </div>
         </div>
         
         <div class="debrief-box" id="debriefContainer">
@@ -603,14 +648,33 @@
         duckBGM(); msg.onend = unduckBGM; window.speechSynthesis.speak(msg);
       }
 
-      // 🚀 飄浮加分/獎勵文字生成器
-      function spawnFloatingText(text, isGold) {
+      // 🚀 飄浮獎勵文字生成器 (鎖定選項區定位 + 停留 1.6 秒)
+      function spawnFloatingText(text, isGold, targetEl) {
         var el = document.createElement('div');
         el.className = 'floating-score';
         if (!isGold) el.style.color = 'var(--accent-green)';
         el.innerText = text;
+        
+        var x = window.innerWidth / 2;
+        var y = window.innerHeight * 0.72;
+        
+        if (targetEl && targetEl.getBoundingClientRect) {
+          var rect = targetEl.getBoundingClientRect();
+          x = rect.left + rect.width / 2;
+          y = rect.top;
+        } else {
+          var ansArea = document.getElementById('answerArea');
+          if (ansArea) {
+            var aRect = ansArea.getBoundingClientRect();
+            x = aRect.left + aRect.width / 2;
+            y = aRect.top + aRect.height / 2;
+          }
+        }
+        
+        el.style.left = x + 'px';
+        el.style.top = y + 'px';
         document.body.appendChild(el);
-        setTimeout(function() { el.remove(); }, 1000);
+        setTimeout(function() { el.remove(); }, 1600);
       }
 
       // 🧠 逐詞處理動態隨機 50% 遮蔽 (保留詞與詞之間的空白，首字母錨定)
@@ -724,7 +788,7 @@
       }
 
       // ==========================================
-      // 🚀 4. 系統介面與登入邏輯
+      // 🚀 4. 系統介面與登入邏輯 (含神經躍遷過場動畫)
       // ==========================================
       function unlockSystemMedia() {
         document.querySelectorAll('.bg-vid').forEach(function(vid) { vid.play().catch(function(){}); });
@@ -772,8 +836,26 @@
             document.getElementById('loadingOverlay').style.display = 'none';
             if(res && res.success) { 
                 try { localStorage.setItem('noah_id', id); localStorage.setItem('noah_pin', pin); } catch(e) {}
-                playSFX('login_success'); currentUserData = res.data; updateUI(); 
-                navTo('dashboardScreen'); isMissionActive = false; if(isBgmPlaying) bgmPlayer.volume = 0.3; 
+                currentUserData = res.data;
+                
+                // 🚀 觸發專屬神經網絡連接躍遷過場動畫
+                playSFX('login_success');
+                var transOverlay = document.getElementById('loginTransitionOverlay');
+                var progFill = document.getElementById('syncProgressFill');
+                document.getElementById('transitionGreeting').innerText = "WELCOME BACK, CAPTAIN " + (currentUserData.name || "OPERATIVE");
+                
+                transOverlay.style.display = 'flex';
+                progFill.style.width = '0%';
+                setTimeout(function() { progFill.style.width = '100%'; }, 50);
+
+                setTimeout(function() {
+                  transOverlay.style.display = 'none';
+                  updateUI(); 
+                  navTo('dashboardScreen'); 
+                  isMissionActive = false; 
+                  if(isBgmPlaying) bgmPlayer.volume = 0.3; 
+                }, 1200);
+
             } else { 
                 try { localStorage.removeItem('noah_id'); localStorage.removeItem('noah_pin'); } catch(e) {}
                 playSFX('login_fail'); showSysMsg("⚠️ Login Failed. Check ID or PIN.", true); 
@@ -1096,7 +1178,6 @@
             wrongAttempts++; playSFX('wrong'); if(btn) btn.classList.add('wrong');
             currentCombo = 0; updateComboUI();
             
-            // 🚀 觸發容器科幻微震動
             appCont.classList.remove('jolt-active');
             void appCont.offsetWidth;
             appCont.classList.add('jolt-active');
@@ -1128,8 +1209,8 @@
         if (correct) { 
           playSFX('correct'); if(btn) btn.classList.add('correct'); 
           currentCombo++; 
-          // 🚀 飄出擊中獎勵字效
-          spawnFloatingText(currentCombo >= 3 ? "🔥 COMBO x" + currentCombo + "!" : "+50 EXP ⚡", currentCombo >= 3);
+          // 🚀 飄浮獎勵字效：鎖定在點擊按鈕或輸入區域上方彈出
+          spawnFloatingText(currentCombo >= 3 ? "🔥 COMBO x" + currentCombo + "!" : "+50 EXP ⚡", currentCombo >= 3, btn || document.getElementById('answerArea'));
         } else { 
           playSFX('wrong'); 
           currentCombo = 0; 
