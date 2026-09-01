@@ -367,6 +367,24 @@
       </div>
     </div>
 
+    <!-- 🚀 全新：區域數據解析完畢 (Zone Cleared) 科幻全息彈窗 -->
+    <div id="zoneClearedOverlay" style="position:fixed; top:0; left:0; width:100vw; height:100vh; background:radial-gradient(circle, rgba(0,30,50,0.95) 0%, rgba(0,5,15,0.98) 100%); z-index:30000; display:none; flex-direction:column; justify-content:center; align-items:center; backdrop-filter:blur(15px); text-align:center; padding:20px; animation:fadeIn 0.5s forwards;">
+      <div class="energy-ring" style="border-color:rgba(46,204,113,0.4); box-shadow:0 0 80px rgba(46,204,113,0.6), inset 0 0 30px rgba(46,204,113,0.4);"></div>
+      <div style="color:var(--accent-green); font-size:24px; font-weight:900; letter-spacing:6px; margin-bottom:25px; text-shadow:0 0 15px rgba(46,204,113,0.8);">
+        AREA FULLY SYNCHRONIZED
+      </div>
+      <div class="rank-card" style="border-color:rgba(46,204,113,0.6); max-width:380px; padding:35px 25px;">
+        <div style="font-size:70px; margin-bottom:15px; filter:drop-shadow(0 0 20px rgba(46,204,113,0.8));">🛰️</div>
+        <div style="font-size:20px; font-weight:900; color:#fff; letter-spacing:2px; margin-bottom:12px;">區域數據解析完畢</div>
+        <div style="font-size:14px; color:#bdc3c7; line-height:1.6; margin-bottom:20px; text-align:justify;">
+          隊長，你今日已成功提取此區域的所有數據碎片！為確保全方位神經能力平衡發展，請前往其他作戰區域（如<strong>戰術學院</strong>或<strong>記憶終端</strong>）繼續特訓。
+        </div>
+        <button class="primary-btn" style="background:linear-gradient(135deg, rgba(46,204,113,0.2), transparent); border:2px solid var(--accent-green); color:var(--accent-green); margin-top:0;" onclick="closeZoneClearedModal()">
+          🧭 轉移作戰區域 (RETURN TO BASE)
+        </button>
+      </div>
+    </div>
+
     <div id="feedback-panel">
       <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px;">
         <h2 id="feedbackTitle" style="margin:0; font-size:20px;">INTEL SECURED</h2>
@@ -654,28 +672,38 @@
       // ==========================================
       // 🚀 5. 任務核心邏輯
       // ==========================================
+      // 關閉清空彈窗並返回大廳
+      function closeZoneClearedModal() {
+        playSFX('click');
+        document.getElementById('zoneClearedOverlay').style.display = 'none';
+        navTo('dashboardScreen');
+      }
+
       function executeMission() {
         playSFX('click');
         var mood = document.getElementById('inputMood').value;
         var count = (mood==="好有鬥志")?15:(mood==="攰到抽筋")?8:(mood==="壓力爆煲")?5:10;
         document.getElementById('loadingOverlay').style.display = 'flex';
         
+        // 🚀 傳入具體的 missionType，使基礎與進階生字能獨立計算記憶
         fetch(API_URL, {
             method: 'POST', headers: { 'Content-Type': 'text/plain' },
             body: JSON.stringify({
-                action: 'fetchMissionData', studentId: currentUserData.studentId,
-                pool: currentMissionType.startsWith('vocab') ? 'Vocab_Pool' : (currentMissionType==='grammar'?'Grammar_Pool':'Listening_Pool'), count: count
+                action: 'fetchMissionData', 
+                studentId: currentUserData.studentId,
+                missionType: currentMissionType, // 傳入 vocab_basic / vocab_adv / grammar / listening
+                pool: currentMissionType.startsWith('vocab') ? 'Vocab_Pool' : (currentMissionType==='grammar'?'Grammar_Pool':'Listening_Pool'), 
+                count: count
             })
         })
         .then(res => res.json())
         .then(res => {
             document.getElementById('loadingOverlay').style.display = 'none';
             if(res && res.success) {
-                // 🚀 新增：攔截「當日已清空題庫」狀態
+                // 🚀 動態攔截：若當日題目已清空，播放通關音效並呼叫科幻全息彈窗
                 if (res.allCleared || !res.missionData || res.missionData.length === 0) {
                     playSFX('clear');
-                    alert("🎖️【區域數據解析完畢】\n\n隊長，你今日已經成功解析此區域的所有數據碎片！\n為免技能發展失衡，系統建議你前往其他副本（如戰術學院、記憶終端）進行全方位能力突破！");
-                    navTo('dashboardScreen');
+                    document.getElementById('zoneClearedOverlay').style.display = 'flex';
                     return;
                 }
 
