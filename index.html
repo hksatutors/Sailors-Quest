@@ -8,7 +8,7 @@
     <title>⚓ Sailors' Quest</title>
     <style>
       /* =========================================
-         ⚓ Sailors' Quest (V18.0 全息動態與戰術覆盤旗艦版)
+         ⚓ Sailors' Quest (V19.0 全動態打擊感與手遊視覺旗艦版)
          ========================================= */
       :root {
         --noah-cyan: #00e5ff; --noah-dark: #0a0f16; --text-main: #ecf0f1; 
@@ -65,10 +65,22 @@
       .screen.active { display: block; animation: screenIn 0.5s forwards; }
       @keyframes screenIn { from { opacity: 0; transform: scale(0.95); } to { opacity: 1; transform: scale(1); } }
       
+      /* 🚀 容器動態微震動 (答錯震動回饋) */
+      @keyframes screenJolt {
+        0% { transform: translateX(0); }
+        20% { transform: translateX(-8px) rotate(-0.5deg); }
+        40% { transform: translateX(8px) rotate(0.5deg); }
+        60% { transform: translateX(-5px); }
+        80% { transform: translateX(5px); }
+        100% { transform: translateX(0); }
+      }
+      .jolt-active { animation: screenJolt 0.35s cubic-bezier(0.36, 0.07, 0.19, 0.97) both; }
+
       h1 { color: var(--noah-cyan); margin: 0; font-size: 40px; letter-spacing: 4px; font-weight: 900; }
       .brand-subtitle { font-size: 15px; color: var(--text-dim); margin-bottom: 30px; letter-spacing: 2px; }
       
-      .input-field { width: 100%; padding: 18px; background: rgba(0,0,0,0.5); border: 1px solid #444; color: white; border-radius: 12px; font-size: 18px; margin-bottom: 10px; }
+      .input-field { width: 100%; padding: 18px; background: rgba(0,0,0,0.5); border: 1px solid #444; color: white; border-radius: 12px; font-size: 18px; margin-bottom: 10px; transition: 0.3s; }
+      .input-field:focus { border-color: var(--noah-cyan); box-shadow: 0 0 15px rgba(0,229,255,0.3); }
       .inline-input { background: rgba(0, 0, 0, 0.6); border: none; border-bottom: 2px solid var(--noah-cyan); color: var(--accent-gold); font-size: 20px; font-weight: 900; font-family: monospace; text-align: center; width: 100px; min-width: 60px; padding: 2px 8px; outline: none; transition: 0.3s; margin: 0 5px; border-radius: 4px 4px 0 0; }
       .inline-input:focus { border-bottom: 2px solid var(--accent-gold); background: rgba(0, 229, 255, 0.15); width: 140px; }
 
@@ -97,39 +109,115 @@
       .q-image-box img.loaded { opacity: 1; }
       .q-badge { position: absolute; top: 10px; left: 10px; background: rgba(0,0,0,0.7); border: 1px solid var(--noah-cyan); color: var(--noah-cyan); padding: 4px 8px; border-radius: 6px; font-size: 14px; font-weight: bold; z-index: 2; }
       
+      /* 🚀 選項按鈕與手遊級彈跳動畫 */
+      @keyframes correctPop {
+        0% { transform: scale(1); }
+        40% { transform: scale(1.08); }
+        70% { transform: scale(0.96); }
+        100% { transform: scale(1); }
+      }
       .options-grid { display: grid; gap: 10px; width: 100%; }
       .option-btn { background: rgba(255,255,255,0.05); border: 1px solid #444; color: #fff; padding: 18px; border-radius: 10px; text-align: left; cursor: pointer; transition: 0.2s; font-size: 18px; }
-      .option-btn.correct { background: var(--accent-green) !important; color: #000; font-weight: bold; border-color: #fff; }
+      .option-btn.correct { background: var(--accent-green) !important; color: #000; font-weight: bold; border-color: #fff; box-shadow: 0 0 25px rgba(46,204,113,0.8); animation: correctPop 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
       .option-btn.wrong { background: var(--accent-red) !important; color: #fff; border-color: #fff; animation: shake 0.3s; }
-      @keyframes shake { 0%,100%{transform:translateX(0);} 25%{transform:translateX(-5px);} 75%{transform:translateX(5px);} }
+      @keyframes shake { 0%,100%{transform:translateX(0);} 25%{transform:translateX(-6px);} 75%{transform:translateX(6px);} }
       
       .word-chips-container { display: flex; flex-wrap: wrap; gap: 10px; justify-content: center; margin-top: 20px; padding: 15px; background: rgba(0,0,0,0.3); border-radius: 12px; width: 100%; }
-      .chip { background: #2c3e50; border: 1px solid #555; padding: 10px 15px; border-radius: 10px; cursor: pointer; font-size: 18px; font-weight: bold; }
+      .chip { background: #2c3e50; border: 1px solid #555; padding: 10px 15px; border-radius: 10px; cursor: pointer; font-size: 18px; font-weight: bold; transition: 0.2s; }
+      .chip:hover { transform: scale(1.05); border-color: var(--noah-cyan); }
       .chip.used { opacity: 0.3; pointer-events: none; }
       .answer-slots { display: flex; flex-wrap: wrap; gap: 10px; min-height: 60px; border-bottom: 2px solid var(--noah-cyan); margin-bottom: 20px; padding: 5px; width: 100%; }
       
-      /* 🚀 多鄰國式彈力情報面板 */
-      #feedback-panel { position: fixed; bottom: 30px; left: 50%; width: 95%; max-width: 460px; background: rgba(15, 22, 30, 0.98); backdrop-filter: blur(20px); padding: 25px; border: 2px solid var(--noah-cyan); border-radius: 26px; transform: translate(-50%, 150%); transition: 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); z-index: 100; text-align: left; box-shadow: 0 20px 50px rgba(0,0,0,0.9); max-height: 80vh; overflow-y: auto; }
-      #feedback-panel.active { transform: translate(-50%, 0); }
-      #feedback-panel.correct { border-color: var(--accent-green); box-shadow: 0 0 30px rgba(46, 204, 113, 0.3); }
-      #feedback-panel.wrong { border-color: var(--accent-red); box-shadow: 0 0 30px rgba(255, 51, 102, 0.3); }
-      #feedback-panel.warning { border-color: var(--accent-gold); box-shadow: 0 0 30px rgba(241, 196, 15, 0.3); }
+      /* 🚀 飄浮加分/連擊動態文字 (Float Text) */
+      @keyframes floatUpScore {
+        0% { transform: translate(-50%, 0) scale(0.5); opacity: 0; }
+        30% { transform: translate(-50%, -20px) scale(1.2); opacity: 1; }
+        80% { transform: translate(-50%, -50px) scale(1); opacity: 1; }
+        100% { transform: translate(-50%, -70px) scale(0.9); opacity: 0; }
+      }
+      .floating-score {
+        position: fixed; left: 50%; top: 38%; z-index: 99999;
+        font-family: monospace; font-size: 26px; font-weight: 900;
+        color: var(--accent-gold); text-shadow: 0 0 15px rgba(241,196,15,0.8), 0 0 30px rgba(241,196,15,0.4);
+        pointer-events: none; animation: floatUpScore 1s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
+      }
+
+      /* 🚀 多鄰國式彈力情報面板 (Spring Pop-Up) */
+      @keyframes feedbackSpring {
+        0% { transform: translate(-50%, 120%); opacity: 0; }
+        60% { transform: translate(-50%, -10px); opacity: 1; }
+        80% { transform: translate(-50%, 4px); }
+        100% { transform: translate(-50%, 0); opacity: 1; }
+      }
+      #feedback-panel { 
+        position: fixed; bottom: 25px; left: 50%; width: 95%; max-width: 460px; 
+        background: rgba(14, 20, 28, 0.98); backdrop-filter: blur(25px); 
+        padding: 22px 20px; border: 2px solid var(--noah-cyan); border-radius: 26px; 
+        transform: translate(-50%, 150%); z-index: 100; text-align: left; 
+        box-shadow: 0 25px 60px rgba(0,0,0,0.95); max-height: 80vh; overflow-y: auto; 
+      }
+      #feedback-panel.active { animation: feedbackSpring 0.45s cubic-bezier(0.175, 0.885, 0.32, 1.2) forwards; }
+      #feedback-panel.correct { border-color: var(--accent-green); box-shadow: 0 0 35px rgba(46, 204, 113, 0.35); }
+      #feedback-panel.wrong { border-color: var(--accent-red); box-shadow: 0 0 35px rgba(255, 51, 102, 0.35); }
+      #feedback-panel.warning { border-color: var(--accent-gold); box-shadow: 0 0 35px rgba(241, 196, 15, 0.35); }
       
+      /* 🚀 生字 Hint 呼吸掃描光效 */
+      @keyframes radarGlow {
+        0%, 100% { text-shadow: 0 0 8px rgba(241,196,15,0.4); opacity: 0.9; }
+        50% { text-shadow: 0 0 20px rgba(241,196,15,1), 0 0 35px rgba(241,196,15,0.8); opacity: 1; }
+      }
+      .hint-radar-text {
+        color: var(--accent-gold); font-weight: 900; letter-spacing: 3px; 
+        font-family: monospace; font-size: 20px; animation: radarGlow 1.8s infinite;
+      }
+
       /* 🚀 字根與衍生詞膠囊標籤 */
       .morph-tag { display: inline-flex; align-items: center; background: rgba(0, 229, 255, 0.1); border: 1px solid var(--noah-cyan); border-radius: 8px; padding: 4px 10px; font-size: 13px; font-weight: bold; margin-right: 6px; margin-bottom: 6px; color: var(--noah-cyan); }
       .morph-tag.derivative { border-color: var(--accent-gold); color: var(--accent-gold); background: rgba(241, 196, 15, 0.1); }
 
-      /* 🚀 Combo 連擊標籤 */
-      #comboBadge { position: absolute; top: 10px; right: 10px; background: rgba(0,0,0,0.8); border: 1.5px solid var(--accent-gold); color: var(--accent-gold); font-family: monospace; font-weight: 900; font-size: 14px; padding: 4px 10px; border-radius: 20px; z-index: 3; display: none; transform: scale(1); transition: transform 0.2s; box-shadow: 0 0 15px rgba(241, 196, 15, 0.4); }
-      #comboBadge.pop { transform: scale(1.3); }
+      /* 🚀 動態 Combo 標籤 */
+      @keyframes comboExplosion {
+        0% { transform: scale(0.6) rotate(-10deg); }
+        50% { transform: scale(1.3) rotate(5deg); }
+        100% { transform: scale(1) rotate(0deg); }
+      }
+      #comboBadge { 
+        background: rgba(241, 196, 15, 0.15); 
+        border: 1.5px solid var(--accent-gold); 
+        color: var(--accent-gold); 
+        font-family: monospace; 
+        font-weight: 900; 
+        font-size: 13px; 
+        padding: 3px 10px; 
+        border-radius: 20px; 
+        display: none; 
+        box-shadow: 0 0 12px rgba(241, 196, 15, 0.4); 
+        letter-spacing: 1px;
+      }
+      #comboBadge.pop { animation: comboExplosion 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards; }
 
-      /* 🚀 結算 S/A/B 評級徽章 */
-      .rank-stamp { width: 90px; height: 90px; border-radius: 50%; border: 4px solid var(--accent-gold); display: flex; align-items: center; justify-content: center; font-size: 48px; font-weight: 900; font-family: monospace; margin: 0 auto 20px auto; color: var(--accent-gold); box-shadow: 0 0 30px rgba(241, 196, 15, 0.5); animation: duoSpringPop 0.8s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards; }
-      .rank-stamp.A { border-color: var(--noah-cyan); color: var(--noah-cyan); box-shadow: 0 0 30px rgba(0, 229, 255, 0.5); }
-      .rank-stamp.B { border-color: #3498db; color: #3498db; box-shadow: 0 0 30px rgba(52, 152, 219, 0.5); }
+      /* 🚀 街機級 S/A/B 重力蓋印徽章 (Stamp Impact) */
+      @keyframes stampImpact {
+        0% { transform: scale(3.5) rotate(-20deg); opacity: 0; filter: blur(6px); }
+        60% { transform: scale(0.85) rotate(3deg); opacity: 1; filter: blur(0); }
+        80% { transform: scale(1.08) rotate(-1deg); }
+        100% { transform: scale(1) rotate(0deg); opacity: 1; }
+      }
+      .rank-stamp { 
+        width: 85px; height: 85px; border-radius: 50%; border: 4px solid var(--accent-gold); 
+        display: flex; align-items: center; justify-content: center; font-size: 46px; font-weight: 900; 
+        font-family: monospace; margin: 0 auto 15px auto; color: var(--accent-gold); 
+        box-shadow: 0 0 35px rgba(241, 196, 15, 0.6); 
+        animation: stampImpact 0.65s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards; 
+      }
+      .rank-stamp.A { border-color: var(--noah-cyan); color: var(--noah-cyan); box-shadow: 0 0 35px rgba(0, 229, 255, 0.6); }
+      .rank-stamp.B { border-color: #3498db; color: #3498db; box-shadow: 0 0 35px rgba(52, 152, 219, 0.6); }
 
-      .audio-matrix { display: grid; grid-template-columns: repeat(auto-fit, minmax(110px, 1fr)); gap: 8px; margin-top: 15px; }
-      .voice-btn { background: rgba(0,229,255,0.1); border: 1px solid var(--noah-cyan); color: var(--noah-cyan); padding: 10px 6px; border-radius: 8px; font-size: 13px; cursor: pointer; font-weight: bold; text-align: center; }
+      /* 🚀 工整排版矩陣 */
+      .audio-matrix-2x2 { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 12px; }
+      .audio-matrix-3col { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 6px; margin-top: 12px; }
+      .voice-btn { background: rgba(0,229,255,0.1); border: 1px solid var(--noah-cyan); color: var(--noah-cyan); padding: 10px 4px; border-radius: 8px; font-size: 13px; cursor: pointer; font-weight: bold; text-align: center; transition: 0.2s; }
+      .voice-btn:hover { background: rgba(0,229,255,0.25); box-shadow: 0 0 10px rgba(0,229,255,0.3); }
 
       #sysMsgBox { position: fixed; top: 20px; left: 50%; transform: translateX(-50%); z-index: 99999; font-size:14px; font-weight:bold; text-align:center; display:none; background:rgba(0,0,0,0.9); padding:12px 20px; border-left:4px solid; border-radius:8px; box-shadow: 0 5px 15px rgba(0,0,0,0.5); width: 90%; max-width: 400px; }
       #loadingOverlay { display: none; position: fixed; top:0; left:0; width:100vw; height:100vh; background: rgba(0,0,0,0.85); z-index: 9999; flex-direction: column; justify-content: center; align-items: center; color: var(--noah-cyan); }
@@ -321,11 +409,12 @@
       </div>
 
       <div id="missionScreen" class="screen">
-        <div id="comboBadge">COMBO x0</div>
-        <div style="display:flex; justify-content:space-between; margin-bottom:15px; font-family:monospace;">
-          <div id="missionProgress" style="color:var(--noah-cyan);">SYNC: 1/10</div>
-          <div id="missionTimer" style="color:var(--accent-gold);">00:00</div>
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px; font-family:monospace; min-height:30px;">
+          <div id="missionProgress" style="color:var(--noah-cyan); font-weight:bold;">SYNC: 1/10</div>
+          <div id="comboBadge">COMBO x0</div>
+          <div id="missionTimer" style="color:var(--accent-gold); font-weight:bold;">00:00</div>
         </div>
+        
         <div class="q-image-box">
           <div class="q-badge" id="qTypeBadge">INTEL</div>
           <img id="qImage" src="">
@@ -342,7 +431,6 @@
         <h1 style="color:var(--accent-gold); font-size:36px; margin-top:0;">MISSION CLEAR</h1>
         <div id="finishAccuracy" style="font-size:18px; color:var(--noah-cyan); margin-bottom:15px;">ACCURACY: 100%</div>
         
-        <!-- 🚀 Combo 收益展示標籤 -->
         <div id="finishComboBanner" style="font-size:13px; color:var(--accent-gold); font-family:monospace; margin-bottom:20px; background:rgba(241,196,15,0.1); border:1px solid var(--accent-gold); border-radius:20px; padding:6px 14px; display:inline-block;">
           🔥 MAX COMBO x10 (+30% BONUS)
         </div>
@@ -352,7 +440,6 @@
             <div style="text-align:center;"><div class="reward-box" id="rewardExp" style="border:3px solid var(--accent-gold); color:var(--accent-gold);">0</div><div style="margin-top:8px; font-size:14px; color:#aaa;">EXP</div></div>
         </div>
         
-        <!-- 🚀 可折疊戰術回顧抽屜 -->
         <div class="debrief-box" id="debriefContainer">
           <button class="debrief-toggle" id="debriefToggleBtn" onclick="toggleDebrief()">
             <span id="debriefBtnText">📋 展開戰術回顧 (0 項數據錯誤)</span>
@@ -426,10 +513,10 @@
       </div>
     </div>
 
-    <!-- 🚀 情報反饋面板 -->
+    <!-- 🚀 情報反饋面板 (支援果凍彈簧登場) -->
     <div id="feedback-panel">
       <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px;">
-        <h2 id="feedbackTitle" style="margin:0; font-size:20px;">INTEL SECURED</h2>
+        <h2 id="feedbackTitle" style="margin:0; font-size:20px; display:flex; align-items:center; gap:8px;">INTEL SECURED</h2>
         <button id="feedbackNextBtn" class="primary-btn btn-cyan" style="width:auto; margin:0; padding:8px 25px;" onclick="nextQuestion()">NEXT ➡️</button>
       </div>
       <div id="feedbackContent" style="font-size:16px;"></div>
@@ -479,7 +566,18 @@
       var bgmSelect = document.getElementById('bgmSelect'), sysMsgBox = document.getElementById('sysMsgBox');
 
       MEDIA.bgm.forEach(function(t, idx) { var opt = document.createElement('option'); opt.value = idx; opt.text = "🎧 " + t.name; bgmSelect.appendChild(opt); });
-      function shuffleBGM() { bgmSelect.selectedIndex = Math.floor(Math.random() * MEDIA.bgm.length); changeBGMTrack(); }
+      
+      function shuffleBGM() { 
+        var hour = new Date().getHours();
+        var targetType = (hour >= 18 || hour < 6) ? "night" : "day";
+        var availableIdx = [];
+        MEDIA.bgm.forEach((t, i) => { if(t.type === targetType) availableIdx.push(i); });
+        if (availableIdx.length > 0) {
+          bgmSelect.selectedIndex = availableIdx[Math.floor(Math.random() * availableIdx.length)];
+          changeBGMTrack();
+        }
+      }
+
       function changeBGMTrack() { bgmPlayer.src = MEDIA.bgm[bgmSelect.value].url; if(isBgmPlaying) bgmPlayer.play(); }
       function toggleBGM() { 
         isBgmPlaying = !isBgmPlaying;
@@ -505,31 +603,38 @@
         duckBGM(); msg.onend = unduckBGM; window.speechSynthesis.speak(msg);
       }
 
-      // 🧠 隨機抽取 50% 字母提示 (固定首字母)
-      function getRandomMaskedWord(word) {
-        if (!word) return "";
-        var arr = word.split("");
-        if (arr.length <= 2) return arr.join(" ");
-        
-        var indices = [];
-        for (var i = 1; i < arr.length; i++) {
-          if (arr[i] !== ' ' && arr[i] !== '-') indices.push(i);
-        }
-        indices.sort(() => 0.5 - Math.random());
-        var hideCount = Math.floor(indices.length * 0.5);
-        var hideSet = new Set(indices.slice(0, hideCount));
+      // 🚀 飄浮加分/獎勵文字生成器
+      function spawnFloatingText(text, isGold) {
+        var el = document.createElement('div');
+        el.className = 'floating-score';
+        if (!isGold) el.style.color = 'var(--accent-green)';
+        el.innerText = text;
+        document.body.appendChild(el);
+        setTimeout(function() { el.remove(); }, 1000);
+      }
 
-        var res = "";
-        for (var j = 0; j < arr.length; j++) {
-          if (arr[j] === ' ' || arr[j] === '-') res += arr[j];
-          else if (j === 0) res += arr[j]; // 首字母錨定
-          else res += hideSet.has(j) ? "_" : arr[j];
-        }
-        return res.split("").join(" ");
+      // 🧠 逐詞處理動態隨機 50% 遮蔽 (保留詞與詞之間的空白，首字母錨定)
+      function getRandomMaskedWord(phrase) {
+        if (!phrase) return "";
+        var words = String(phrase).trim().split(/\s+/);
+        var maskedWords = words.map(function(word) {
+          if (word.length <= 1) return word;
+          var arr = word.split("");
+          var maskable = [];
+          for (var i = 1; i < arr.length; i++) {
+            if (/[a-zA-Z0-9]/.test(arr[i])) maskable.push(i);
+          }
+          maskable.sort(() => 0.5 - Math.random());
+          var hideCount = Math.max(1, Math.floor(maskable.length * 0.5));
+          var hideSet = new Set(maskable.slice(0, hideCount));
+
+          return arr.map((c, idx) => hideSet.has(idx) ? "_" : c).join(" ");
+        });
+        return maskedWords.join("   ");
       }
 
       // ==========================================
-      // 🗣️ 單字語音 API (支援 0.9x 正常速 與 0.6x 慢速)
+      // 🗣️ 單字語音 API (0.9x 正常速 與 0.6x 慢速)
       // ==========================================
       function playAudioLogic(text, isSlow) {
         if (!text) return;
@@ -549,25 +654,24 @@
                     elevenPlayer.play();
                 } else throw "API 回傳失敗: " + data.message;
             } catch(e) {
-                console.error("❌ 單字語音 JSON 解析失敗:", textData);
                 throw e;
             }
         })
         .catch(err => { 
-            console.error("🔊 TTS 連線崩潰:", err); 
             unduckBGM(); 
             playVoice(text, isSlow ? 0.6 : 0.9); 
         });
       }
       
       // ==========================================
-      // 🗣️ 聆聽對話 API (支援 0.7x / 0.85x / 1.0x 三段速)
+      // 🗣️ 聆聽對話 API (Normal 1.0x / Slow 0.85x / Slower 0.7x)
       // ==========================================
       async function playListeningAudio(speedRate) { 
         if(!currentListeningScript) return showSysMsg("⚠️ No script data found", true);
         var scriptArr = []; try { scriptArr = JSON.parse(currentListeningScript); } catch(e) { scriptArr = [{ role: "Log", text_en: currentListeningScript }]; }
-        var listenBtn = document.getElementById('listen-btn');
-        if(listenBtn) listenBtn.disabled = true; duckBGM(); showSysMsg("📡 Syncing Audio...", false);
+        var listenBtns = document.querySelectorAll('#qAudioContainer button');
+        listenBtns.forEach(b => b.disabled = true);
+        duckBGM(); showSysMsg("📡 Syncing Audio...", false);
 
         var availableVoices = { "Male": VOICE_POOL.Male.slice().sort(function(){ return 0.5-Math.random(); }), "Female": VOICE_POOL.Female.slice().sort(function(){ return 0.5-Math.random(); }) };
         var roleVoices = {};
@@ -607,13 +711,13 @@
                     elevenPlayer.onended = function(){ playIdx++; playNext(); }; 
                     elevenPlayer.play();
                 } else { 
-                    unduckBGM(); if(listenBtn) listenBtn.disabled = false; showSysMsg("✅ Playback finished", false); 
+                    unduckBGM(); listenBtns.forEach(b => b.disabled = false); showSysMsg("✅ Playback finished", false); 
                 }
             }
             playNext();
 
         } catch (err) {
-            unduckBGM(); if(listenBtn) listenBtn.disabled = false; showSysMsg("⚠️ Connection failed, using fallback", true); 
+            unduckBGM(); listenBtns.forEach(b => b.disabled = false); showSysMsg("⚠️ Connection failed, using fallback", true); 
             var fullText = scriptArr.map(function(l){ return String(l.text_en || l.text || l.dialogue || l.content || ""); }).join(". ");
             playVoice(fullText, speedRate || 1.0);
         }
@@ -625,13 +729,8 @@
       function unlockSystemMedia() {
         document.querySelectorAll('.bg-vid').forEach(function(vid) { vid.play().catch(function(){}); });
         elevenPlayer.load(); sePlayer.load();
-        var hour = new Date().getHours();
-        var targetType = (hour >= 18 || hour < 6) ? "night" : "day";
-        var availableIdx = [];
-        MEDIA.bgm.forEach((t, i) => { if(t.type === targetType) availableIdx.push(i); });
         
-        bgmSelect.selectedIndex = availableIdx[Math.floor(Math.random() * availableIdx.length)];
-        bgmPlayer.src = MEDIA.bgm[bgmSelect.value].url;
+        shuffleBGM();
         bgmPlayer.volume = 0;
         var bp = bgmPlayer.play();
         if(bp) bp.then(function() { bgmPlayer.pause(); }).catch(function(){});
@@ -858,10 +957,11 @@
       function updateComboUI() {
         var cb = document.getElementById('comboBadge');
         if (currentCombo >= 2) {
-          cb.style.display = 'block';
-          cb.innerText = (currentCombo >= 10 ? "⚡ MAX SYNC x" : (currentCombo >= 5 ? "🔥 COMBO x" : "COMBO x")) + currentCombo;
+          cb.style.display = 'inline-block';
+          cb.innerText = (currentCombo >= 10 ? "⚡ MAX x" : (currentCombo >= 5 ? "🔥 COMBO x" : "COMBO x")) + currentCombo;
+          cb.classList.remove('pop');
+          void cb.offsetWidth;
           cb.classList.add('pop');
-          setTimeout(() => cb.classList.remove('pop'), 200);
         } else {
           cb.style.display = 'none';
         }
@@ -908,7 +1008,7 @@
                 currentBadge="AUDIO"; instructionText="Listen and spell."; 
                 displayQ="Hint: " + getRandomMaskedWord(targetCurrentAnswer) + " ("+(q.Part_of_Speech || q.POS)+")"; 
                 audioCont.style.display="block"; 
-                audioCont.innerHTML = '<div class="audio-matrix"><button class="voice-btn" onclick="playAudioLogic(\''+targetCurrentAnswer.replace(/'/g,"\\'")+'\', false)">🔊 正常 (0.9x)</button><button class="voice-btn" onclick="playAudioLogic(\''+targetCurrentAnswer.replace(/'/g,"\\'")+'\', true)">🐢 慢速 (0.6x)</button></div>';
+                audioCont.innerHTML = '<div class="audio-matrix-2x2"><button class="voice-btn" onclick="playAudioLogic(\''+targetCurrentAnswer.replace(/'/g,"\\'")+'\', false)">🔊 Normal</button><button class="voice-btn" onclick="playAudioLogic(\''+targetCurrentAnswer.replace(/'/g,"\\'")+'\', true)">🐢 Slow</button></div>';
                 playAudioLogic(targetCurrentAnswer, false); 
             }
             else if (r===2) { currentBadge="SEMANTIC"; instructionText="Choose the correct meaning."; displayQ="What is the meaning of: "+targetCurrentAnswer+"?"; targetCurrentAnswer=String(q.Meaning).trim(); renderMode="MCQ"; }
@@ -919,7 +1019,7 @@
                 currentBadge="VOICE UPLINK"; instructionText="Tap 🎤 on your keyboard and read the word."; 
                 displayQ="Target: 『 CLASSIFIED 』\nMeaning: "+q.Meaning; 
                 audioCont.style.display="block"; 
-                audioCont.innerHTML = '<div class="audio-matrix"><button class="voice-btn" onclick="playAudioLogic(\''+targetCurrentAnswer.replace(/'/g,"\\'")+'\', false)">🔊 正常 (0.9x)</button><button class="voice-btn" onclick="playAudioLogic(\''+targetCurrentAnswer.replace(/'/g,"\\'")+'\', true)">🐢 慢速 (0.6x)</button></div>';
+                audioCont.innerHTML = '<div class="audio-matrix-2x2"><button class="voice-btn" onclick="playAudioLogic(\''+targetCurrentAnswer.replace(/'/g,"\\'")+'\', false)">🔊 Normal</button><button class="voice-btn" onclick="playAudioLogic(\''+targetCurrentAnswer.replace(/'/g,"\\'")+'\', true)">🐢 Slow</button></div>';
                 playAudioLogic(targetCurrentAnswer, false); 
             } 
             else if (r===7) { currentBadge="SUFFIX ANALYSIS"; instructionText="Identify the part of speech."; displayQ="Analyze the suffix to find the part of speech for:\n「 " + deriv.word + " 」"; targetCurrentAnswer=String(deriv.pos).trim(); renderMode="MCQ"; }
@@ -936,10 +1036,10 @@
             currentListeningScript = ""; for(var k in q){ if(typeof q[k]==='string' && q[k].indexOf('"role"')>-1){ currentListeningScript=q[k]; break; } }
             audioCont.style.display="block";
             audioCont.innerHTML = 
-                '<div class="audio-matrix">' +
-                '<button class="voice-btn" onclick="playListeningAudio(1.0)">🔊 正常 (1.0x)</button>' +
-                '<button class="voice-btn" onclick="playListeningAudio(0.85)">🚶 中速 (0.85x)</button>' +
-                '<button class="voice-btn" onclick="playListeningAudio(0.7)">🐢 慢速 (0.7x)</button>' +
+                '<div class="audio-matrix-3col">' +
+                '<button class="voice-btn" onclick="playListeningAudio(1.0)">🔊 Normal</button>' +
+                '<button class="voice-btn" onclick="playListeningAudio(0.85)">🚶 Slow</button>' +
+                '<button class="voice-btn" onclick="playListeningAudio(0.7)">🐢 Slower</button>' +
                 '</div>';
             if (currentBadge.toUpperCase() === 'TFNG' || currentBadge.toUpperCase() === 'T/F/NG') { instructionText = "Choose True, False, or Not Given."; renderMode = "MCQ"; } else { instructionText = "Listen and solve."; if(String(q.Distractors||"").length>0) renderMode = "MCQ"; }
         }
@@ -990,19 +1090,37 @@
         var cUser = cleanStr(userAns); var cTarget = cleanStr(targetCurrentAnswer); var correct = (cUser === cTarget);
         if (!correct) { var rawUser = cUser.replace(/[^a-z0-9\u4e00-\u9fa5]/ig, ""); var rawTarget = cTarget.replace(/[^a-z0-9\u4e00-\u9fa5]/ig, ""); if (rawUser === rawTarget && rawTarget !== "") correct = true; }
 
+        var appCont = document.getElementById('app-container');
+
         if (!correct && wrongAttempts === 0) {
             wrongAttempts++; playSFX('wrong'); if(btn) btn.classList.add('wrong');
             currentCombo = 0; updateComboUI();
-            var panelWarning = document.getElementById('feedback-panel'); panelWarning.className = 'active warning'; 
-            document.getElementById('feedbackTitle').innerText = "⚠️ NOISE DETECTED";
+            
+            // 🚀 觸發容器科幻微震動
+            appCont.classList.remove('jolt-active');
+            void appCont.offsetWidth;
+            appCont.classList.add('jolt-active');
+
+            var panelWarning = document.getElementById('feedback-panel'); 
+            panelWarning.className = 'active warning'; 
+            document.getElementById('feedbackTitle').innerHTML = "⚠️ NOISE DETECTED";
             
             var hint = q.Explanation || "Please check the context carefully.";
             if(document.getElementById('userIn') && currentMissionType.startsWith('vocab')) { 
                 hint = getRandomMaskedWord(String(q.Vocabulary || targetCurrentAnswer)); 
             }
-            document.getElementById('feedbackContent').innerHTML = '<p>Hint: <span style="color:var(--accent-gold); font-weight:bold; letter-spacing:2px; font-family:monospace;">'+hint+'</span></p>';
-            var nextBtn = document.getElementById('feedbackNextBtn'); nextBtn.innerText = "TRY AGAIN 🔄";
-            nextBtn.onclick = function() { panelWarning.classList.remove('active'); if(btn) btn.classList.remove('wrong'); nextBtn.innerText = "NEXT ➡️"; nextBtn.onclick = nextQuestion; };
+            document.getElementById('feedbackContent').innerHTML = '<div style="margin: 10px 0;"><span style="color:#aaa; font-size:14px;">ANALYSIS HINT:</span><br><div class="hint-radar-text" style="margin-top:5px;">'+hint+'</div></div>';
+            
+            var nextBtn = document.getElementById('feedbackNextBtn'); 
+            nextBtn.innerText = "TRY AGAIN 🔄";
+            nextBtn.style.boxShadow = "0 0 15px rgba(241,196,15,0.4)";
+            nextBtn.onclick = function() { 
+              panelWarning.classList.remove('active'); 
+              if(btn) btn.classList.remove('wrong'); 
+              nextBtn.style.boxShadow = "none";
+              nextBtn.innerText = "NEXT ➡️"; 
+              nextBtn.onclick = nextQuestion; 
+            };
             return;
         }
 
@@ -1010,6 +1128,8 @@
         if (correct) { 
           playSFX('correct'); if(btn) btn.classList.add('correct'); 
           currentCombo++; 
+          // 🚀 飄出擊中獎勵字效
+          spawnFloatingText(currentCombo >= 3 ? "🔥 COMBO x" + currentCombo + "!" : "+50 EXP ⚡", currentCombo >= 3);
         } else { 
           playSFX('wrong'); 
           currentCombo = 0; 
@@ -1018,9 +1138,13 @@
         updateComboUI();
 
         missionResults.push({ qId: q.Question_ID, isCorrect: correct });
-        var panel = document.getElementById('feedback-panel'); panel.className = 'active ' + (correct?'correct':'wrong');
-        document.getElementById('feedbackTitle').innerText = correct ? "INTEL SECURED" : "CONNECTION LOST";
-        var nextBtnDone = document.getElementById('feedbackNextBtn'); nextBtnDone.innerText = "NEXT ➡️"; nextBtnDone.onclick = nextQuestion;
+        var panel = document.getElementById('feedback-panel'); 
+        panel.className = 'active ' + (correct ? 'correct' : 'wrong');
+        document.getElementById('feedbackTitle').innerHTML = correct ? "🛡️ INTEL SECURED" : "❌ CONNECTION LOST";
+        var nextBtnDone = document.getElementById('feedbackNextBtn'); 
+        nextBtnDone.innerText = "NEXT ➡️"; 
+        nextBtnDone.style.boxShadow = correct ? "0 0 15px rgba(46,204,113,0.4)" : "0 0 15px rgba(255,51,102,0.4)";
+        nextBtnDone.onclick = nextQuestion;
         
         var content = "";
         if(currentMissionType.startsWith('vocab')) {
@@ -1028,7 +1152,6 @@
             content += '<div style="color:var(--noah-cyan); font-weight:900; font-size:24px; letter-spacing:1px;">' + vocWord + (pos ? ' <span style="font-size:14px; color:#888; font-weight:normal;">('+pos+')</span>' : '') + '</div>';
             if (meaning) content += '<div style="font-size:16px; color:#ddd; margin-bottom:10px;">' + meaning + '</div>';
             
-            // 🚀 形態學標籤 (字根與衍生詞)
             var derivObj = null; try { if(q.Derivative) derivObj = JSON.parse(q.Derivative); } catch(e){}
             if (q.Root || (derivObj && derivObj.word)) {
               content += '<div style="margin-bottom:10px;">';
@@ -1039,11 +1162,12 @@
 
             var exObj = {en:"", zh:""}; try { if(q.Example) exObj = JSON.parse(q.Example); } catch(e){}
             if(exObj.en) content += '<div style="margin-bottom:15px; padding:12px; background:rgba(0,229,255,0.05); border-left:3px solid var(--noah-cyan); border-radius:0 8px 8px 0;"><div style="color:#fff; font-style:italic; line-height:1.4;">"'+exObj.en+'"</div><div style="color:#888; font-size:14px; margin-top:5px;">'+(exObj.zh||"")+'</div></div>';
-            content += '<div class="audio-matrix">' +
-                '<button class="voice-btn" onclick="playAudioLogic(\''+vocWord.replace(/'/g,"\\'")+'\', false)">🔊 WORD (0.9x)</button>' +
-                '<button class="voice-btn" onclick="playAudioLogic(\''+vocWord.replace(/'/g,"\\'")+'\', true)">🐢 WORD (0.6x)</button>' +
-                (exObj.en ? '<button class="voice-btn" onclick="playAudioLogic(\''+String(exObj.en).replace(/'/g,"\\'")+'\', false)">🔊 EXAMPLE (0.9x)</button>' : '') +
-                (exObj.en ? '<button class="voice-btn" onclick="playAudioLogic(\''+String(exObj.en).replace(/'/g,"\\'")+'\', true)">🐢 EXAMPLE (0.6x)</button>' : '') +
+            
+            content += '<div class="audio-matrix-2x2">' +
+                '<button class="voice-btn" onclick="playAudioLogic(\''+vocWord.replace(/'/g,"\\'")+'\', false)">🔊 Word (Normal)</button>' +
+                '<button class="voice-btn" onclick="playAudioLogic(\''+vocWord.replace(/'/g,"\\'")+'\', true)">🐢 Word (Slow)</button>' +
+                (exObj.en ? '<button class="voice-btn" onclick="playAudioLogic(\''+String(exObj.en).replace(/'/g,"\\'")+'\', false)">🔊 Example (Normal)</button>' : '') +
+                (exObj.en ? '<button class="voice-btn" onclick="playAudioLogic(\''+String(exObj.en).replace(/'/g,"\\'")+'\', true)">🐢 Example (Slow)</button>' : '') +
                 '</div>';
         } else {
             content = '<div style="color:var(--noah-cyan); font-weight:bold; font-size:20px; margin-bottom:10px;">Target: '+targetCurrentAnswer+'</div>';
@@ -1109,7 +1233,6 @@
                 } else { playSFX('clear'); setTimeout(function(){ playSFX('rank_up'); }, 800); }
                 isMissionActive = false; if(isBgmPlaying) bgmPlayer.volume = 0.3;
                 
-                // 🚀 S / A / B 評級印章
                 var stamp = document.getElementById('finishRankStamp');
                 var acc = res.accuracy || 0;
                 if (acc === 100) { stamp.innerText = 'S'; stamp.className = 'rank-stamp'; }
@@ -1118,7 +1241,6 @@
 
                 document.getElementById('finishAccuracy').innerText = "ACCURACY: " + acc + "%";
                 
-                // 🚀 Combo 加成標籤展示
                 var comboBanner = document.getElementById('finishComboBanner');
                 if (res.maxCombo >= 5 && res.comboBonusPercent > 0) {
                   comboBanner.style.display = 'inline-block';
@@ -1127,14 +1249,12 @@
                   comboBanner.style.display = 'none';
                 }
 
-                // 🚀 戰術回顧清單填充
                 var debriefBtnText = document.getElementById('debriefBtnText');
                 var debriefContent = document.getElementById('debriefContent');
                 if (wrongQuestionsList.length > 0) {
                   debriefBtnText.innerText = "📋 展開戰術回顧 (" + wrongQuestionsList.length + " 項數據錯誤)";
                   var dHtml = "";
                   wrongQuestionsList.forEach((item, idx) => {
-                    var wordOrQ = item.q.Vocabulary || item.q.Question || "Question";
                     var meanOrExp = item.q.Meaning || item.q.Explanation || item.q.Translation || "";
                     dHtml += '<div class="debrief-item">';
                     dHtml += '<strong style="color:var(--accent-red);">#' + (idx+1) + ' Target:</strong> <span style="color:#fff;">' + item.ans + '</span><br>';
@@ -1149,7 +1269,6 @@
                   document.getElementById('debriefContainer').style.display = 'block';
                 }
 
-                // 數字滾動跳動特效
                 animateNumber('rewardCoins', res.earnedCoins, 1000);
                 animateNumber('rewardExp', res.earnedExp, 1000);
                 
