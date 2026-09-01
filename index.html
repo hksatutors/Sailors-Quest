@@ -172,6 +172,83 @@
         #app-container { padding: 20px 15px; }
         h1 { font-size: 32px; }
         .q-image-box { height: 160px; }
+
+      /* =========================================
+         🎉 多鄰國式全息同步過關動效 (Zone Cleared)
+         ========================================= */
+      @keyframes duoSpringPop {
+        0% { transform: scale(0.3) rotate(-10deg); opacity: 0; }
+        60% { transform: scale(1.15) rotate(3deg); opacity: 1; }
+        80% { transform: scale(0.95) rotate(-1deg); }
+        100% { transform: scale(1) rotate(0deg); opacity: 1; }
+      }
+
+      @keyframes syncRingDraw {
+        from { stroke-dashoffset: 283; }
+        to { stroke-dashoffset: 0; }
+      }
+
+      @keyframes duoFloat {
+        0%, 100% { transform: translateY(0px); }
+        50% { transform: translateY(-8px); }
+      }
+
+      .duo-card {
+        background: linear-gradient(135deg, rgba(10, 30, 25, 0.95), rgba(5, 15, 20, 0.98));
+        border: 2px solid var(--accent-green);
+        border-radius: 28px;
+        padding: 30px 20px;
+        max-width: 380px;
+        width: 90%;
+        text-align: center;
+        box-shadow: 0 0 50px rgba(46, 204, 113, 0.3), 0 20px 40px rgba(0,0,0,0.8);
+        animation: duoSpringPop 0.7s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+        position: relative;
+        z-index: 30002;
+      }
+
+      .sync-meter-box {
+        position: relative;
+        width: 110px;
+        height: 110px;
+        margin: 0 auto 15px auto;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        animation: duoFloat 3s ease-in-out infinite;
+      }
+
+      .sync-meter-svg {
+        transform: rotate(-90deg);
+        width: 100%;
+        height: 100%;
+      }
+
+      .sync-meter-bg {
+        fill: none;
+        stroke: rgba(255, 255, 255, 0.1);
+        stroke-width: 8;
+      }
+
+      .sync-meter-fill {
+        fill: none;
+        stroke: var(--accent-green);
+        stroke-width: 8;
+        stroke-dasharray: 283;
+        stroke-dashoffset: 283;
+        stroke-linecap: round;
+        filter: drop-shadow(0 0 8px var(--accent-green));
+      }
+
+      .sync-meter-fill.animate {
+        animation: syncRingDraw 1.2s cubic-bezier(0.4, 0, 0.2, 1) 0.3s forwards;
+      }
+
+      .sync-meter-badge {
+        position: absolute;
+        font-size: 42px;
+        filter: drop-shadow(0 0 15px rgba(46, 204, 113, 0.8));
+      }
       }
     </style>
   </head>
@@ -367,20 +444,35 @@
       </div>
     </div>
 
-    <!-- 🚀 全新：區域數據解析完畢 (Zone Cleared) 科幻全息彈窗 -->
-    <div id="zoneClearedOverlay" style="position:fixed; top:0; left:0; width:100vw; height:100vh; background:radial-gradient(circle, rgba(0,30,50,0.95) 0%, rgba(0,5,15,0.98) 100%); z-index:30000; display:none; flex-direction:column; justify-content:center; align-items:center; backdrop-filter:blur(15px); text-align:center; padding:20px; animation:fadeIn 0.5s forwards;">
-      <div class="energy-ring" style="border-color:rgba(46,204,113,0.4); box-shadow:0 0 80px rgba(46,204,113,0.6), inset 0 0 30px rgba(46,204,113,0.4);"></div>
-      <div style="color:var(--accent-green); font-size:24px; font-weight:900; letter-spacing:6px; margin-bottom:25px; text-shadow:0 0 15px rgba(46,204,113,0.8);">
-        AREA FULLY SYNCHRONIZED
-      </div>
-      <div class="rank-card" style="border-color:rgba(46,204,113,0.6); max-width:380px; padding:35px 25px;">
-        <div style="font-size:70px; margin-bottom:15px; filter:drop-shadow(0 0 20px rgba(46,204,113,0.8));">🛰️</div>
-        <div style="font-size:20px; font-weight:900; color:#fff; letter-spacing:2px; margin-bottom:12px;">區域數據解析完畢</div>
-        <div style="font-size:14px; color:#bdc3c7; line-height:1.6; margin-bottom:20px; text-align:justify;">
-          隊長，你今日已成功提取此區域的所有數據碎片！為確保全方位神經能力平衡發展，請前往其他作戰區域（如<strong>戰術學院</strong>或<strong>記憶終端</strong>）繼續特訓。
+    <!-- 🚀 多鄰國式：全息同步達成 (Zone Cleared) 動畫彈窗 -->
+    <div id="zoneClearedOverlay" style="position:fixed; top:0; left:0; width:100vw; height:100vh; background:rgba(2, 8, 12, 0.92); z-index:30000; display:none; flex-direction:column; justify-content:center; align-items:center; backdrop-filter:blur(16px);">
+      <!-- 粒子噴射畫布 -->
+      <canvas id="duoConfettiCanvas" style="position:absolute; top:0; left:0; width:100%; height:100%; pointer-events:none; z-index:30001;"></canvas>
+
+      <div class="duo-card">
+        <!-- 圓形 100% 同步進度動畫 -->
+        <div class="sync-meter-box">
+          <svg class="sync-meter-svg" viewBox="0 0 100 100">
+            <circle class="sync-meter-bg" cx="50" cy="50" r="45"></circle>
+            <circle id="syncMeterCircle" class="sync-meter-fill" cx="50" cy="50" r="45"></circle>
+          </svg>
+          <div class="sync-meter-badge">🛰️</div>
         </div>
-        <button class="primary-btn" style="background:linear-gradient(135deg, rgba(46,204,113,0.2), transparent); border:2px solid var(--accent-green); color:var(--accent-green); margin-top:0;" onclick="closeZoneClearedModal()">
-          🧭 轉移作戰區域 (RETURN TO BASE)
+
+        <div style="color:var(--accent-green); font-size:12px; font-weight:900; letter-spacing:4px; margin-bottom:5px; font-family:monospace;">
+          100% SYNCHRONIZED
+        </div>
+        <div style="font-size:22px; font-weight:900; color:#fff; letter-spacing:1px; margin-bottom:12px;">
+          今日數據解析完畢！
+        </div>
+
+        <div style="background:rgba(0,0,0,0.4); border-radius:14px; padding:12px 14px; border:1px solid rgba(46,204,113,0.2); font-size:13px; color:#bdc3c7; line-height:1.6; margin-bottom:22px; text-align:left;">
+          ✨ <strong>目標達成：</strong>隊長，你已將此區域今日所有可提取的數據碎片全部消化！<br>
+          💡 <strong>作戰建議：</strong>記憶神經需要時間沉澱，請轉戰<strong>戰術學院</strong>或<strong>記憶終端</strong>進行全方位特訓。
+        </div>
+
+        <button class="primary-btn btn-cyan" style="margin-top:0; border-color:var(--accent-green); color:#000; background:var(--accent-green); font-size:16px; box-shadow:0 0 25px rgba(46,204,113,0.5);" onclick="closeZoneClearedModal()">
+          🧭 轉移作戰區域 (RETURN)
         </button>
       </div>
     </div>
@@ -459,6 +551,98 @@
         window.speechSynthesis.cancel();
         var msg = new SpeechSynthesisUtterance(text); msg.lang = 'en-US'; msg.rate = rate || 1.0;
         duckBGM(); msg.onend = unduckBGM; window.speechSynthesis.speak(msg);
+
+      // ==========================================
+      // 🎉 多鄰國式粒子噴發與彈窗控制系統
+      // ==========================================
+      var confettiAnimationId = null;
+
+      function triggerDuoCelebration() {
+        playSFX('clear');
+        setTimeout(function(){ playSFX('rank_up'); }, 400);
+
+        var overlay = document.getElementById('zoneClearedOverlay');
+        var ring = document.getElementById('syncMeterCircle');
+        
+        // 重置並觸發圓環動畫
+        ring.classList.remove('animate');
+        void ring.offsetWidth; // 強制重繪
+        ring.classList.add('animate');
+        
+        overlay.style.display = 'flex';
+        startConfetti();
+      }
+
+      function closeZoneClearedModal() {
+        playSFX('click');
+        stopConfetti();
+        document.getElementById('zoneClearedOverlay').style.display = 'none';
+        navTo('dashboardScreen');
+      }
+
+      // 輕量化粒子噴發引擎
+      function startConfetti() {
+        var canvas = document.getElementById('duoConfettiCanvas');
+        var ctx = canvas.getContext('2d');
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+
+        var particles = [];
+        var colors = ['#2ecc71', '#00e5ff', '#f1c40f', '#e74c3c', '#9b59b6', '#ffffff'];
+
+        for (var i = 0; i < 75; i++) {
+          particles.push({
+            x: canvas.width / 2,
+            y: canvas.height / 2 + 50,
+            w: Math.random() * 10 + 6,
+            h: Math.random() * 6 + 4,
+            vx: (Math.random() - 0.5) * 16,
+            vy: (Math.random() - 0.8) * 18,
+            color: colors[Math.floor(Math.random() * colors.length)],
+            rotation: Math.random() * 360,
+            vRot: (Math.random() - 0.5) * 12,
+            gravity: 0.35,
+            opacity: 1
+          });
+        }
+
+        function render() {
+          ctx.clearRect(0, 0, canvas.width, canvas.height);
+          var activeCount = 0;
+
+          particles.forEach(function(p) {
+            p.x += p.vx;
+            p.y += p.vy;
+            p.vy += p.gravity;
+            p.rotation += p.vRot;
+            p.opacity -= 0.006;
+
+            if (p.opacity > 0) {
+              activeCount++;
+              ctx.save();
+              ctx.translate(p.x, p.y);
+              ctx.rotate((p.rotation * Math.PI) / 180);
+              ctx.globalAlpha = Math.max(0, p.opacity);
+              ctx.fillStyle = p.color;
+              ctx.fillRect(-p.w / 2, -p.h / 2, p.w, p.h);
+              ctx.restore();
+            }
+          });
+
+          if (activeCount > 0) {
+            confettiAnimationId = requestAnimationFrame(render);
+          }
+        }
+        render();
+      }
+
+      function stopConfetti() {
+        if (confettiAnimationId) cancelAnimationFrame(confettiAnimationId);
+        var canvas = document.getElementById('duoConfettiCanvas');
+        if (canvas) {
+          var ctx = canvas.getContext('2d');
+          ctx.clearRect(0, 0, canvas.width, canvas.height);
+        }
       }
 
       // ==========================================
@@ -700,12 +884,14 @@
         .then(res => {
             document.getElementById('loadingOverlay').style.display = 'none';
             if(res && res.success) {
-                // 🚀 動態攔截：若當日題目已清空，播放通關音效並呼叫科幻全息彈窗
+                // 🚀 當日題目清空：觸發多鄰國式粒子慶祝與全息彈窗
                 if (res.allCleared || !res.missionData || res.missionData.length === 0) {
-                    playSFX('clear');
-                    document.getElementById('zoneClearedOverlay').style.display = 'flex';
+                    triggerDuoCelebration();
                     return;
                 }
+
+                playSFX(currentMissionType.split('_')[0]);
+                // ... 後續正常載入任務邏輯 ...
 
                 playSFX(currentMissionType.split('_')[0]); isMissionActive = true; 
                 if(isBgmPlaying) bgmPlayer.volume = 0.05;
