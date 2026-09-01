@@ -44,18 +44,11 @@
         #bgmSelect { max-width: 80px; font-size: 10px; }
       }
 
-      /* 🚀 左下角浮水印 (加入高對比深色陰影) */
+      /* 🚀 左下角浮水印 */
       #footerWatermark {
-        position: fixed; 
-        bottom: 10px; 
-        left: 10px; 
-        font-size: 11px; /* 稍微放大少少 */
-        color: rgba(255, 255, 255, 0.6); /* 提高白字清晰度 */
-        font-family: 'Arial', sans-serif; 
-        letter-spacing: 0.5px; 
-        pointer-events: none; 
-        z-index: 9000;
-        /* 🚀 魔法代碼：加上兩層黑色陰影，保證喺極光背景都清晰可見 */
+        position: fixed; bottom: 10px; left: 10px; font-size: 11px;
+        color: rgba(255, 255, 255, 0.6); font-family: 'Arial', sans-serif; letter-spacing: 0.5px; 
+        pointer-events: none; z-index: 9000;
         text-shadow: 1px 1px 3px rgba(0,0,0,1), 0 0 5px rgba(0,0,0,0.8); 
       }
 
@@ -168,11 +161,6 @@
       .lb-name { text-align: left; padding-left: 5px; color: #fff; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
       .lb-exp { text-align: right; color: var(--noah-cyan); font-weight: bold; font-size: 14px; }
 
-      @media (max-width: 480px) {
-        #app-container { padding: 20px 15px; }
-        h1 { font-size: 32px; }
-        .q-image-box { height: 160px; }
-
       /* =========================================
          🎉 多鄰國式全息同步過關動效 (Zone Cleared)
          ========================================= */
@@ -249,6 +237,11 @@
         font-size: 42px;
         filter: drop-shadow(0 0 15px rgba(46, 204, 113, 0.8));
       }
+
+      @media (max-width: 480px) {
+        #app-container { padding: 20px 15px; }
+        h1 { font-size: 32px; }
+        .q-image-box { height: 160px; }
       }
     </style>
   </head>
@@ -325,7 +318,8 @@
           </div>
           <button style="background:rgba(0,0,0,0.5); border:1px solid #444; color:#888; padding:8px 12px; border-radius:8px;" onclick="logout()">🚪 登出</button>
         </div>
-        <!-- 🚀 升級版 2x2 幹員數據面版 -->
+        
+        <!-- 🚀 2x2 幹員數據面板 -->
         <div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px; margin-bottom:20px;">
           <div style="background:rgba(0,0,0,0.5); padding:10px; border-radius:12px; border:1px solid #333;">
             <div style="font-size:14px; color:#7f8c8d;">💰 信用點</div>
@@ -344,6 +338,7 @@
             <div id="dashTotalQuestions" style="font-size:20px; font-weight:bold; color:#fff;">0</div>
           </div>
         </div>
+
         <div class="mission-grid" style="grid-template-columns: repeat(2, 1fr); margin-bottom: 10px;">
           <div class="mission-card bg-vocab" onclick="showBriefing('vocab_basic')"><span>📡</span><div class="label">偵察任務</div><div style="font-size:10px; color:#aaa; margin-top:2px;">[ 基礎生字記憶 ]</div></div>
           <div class="mission-card" style="background: linear-gradient(135deg, rgba(192,57,43,0.6), rgba(142,68,173,0.6)); border-color: var(--accent-red);" onclick="showBriefing('vocab_adv')"><span>⚡</span><div class="label">駭客潛行</div><div style="font-size:10px; color:#aaa; margin-top:2px;">[ 進階生字應用 ]</div></div>
@@ -410,7 +405,7 @@
             <div style="text-align:center;"><div class="reward-box" id="rewardExp" style="border:3px solid var(--accent-gold); color:var(--accent-gold);">0</div><div style="margin-top:8px; font-size:14px; color:#aaa;">EXP</div></div>
         </div>
         
-        <!-- 🚀 新增：本週累計進度提示區 -->
+        <!-- 🚀 本週累計進度提示區 -->
         <div id="finishWeeklyStats" style="font-size:13px; color:#aaa; margin-bottom:25px; padding:10px; background:rgba(0,229,255,0.05); border-radius:8px; border:1px dashed rgba(0,229,255,0.3); text-align:center; letter-spacing:1px;">
           📟 SYSTEM LOG: Executed <span id="fwMissions" style="color:var(--noah-cyan); font-weight:bold; font-size:16px;">0</span> operations & extracted <span id="fwQuestions" style="color:var(--noah-cyan); font-weight:bold; font-size:16px;">0</span> fragments of data this week.
         </div>
@@ -432,6 +427,7 @@
 
     </div>
 
+    <!-- 🚀 升階動效彈窗 -->
     <div id="rankUpOverlay" onclick="this.style.display='none'">
       <div class="energy-ring"></div>
       <div class="promotion-title">RANK PROMOTED</div>
@@ -446,11 +442,9 @@
 
     <!-- 🚀 多鄰國式：全息同步達成 (Zone Cleared) 動畫彈窗 -->
     <div id="zoneClearedOverlay" style="position:fixed; top:0; left:0; width:100vw; height:100vh; background:rgba(2, 8, 12, 0.92); z-index:30000; display:none; flex-direction:column; justify-content:center; align-items:center; backdrop-filter:blur(16px);">
-      <!-- 粒子噴射畫布 -->
       <canvas id="duoConfettiCanvas" style="position:absolute; top:0; left:0; width:100%; height:100%; pointer-events:none; z-index:30001;"></canvas>
 
       <div class="duo-card">
-        <!-- 圓形 100% 同步進度動畫 -->
         <div class="sync-meter-box">
           <svg class="sync-meter-svg" viewBox="0 0 100 100">
             <circle class="sync-meter-bg" cx="50" cy="50" r="45"></circle>
@@ -477,6 +471,7 @@
       </div>
     </div>
 
+    <!-- 🚀 情報反饋面板 -->
     <div id="feedback-panel">
       <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px;">
         <h2 id="feedbackTitle" style="margin:0; font-size:20px;">INTEL SECURED</h2>
@@ -522,7 +517,7 @@
       var currentUserData = null, isBgmPlaying = false, missionQueue = [], currentIdx = 0;
       var currentMissionType = "", missionResults = [], wrongAttempts = 0, timerVal = 0, timerInterval;
       var targetCurrentAnswer = "", currentListeningScript = "", isQuestionLocked = false, currentBadge = ""; 
-      var currentLBData = null, isMissionActive = false;
+      var currentLBData = null, isMissionActive = false, confettiAnimationId = null;
       var bgmPlayer = document.getElementById('bgm-player'), sePlayer = document.getElementById('se-player'), elevenPlayer = document.getElementById('eleven-player');
       var bgmSelect = document.getElementById('bgmSelect'), sysMsgBox = document.getElementById('sysMsgBox');
 
@@ -551,106 +546,13 @@
         window.speechSynthesis.cancel();
         var msg = new SpeechSynthesisUtterance(text); msg.lang = 'en-US'; msg.rate = rate || 1.0;
         duckBGM(); msg.onend = unduckBGM; window.speechSynthesis.speak(msg);
-
-      // ==========================================
-      // 🎉 多鄰國式粒子噴發與彈窗控制系統
-      // ==========================================
-      var confettiAnimationId = null;
-
-      function triggerDuoCelebration() {
-        playSFX('clear');
-        setTimeout(function(){ playSFX('rank_up'); }, 400);
-
-        var overlay = document.getElementById('zoneClearedOverlay');
-        var ring = document.getElementById('syncMeterCircle');
-        
-        // 重置並觸發圓環動畫
-        ring.classList.remove('animate');
-        void ring.offsetWidth; // 強制重繪
-        ring.classList.add('animate');
-        
-        overlay.style.display = 'flex';
-        startConfetti();
-      }
-
-      function closeZoneClearedModal() {
-        playSFX('click');
-        stopConfetti();
-        document.getElementById('zoneClearedOverlay').style.display = 'none';
-        navTo('dashboardScreen');
-      }
-
-      // 輕量化粒子噴發引擎
-      function startConfetti() {
-        var canvas = document.getElementById('duoConfettiCanvas');
-        var ctx = canvas.getContext('2d');
-        canvas.width = window.innerWidth;
-        canvas.height = window.innerHeight;
-
-        var particles = [];
-        var colors = ['#2ecc71', '#00e5ff', '#f1c40f', '#e74c3c', '#9b59b6', '#ffffff'];
-
-        for (var i = 0; i < 75; i++) {
-          particles.push({
-            x: canvas.width / 2,
-            y: canvas.height / 2 + 50,
-            w: Math.random() * 10 + 6,
-            h: Math.random() * 6 + 4,
-            vx: (Math.random() - 0.5) * 16,
-            vy: (Math.random() - 0.8) * 18,
-            color: colors[Math.floor(Math.random() * colors.length)],
-            rotation: Math.random() * 360,
-            vRot: (Math.random() - 0.5) * 12,
-            gravity: 0.35,
-            opacity: 1
-          });
-        }
-
-        function render() {
-          ctx.clearRect(0, 0, canvas.width, canvas.height);
-          var activeCount = 0;
-
-          particles.forEach(function(p) {
-            p.x += p.vx;
-            p.y += p.vy;
-            p.vy += p.gravity;
-            p.rotation += p.vRot;
-            p.opacity -= 0.006;
-
-            if (p.opacity > 0) {
-              activeCount++;
-              ctx.save();
-              ctx.translate(p.x, p.y);
-              ctx.rotate((p.rotation * Math.PI) / 180);
-              ctx.globalAlpha = Math.max(0, p.opacity);
-              ctx.fillStyle = p.color;
-              ctx.fillRect(-p.w / 2, -p.h / 2, p.w, p.h);
-              ctx.restore();
-            }
-          });
-
-          if (activeCount > 0) {
-            confettiAnimationId = requestAnimationFrame(render);
-          }
-        }
-        render();
-      }
-
-      function stopConfetti() {
-        if (confettiAnimationId) cancelAnimationFrame(confettiAnimationId);
-        var canvas = document.getElementById('duoConfettiCanvas');
-        if (canvas) {
-          var ctx = canvas.getContext('2d');
-          ctx.clearRect(0, 0, canvas.width, canvas.height);
-        }
       }
 
       // ==========================================
-      // 🗣️ 單字語音 API (支援 ElevenLabs 完美慢速播放)
+      // 🗣️ 單字語音 API (支援 ElevenLabs 慢速播放)
       // ==========================================
       function playAudioLogic(text, isSlow) {
         if (!text) return;
-        
         duckBGM();
         fetch(API_URL, {
             method: 'POST', headers: { 'Content-Type': 'text/plain' },
@@ -662,28 +564,24 @@
                 var data = JSON.parse(textData);
                 if (data.success && data.audioBase64) {
                     elevenPlayer.src = data.audioBase64;
-                    
-                    // 🚀 魔法代碼：前端控制語速 (0.6倍速 / 1.0正常速度)
                     elevenPlayer.playbackRate = isSlow ? 0.6 : 1.0; 
-                    
                     elevenPlayer.onended = unduckBGM; 
                     elevenPlayer.play();
                 } else throw "API 回傳失敗: " + data.message;
             } catch(e) {
-                console.error("❌ 單字語音 JSON 解析失敗，伺服器吐出:", textData);
+                console.error("❌ 單字語音 JSON 解析失敗:", textData);
                 throw e;
             }
         })
         .catch(err => { 
             console.error("🔊 TTS 連線崩潰:", err); 
             unduckBGM(); 
-            // 如果跌落 Google 備用發聲，都一樣支援慢速
             playVoice(text, isSlow ? 0.6 : 1.0); 
         });
       }
       
       // ==========================================
-      // 🗣️ 3. 聆聽對話 API (排隊逐句發送版)
+      // 🗣️ 聆聽對話 API (排隊逐句發送版)
       // ==========================================
       async function playListeningAudio(isSlow) { 
         if(!currentListeningScript) return showSysMsg("⚠️ No script data found", true);
@@ -730,10 +628,7 @@
                 if (playIdx < validResults.length) {
                     showSysMsg("🗣️ " + validResults[playIdx].role + " speaking...", false);
                     elevenPlayer.src = validResults[playIdx].url; 
-                    
-                    // 🚀 2. 魔法代碼：喺準備播嗰刻，根據 isSlow 決定語速 (0.7倍速聽對話會自然啲)
                     elevenPlayer.playbackRate = isSlow ? 0.7 : 1.0; 
-                    
                     elevenPlayer.onended = function(){ playIdx++; playNext(); }; 
                     elevenPlayer.play();
                 } else { 
@@ -825,8 +720,6 @@
         document.getElementById('dashExp').innerText = currentUserData.totalExp;
         document.getElementById('roomCoins').innerText = currentUserData.coins;
         document.getElementById('roomGreeting').innerText = (currentUserData.name || "隊長");
-        
-        // 🚀 新增：更新主畫面嘅總任務與答題數
         document.getElementById('dashTotalMissions').innerText = currentUserData.totalMissions || 0;
         document.getElementById('dashTotalQuestions').innerText = currentUserData.totalQuestions || 0;
       }
@@ -854,28 +747,110 @@
       }
 
       // ==========================================
-      // 🚀 5. 任務核心邏輯
+      // 🎉 多鄰國式粒子噴發與彈窗控制系統
       // ==========================================
-      // 關閉清空彈窗並返回大廳
+      function triggerDuoCelebration() {
+        playSFX('clear');
+        setTimeout(function(){ playSFX('rank_up'); }, 400);
+
+        var overlay = document.getElementById('zoneClearedOverlay');
+        var ring = document.getElementById('syncMeterCircle');
+        
+        ring.classList.remove('animate');
+        void ring.offsetWidth; 
+        ring.classList.add('animate');
+        
+        overlay.style.display = 'flex';
+        startConfetti();
+      }
+
       function closeZoneClearedModal() {
         playSFX('click');
+        stopConfetti();
         document.getElementById('zoneClearedOverlay').style.display = 'none';
         navTo('dashboardScreen');
       }
 
+      function startConfetti() {
+        var canvas = document.getElementById('duoConfettiCanvas');
+        if (!canvas) return;
+        var ctx = canvas.getContext('2d');
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+
+        var particles = [];
+        var colors = ['#2ecc71', '#00e5ff', '#f1c40f', '#e74c3c', '#9b59b6', '#ffffff'];
+
+        for (var i = 0; i < 75; i++) {
+          particles.push({
+            x: canvas.width / 2,
+            y: canvas.height / 2 + 50,
+            w: Math.random() * 10 + 6,
+            h: Math.random() * 6 + 4,
+            vx: (Math.random() - 0.5) * 16,
+            vy: (Math.random() - 0.8) * 18,
+            color: colors[Math.floor(Math.random() * colors.length)],
+            rotation: Math.random() * 360,
+            vRot: (Math.random() - 0.5) * 12,
+            gravity: 0.35,
+            opacity: 1
+          });
+        }
+
+        function render() {
+          ctx.clearRect(0, 0, canvas.width, canvas.height);
+          var activeCount = 0;
+
+          particles.forEach(function(p) {
+            p.x += p.vx;
+            p.y += p.vy;
+            p.vy += p.gravity;
+            p.rotation += p.vRot;
+            p.opacity -= 0.006;
+
+            if (p.opacity > 0) {
+              activeCount++;
+              ctx.save();
+              ctx.translate(p.x, p.y);
+              ctx.rotate((p.rotation * Math.PI) / 180);
+              ctx.globalAlpha = Math.max(0, p.opacity);
+              ctx.fillStyle = p.color;
+              ctx.fillRect(-p.w / 2, -p.h / 2, p.w, p.h);
+              ctx.restore();
+            }
+          });
+
+          if (activeCount > 0) {
+            confettiAnimationId = requestAnimationFrame(render);
+          }
+        }
+        render();
+      }
+
+      function stopConfetti() {
+        if (confettiAnimationId) cancelAnimationFrame(confettiAnimationId);
+        var canvas = document.getElementById('duoConfettiCanvas');
+        if (canvas) {
+          var ctx = canvas.getContext('2d');
+          ctx.clearRect(0, 0, canvas.width, canvas.height);
+        }
+      }
+
+      // ==========================================
+      // 🚀 5. 任務核心邏輯
+      // ==========================================
       function executeMission() {
         playSFX('click');
         var mood = document.getElementById('inputMood').value;
         var count = (mood==="好有鬥志")?15:(mood==="攰到抽筋")?8:(mood==="壓力爆煲")?5:10;
         document.getElementById('loadingOverlay').style.display = 'flex';
         
-        // 🚀 傳入具體的 missionType，使基礎與進階生字能獨立計算記憶
         fetch(API_URL, {
             method: 'POST', headers: { 'Content-Type': 'text/plain' },
             body: JSON.stringify({
                 action: 'fetchMissionData', 
                 studentId: currentUserData.studentId,
-                missionType: currentMissionType, // 傳入 vocab_basic / vocab_adv / grammar / listening
+                missionType: currentMissionType,
                 pool: currentMissionType.startsWith('vocab') ? 'Vocab_Pool' : (currentMissionType==='grammar'?'Grammar_Pool':'Listening_Pool'), 
                 count: count
             })
@@ -884,14 +859,10 @@
         .then(res => {
             document.getElementById('loadingOverlay').style.display = 'none';
             if(res && res.success) {
-                // 🚀 當日題目清空：觸發多鄰國式粒子慶祝與全息彈窗
                 if (res.allCleared || !res.missionData || res.missionData.length === 0) {
                     triggerDuoCelebration();
                     return;
                 }
-
-                playSFX(currentMissionType.split('_')[0]);
-                // ... 後續正常載入任務邏輯 ...
 
                 playSFX(currentMissionType.split('_')[0]); isMissionActive = true; 
                 if(isBgmPlaying) bgmPlayer.volume = 0.05;
@@ -951,19 +922,36 @@
                 var match = exEn.match(/\[(.*?)\]/);
                 if (match) { targetCurrentAnswer = String(match[1]).trim(); displayQ = exEn; } else { displayQ = exEn.replace(new RegExp(targetCurrentAnswer, 'ig'), '[...]'); }
             }
-            else if (r===1) { currentBadge="AUDIO"; instructionText="Listen and spell."; displayQ="Hint: " + getMaskedWord(targetCurrentAnswer) + " ("+(q.Part_of_Speech || q.POS)+")"; document.getElementById('qAudioContainer').style.display="block"; document.getElementById('listen-btn').onclick=function(){playAudioLogic(q.Vocabulary, false, false);}; playAudioLogic(q.Vocabulary, false, false); }
+            else if (r===1) { currentBadge="AUDIO"; instructionText="Listen and spell."; displayQ="Hint: " + getMaskedWord(targetCurrentAnswer) + " ("+(q.Part_of_Speech || q.POS)+")"; document.getElementById('qAudioContainer').style.display="block"; document.getElementById('listen-btn').onclick=function(){playAudioLogic(q.Vocabulary, false);}; playAudioLogic(q.Vocabulary, false); }
             else if (r===2) { currentBadge="SEMANTIC"; instructionText="Choose the correct meaning."; displayQ="What is the meaning of: "+targetCurrentAnswer+"?"; targetCurrentAnswer=String(q.Meaning).trim(); renderMode="MCQ"; }
             else if (r===3) { currentBadge="ROOT"; instructionText="Identify the root meaning."; displayQ="Root of: 「" + targetCurrentAnswer + "」"; targetCurrentAnswer=q.Root?(q.Root.match(/\(([^)]+)\)/)?q.Root.match(/\(([^)]+)\)/)[1]:q.Root):""; renderMode="MCQ"; }
             else if (r===4) { currentBadge="COLLOCATION"; instructionText="Complete the pairing."; displayQ="Collocation:\n"+String(colloc).replace(new RegExp(targetCurrentAnswer, 'ig'), '[...]'); }
             else if (r===5) { currentBadge="SPELLING"; instructionText="Translate into English."; displayQ="Meaning: "+q.Meaning + "\nHint: " + getMaskedWord(targetCurrentAnswer); }
-            else if (r===6) { currentBadge="VOICE UPLINK"; instructionText="Tap 🎤 on your keyboard and read the word."; displayQ="Target: 『 CLASSIFIED 』\nMeaning: "+q.Meaning; document.getElementById('qAudioContainer').style.display="block"; document.getElementById('listen-btn').onclick=function(){playAudioLogic(q.Vocabulary, false, false);}; playAudioLogic(q.Vocabulary, false, false); } 
+            else if (r===6) { currentBadge="VOICE UPLINK"; instructionText="Tap 🎤 on your keyboard and read the word."; displayQ="Target: 『 CLASSIFIED 』\nMeaning: "+q.Meaning; document.getElementById('qAudioContainer').style.display="block"; document.getElementById('listen-btn').onclick=function(){playAudioLogic(q.Vocabulary, false);}; playAudioLogic(q.Vocabulary, false); } 
             else if (r===7) { currentBadge="SUFFIX ANALYSIS"; instructionText="Identify the part of speech."; displayQ="Analyze the suffix to find the part of speech for:\n「 " + deriv.word + " 」"; targetCurrentAnswer=String(deriv.pos).trim(); renderMode="MCQ"; }
         }
         else if (currentMissionType === 'grammar') {
-            currentBadge = q.Type || "GRAMMAR"; displayQ = q.Question; targetCurrentAnswer = String(q.Answer).trim();
-            if(q.Type==='UNSCRAMBLE'){ instructionText="Rearrange the fragments."; renderMode="UNSCRAMBLE"; }
-            else if(q.Type==='MATCH'||q.Type==='IDENTIFY'){ instructionText="Choose correctly."; renderMode="MCQ"; }
-            else { instructionText="Complete the sentence."; if(String(q.Distractors||"").length>0) renderMode="MCQ"; }
+            var rawType = String(q.Type || "MCQ").trim().toUpperCase();
+            currentBadge = rawType;
+            displayQ = String(q.Question || "").trim();
+            targetCurrentAnswer = String(q.Answer || "").trim();
+
+            if (rawType === 'UNSCRAMBLE') {
+                instructionText = "Rearrange the fragments.";
+                renderMode = "UNSCRAMBLE";
+            } else if (rawType === 'MATCH' || rawType === 'IDENTIFY') {
+                instructionText = "Choose correctly.";
+                renderMode = "MCQ";
+            } else {
+                instructionText = "Complete the sentence.";
+                if (String(q.Distractors || "").trim().length > 0) {
+                    renderMode = "MCQ";
+                } else if (displayQ.indexOf('...') !== -1 || displayQ.indexOf('___') !== -1) {
+                    renderMode = "INPUT";
+                } else {
+                    renderMode = "MCQ";
+                }
+            }
         } 
         else if (currentMissionType === 'listening') {
             currentBadge = q.Type || "AUDIO LOG"; displayQ = q.Question; targetCurrentAnswer = String(q.Answer).trim();
@@ -1048,10 +1036,10 @@
             var exObj = {en:"", zh:""}; try { if(q.Example) exObj = JSON.parse(q.Example); } catch(e){}
             if(exObj.en) content += '<div style="margin-bottom:15px; padding:12px; background:rgba(0,229,255,0.05); border-left:3px solid var(--noah-cyan); border-radius:0 8px 8px 0;"><div style="color:#fff; font-style:italic; line-height:1.4;">"'+exObj.en+'"</div><div style="color:#888; font-size:14px; margin-top:5px;">'+(exObj.zh||"")+'</div></div>';
             content += '<div class="audio-matrix">' +
-                '<button class="voice-btn" onclick="playAudioLogic(\''+vocWord.replace(/'/g,"\\'")+'\', false, false)">🔊 WORD</button>' +
-                '<button class="voice-btn" onclick="playAudioLogic(\''+vocWord.replace(/'/g,"\\'")+'\', true, true)">🐢 WORD (SLOW)</button>' +
-                (exObj.en ? '<button class="voice-btn" onclick="playAudioLogic(\''+String(exObj.en).replace(/'/g,"\\'")+'\', false, false)">🔊 EXAMPLE</button>' : '') +
-                (exObj.en ? '<button class="voice-btn" onclick="playAudioLogic(\''+String(exObj.en).replace(/'/g,"\\'")+'\', true, true)">🐢 EXAMPLE (SLOW)</button>' : '') +
+                '<button class="voice-btn" onclick="playAudioLogic(\''+vocWord.replace(/'/g,"\\'")+'\', false)">🔊 WORD</button>' +
+                '<button class="voice-btn" onclick="playAudioLogic(\''+vocWord.replace(/'/g,"\\'")+'\', true)">🐢 WORD (SLOW)</button>' +
+                (exObj.en ? '<button class="voice-btn" onclick="playAudioLogic(\''+String(exObj.en).replace(/'/g,"\\'")+'\', false)">🔊 EXAMPLE</button>' : '') +
+                (exObj.en ? '<button class="voice-btn" onclick="playAudioLogic(\''+String(exObj.en).replace(/'/g,"\\'")+'\', true)">🐢 EXAMPLE (SLOW)</button>' : '') +
                 '</div>';
         } else {
             content = '<div style="color:var(--noah-cyan); font-weight:bold; font-size:20px; margin-bottom:10px;">Target: '+targetCurrentAnswer+'</div>';
@@ -1107,19 +1095,18 @@
                 document.getElementById('finishAccuracy').innerText = "ACCURACY: " + res.accuracy + "%";
                 document.getElementById('rewardCoins').innerText = res.earnedCoins; document.getElementById('rewardExp').innerText = res.earnedExp;
                 
-                // 🚀 新增：寫入結算畫面嘅本週累計數據
                 document.getElementById('fwMissions').innerText = res.currentWeeklyM || 0;
                 document.getElementById('fwQuestions').innerText = res.currentWeeklyQ || 0;
                 
                 shuffleBGM(); navTo('finishScreen');
                 
-                // 順手更新 currentUserData，等返去大廳時數字會升
                 currentUserData.coins += res.earnedCoins; 
                 currentUserData.totalExp += res.earnedExp; 
-                currentUserData.totalMissions += 1; // 總任務 +1
-                // 補差額計法：用最新嘅 WeeklyQ 減去舊嘅 WeeklyQ，就係今次做咗幾多題
+                currentUserData.totalMissions += 1;
                 var questionsDoneThisTime = res.currentWeeklyQ - (currentUserData.weeklyQuestions || 0);
-                currentUserData.totalQuestions += questionsDoneThisTime; 
+                if (!isNaN(questionsDoneThisTime)) {
+                    currentUserData.totalQuestions += questionsDoneThisTime; 
+                }
                 currentUserData.weeklyQuestions = res.currentWeeklyQ;
                 currentUserData.weeklyMissions = res.currentWeeklyM;
                 updateUI();
