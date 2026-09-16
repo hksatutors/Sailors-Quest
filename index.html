@@ -8,11 +8,11 @@
     <title>⚓ Sailors' Quest</title>
     <style>
       /* =========================================
-         ⚓ Sailors' Quest (V20.0 科技冷藍與極限沉浸旗艦版)
+         ⚓ Sailors' Quest (V21.0 全息招募與神經躍遷旗艦版)
          ========================================= */
       :root {
         --noah-cyan: #00e5ff; --noah-dark: #0a0f16; --text-main: #ecf0f1; 
-        --text-dim: #7f8c8d; --accent-red: #ff3366; --accent-green: #2ecc71; --accent-gold: #f1c40f;
+        --text-dim: #7f8c8d; --accent-red: #ff3366; --accent-green: #2ecc71; --accent-gold: #f1c40f; --accent-purple: #a855f7;
       }
       * { box-sizing: border-box; }
 
@@ -87,8 +87,10 @@
       .primary-btn:disabled { opacity: 0.5; cursor: not-allowed; }
       .btn-cyan { background: linear-gradient(135deg, rgba(0, 229, 255, 0.15), transparent); border: 1px solid var(--noah-cyan); color: var(--noah-cyan); }
       .btn-cyan:hover:not(:disabled) { background: var(--noah-cyan); color: #000; box-shadow: 0 5px 20px rgba(0,229,255,0.4); transform: translateY(-2px); }
+      .btn-gold { background: linear-gradient(135deg, rgba(241, 196, 15, 0.15), transparent); border: 1px solid var(--accent-gold); color: var(--accent-gold); }
+      .btn-gold:hover:not(:disabled) { background: var(--accent-gold); color: #000; box-shadow: 0 5px 20px rgba(241,196,15,0.4); transform: translateY(-2px); }
       
-      .mission-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin: 20px 0; }
+      .mission-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; margin: 20px 0; }
       .mission-card { background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); border-radius: 16px; padding: 15px 5px; cursor: pointer; transition: 0.3s; display: flex; flex-direction: column; align-items: center; gap: 8px; }
       .mission-card:hover { border-color: var(--noah-cyan); transform: translateY(-3px); box-shadow: 0 5px 15px rgba(0,229,255,0.3); }
       .mission-card span { font-size: 42px; } 
@@ -97,10 +99,10 @@
       .bg-grammar { background: linear-gradient(135deg, rgba(91,44,111,0.6), rgba(142,68,173,0.6)); }
       .bg-listening { background: linear-gradient(135deg, rgba(17,120,100,0.6), rgba(26,188,156,0.6)); }
 
-      .squad-view { display: flex; justify-content: center; align-items: flex-end; gap: 15px; height: 260px; margin-bottom: 25px; }
+      .squad-view { display: flex; justify-content: center; align-items: flex-end; gap: 10px; height: 250px; margin-bottom: 25px; }
       .op-frame { background: rgba(0,0,0,0.4); border: 1px solid #333; border-radius: 12px; position: relative; overflow: hidden; display: flex; align-items: center; justify-content: center; flex: 1; }
-      .op-frame.leader { border: 2px solid var(--noah-cyan); height: 250px; box-shadow: 0 0 20px rgba(0,229,255,0.3); }
-      .op-frame.member { height: 200px; opacity: 0.7; }
+      .op-frame.leader { border: 2px solid var(--accent-gold); height: 240px; box-shadow: 0 0 20px rgba(241,196,15,0.3); }
+      .op-frame.member { height: 190px; opacity: 0.75; }
       .op-placeholder { width: 100%; height: 100%; background-color: #050a0f; background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="%23ffffff" opacity="0.1"><path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/></svg>'); background-size: 60%; background-repeat: no-repeat; background-position: center 30%; }
       
       .q-image-box { width: 100%; height: 200px; border-radius: 12px; border: 1px solid var(--noah-cyan); margin-bottom: 20px; overflow: hidden; background: #000; position: relative; display: flex; justify-content: center; align-items: center;}
@@ -240,7 +242,7 @@
       .lb-exp { text-align: right; color: var(--noah-cyan); font-weight: bold; font-size: 14px; }
 
       /* =========================================
-         🎉 多鄰國式全息同步過關動效 (Zone Cleared - 科技冷藍版)
+         🎉 多鄰國式全息同步過關動效 (Zone Cleared)
          ========================================= */
       @keyframes duoSpringPop {
         0% { transform: scale(0.3) rotate(-10deg); opacity: 0; }
@@ -251,7 +253,6 @@
       @keyframes syncRingDraw { from { stroke-dashoffset: 283; } to { stroke-dashoffset: 0; } }
       @keyframes duoFloat { 0%, 100% { transform: translateY(0px); } 50% { transform: translateY(-8px); } }
 
-      /* 🚀 升級：深海冷藍科技背景與青藍光暈 */
       .duo-card { 
         background: linear-gradient(135deg, rgba(6, 25, 45, 0.96), rgba(2, 12, 22, 0.98)); 
         border: 2px solid var(--noah-cyan); 
@@ -279,7 +280,7 @@
       .debrief-item { border-bottom: 1px solid #333; padding-bottom: 8px; margin-bottom: 8px; font-size: 13px; }
       .debrief-item:last-child { border-bottom: none; margin-bottom: 0; padding-bottom: 0; }
 
-      /* 🚀 全新：神經網絡連接過場動畫 (Neural Sync Transition) */
+      /* 🚀 神經網絡連接過場動畫 */
       #loginTransitionOverlay {
         position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
         background: radial-gradient(circle at center, rgba(0, 30, 45, 0.98) 0%, rgba(2, 5, 10, 0.99) 100%);
@@ -300,6 +301,71 @@
         border-radius: 6px; box-shadow: 0 0 10px var(--noah-cyan);
         transition: width 0.8s cubic-bezier(0.2, 0.8, 0.2, 1);
       }
+
+      /* =========================================
+         🎲 全息招募開箱動畫與卡牌矩陣 (Gacha Terminal)
+         ========================================= */
+      #gachaOverlay {
+        position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
+        background: radial-gradient(circle at center, rgba(5, 15, 25, 0.98) 0%, rgba(1, 4, 8, 1) 100%);
+        z-index: 35000; display: none; flex-direction: column; justify-content: center; align-items: center;
+        backdrop-filter: blur(25px); overflow: hidden;
+      }
+
+      /* 躍遷能量聚能環 */
+      .gacha-portal {
+        position: absolute; width: 320px; height: 320px; border-radius: 50%;
+        border: 3px dashed var(--noah-cyan); box-shadow: 0 0 50px rgba(0,229,255,0.4);
+        animation: spinRing 8s linear infinite; display: none;
+      }
+      .gacha-portal.gold { border-color: var(--accent-gold); box-shadow: 0 0 80px rgba(241,196,15,0.6); }
+      .gacha-portal.purple { border-color: var(--accent-purple); box-shadow: 0 0 60px rgba(168,85,247,0.6); }
+
+      /* 卡牌翻牌容器與卡背翻轉 */
+      .gacha-cards-container {
+        display: flex; flex-wrap: wrap; justify-content: center; align-items: center;
+        gap: 12px; width: 95%; max-width: 460px; max-height: 80vh; overflow-y: auto; z-index: 35002;
+      }
+
+      .gacha-card {
+        width: 80px; height: 120px; border-radius: 12px; background: rgba(0,0,0,0.6);
+        border: 1.5px solid #444; position: relative; overflow: hidden; cursor: pointer;
+        transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        animation: duoSpringPop 0.5s backwards;
+      }
+      .gacha-card.single { width: 180px; height: 260px; border-radius: 18px; }
+      .gacha-card:hover { transform: scale(1.05); }
+
+      .gacha-card.SSR { border-color: var(--accent-gold); box-shadow: 0 0 20px rgba(241,196,15,0.4); }
+      .gacha-card.SR { border-color: var(--accent-purple); box-shadow: 0 0 15px rgba(168,85,247,0.4); }
+      .gacha-card.R { border-color: var(--noah-cyan); box-shadow: 0 0 10px rgba(0,229,255,0.3); }
+
+      .card-badge-rarity {
+        position: absolute; top: 4px; left: 4px; font-size: 10px; font-weight: 900;
+        font-family: monospace; padding: 2px 6px; border-radius: 4px; z-index: 3;
+      }
+      .SSR .card-badge-rarity { background: var(--accent-gold); color: #000; }
+      .SR .card-badge-rarity { background: var(--accent-purple); color: #fff; }
+      .R .card-badge-rarity { background: var(--noah-cyan); color: #000; }
+
+      .card-badge-new {
+        position: absolute; top: 4px; right: 4px; font-size: 9px; font-weight: 900;
+        background: var(--accent-red); color: #fff; padding: 2px 5px; border-radius: 4px; z-index: 3;
+        animation: pulse 1.5s infinite;
+      }
+      .card-badge-break {
+        position: absolute; top: 4px; right: 4px; font-size: 9px; font-weight: 900;
+        background: rgba(0,0,0,0.7); border: 1px solid var(--accent-gold); color: var(--accent-gold);
+        padding: 2px 4px; border-radius: 4px; z-index: 3;
+      }
+
+      .card-img { width: 100%; height: 100%; object-fit: cover; }
+      .card-name-bar {
+        position: absolute; bottom: 0; left: 0; width: 100%; background: rgba(0,0,0,0.85);
+        padding: 4px 2px; font-size: 10px; font-weight: bold; text-align: center;
+        white-space: nowrap; overflow: hidden; text-overflow: ellipsis; color: #fff;
+      }
+      .gacha-card.single .card-name-bar { font-size: 14px; padding: 8px 4px; }
     </style>
   </head>
   <body>
@@ -332,6 +398,30 @@
       <div class="sync-progress-bar-bg">
         <div id="syncProgressFill" class="sync-progress-bar-fill"></div>
       </div>
+    </div>
+
+    <!-- 🚀 全息招募終端展示浮層 (Gacha Result Modal) -->
+    <div id="gachaOverlay">
+      <!-- 稀有度能量環光效 -->
+      <div id="gachaPortal" class="gacha-portal"></div>
+      
+      <!-- 頂部資訊與跳過按鈕 -->
+      <div style="position:absolute; top:20px; width:90%; max-width:460px; display:flex; justify-content:space-between; align-items:center; z-index:35005;">
+        <div style="color:var(--noah-cyan); font-family:monospace; font-weight:900; font-size:16px; letter-spacing:2px;">
+          RECRUITMENT TERMINAL
+        </div>
+        <button id="gachaSkipBtn" style="background:rgba(0,0,0,0.6); border:1px solid #666; color:#aaa; padding:6px 12px; border-radius:6px; font-size:12px; cursor:pointer; font-family:monospace;" onclick="skipGachaReveal()">
+          [ SKIP ⏩ ]
+        </button>
+      </div>
+
+      <!-- 招募卡牌結果陣列 -->
+      <div id="gachaCardsContainer" class="gacha-cards-container"></div>
+
+      <!-- 底部確認關閉按鈕 -->
+      <button id="gachaCloseBtn" class="primary-btn btn-cyan" style="display:none; width:85%; max-width:380px; margin-top:20px; z-index:35005;" onclick="closeGachaOverlay()">
+        ✔ 確認歸隊 (CONFIRM)
+      </button>
     </div>
 
     <div id="system-unlock-screen">
@@ -407,20 +497,20 @@
           </div>
         </div>
 
-        <div class="mission-grid" style="grid-template-columns: repeat(2, 1fr); margin-bottom: 10px;">
+        <div class="mission-grid">
           <div class="mission-card bg-vocab" onclick="showBriefing('vocab_basic')"><span>📡</span><div class="label">偵察任務</div><div style="font-size:10px; color:#aaa; margin-top:2px;">[ 基礎生字記憶 ]</div></div>
           <div class="mission-card" style="background: linear-gradient(135deg, rgba(192,57,43,0.6), rgba(142,68,173,0.6)); border-color: var(--accent-red);" onclick="showBriefing('vocab_adv')"><span>⚡</span><div class="label">駭客潛行</div><div style="font-size:10px; color:#aaa; margin-top:2px;">[ 進階生字應用 ]</div></div>
-        </div>
-        <div class="mission-grid" style="grid-template-columns: repeat(2, 1fr);">
           <div class="mission-card bg-grammar" onclick="showBriefing('grammar')"><span>🏛️</span><div class="label">戰術學院</div><div style="font-size:10px; color:#aaa; margin-top:2px;">[ 文法解難 ]</div></div>
           <div class="mission-card bg-listening" onclick="showBriefing('listening')"><span>💾</span><div class="label">記憶終端</div><div style="font-size:10px; color:#aaa; margin-top:2px;">[ 聆聽訓練 ]</div></div>
         </div>
+
         <div style="display:flex; gap:10px; flex-direction:column;">
           <button class="primary-btn btn-cyan" style="margin-top:0;" onclick="navTo('briefingRoom')">🛡️ 作戰會議室</button>
           <button class="primary-btn" style="margin-top:0; background:rgba(241,196,15,0.1); border:1px solid var(--accent-gold); color:var(--accent-gold);" onclick="openLeaderboard('weekly')">📊 戰績排行榜</button>
         </div>
       </div>
 
+      <!-- 🛡️ 作戰會議室 -->
       <div id="briefingRoom" class="screen">
         <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px; border-bottom:1px solid #333; padding-bottom:10px;">
           <div id="roomGreeting" style="font-weight:bold; color:var(--noah-cyan);">隊長</div>
@@ -431,9 +521,36 @@
           <div class="op-frame leader"><div class="op-placeholder"></div></div>
           <div class="op-frame member"><div class="op-placeholder"></div></div>
         </div>
-        <button class="primary-btn" style="background:rgba(0,0,0,0.5); border:1px solid #555;" onclick="alert('小隊編成系統連線中...')">[ 小隊編成 ]</button>
-        <button class="primary-btn" style="background:rgba(0,0,0,0.5); border:1px solid var(--accent-gold); color:var(--accent-gold);" onclick="alert('招募系統連線中...')">[ 幹員招募 ]</button>
+        <button class="primary-btn" style="background:rgba(0,0,0,0.5); border:1px solid #555;" onclick="alert('小隊編成系統即將於下一階段啟動...')">[ 小隊編成 ]</button>
+        <button class="primary-btn btn-gold" onclick="openGachaScreen()">🎲 幹員招募 (RECRUIT)</button>
         <button class="primary-btn" style="background:transparent; color:#888;" onclick="navTo('dashboardScreen')">⬅ 返回大廳</button>
+      </div>
+
+      <!-- 🎲 幹員招募終端介面 (Gacha Screen) -->
+      <div id="gachaScreen" class="screen">
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px; border-bottom:1px solid #333; padding-bottom:10px;">
+          <div style="font-weight:bold; color:var(--noah-cyan); letter-spacing:1px;">🎲 幹員招募終端</div>
+          <div style="color:var(--accent-gold); font-weight:bold; font-family:monospace;">💰 <span id="gachaCoinsDisplay">0</span></div>
+        </div>
+
+        <!-- 招募立繪主題看板 -->
+        <div style="position:relative; width:100%; height:200px; border-radius:16px; border:2px solid var(--noah-cyan); overflow:hidden; margin-bottom:20px; background:radial-gradient(circle, #092032 0%, #030a10 100%); display:flex; flex-direction:column; justify-content:center; align-items:center; box-shadow:0 0 30px rgba(0,229,255,0.25);">
+          <div style="font-size:45px; margin-bottom:5px;">🛰️</div>
+          <div style="color:var(--accent-gold); font-size:20px; font-weight:900; letter-spacing:3px;">NEURAL RECRUITMENT</div>
+          <div style="font-size:11px; color:#aaa; font-family:monospace; margin-top:4px;">SSR 4% ｜ SR 20% ｜ R 76%</div>
+          <div style="position:absolute; bottom:8px; font-size:10px; color:var(--noah-cyan); letter-spacing:1px;">四大陣營首發 20 位幹員集結連線中</div>
+        </div>
+
+        <!-- 招募操作按鈕 -->
+        <button class="primary-btn btn-cyan" onclick="startRecruit(1)">
+          🧭 單次鏈接 (100 信用點)
+        </button>
+        <button class="primary-btn btn-gold" onclick="startRecruit(10)">
+          ⚡ 十連躍遷 (900 信用點・9折)
+        </button>
+        <button class="primary-btn" style="background:transparent; color:#888;" onclick="navTo('briefingRoom')">
+          ⬅ 返回作戰會議室
+        </button>
       </div>
 
       <div id="preMissionScreen" class="screen">
@@ -473,16 +590,13 @@
           🔥 MAX COMBO x10 (+30% BONUS)
         </div>
 
-        <!-- 🚀 結算黃金佈局：左邊行動評級印章，右邊經驗值與信用點數據 -->
         <div style="display:flex; justify-content:center; align-items:center; gap:15px; margin: 10px 0 20px 0; background:rgba(0,0,0,0.45); border:1px solid rgba(0,229,255,0.25); border-radius:20px; padding:16px 14px;">
-          <!-- 左欄：評級印章 -->
           <div style="flex: 1; display:flex; flex-direction:column; align-items:center; border-right: 1px solid rgba(255,255,255,0.1); padding-right:12px;">
             <div style="font-size:11px; color:#888; letter-spacing:2px; font-family:monospace; margin-bottom:4px;">EVALUATION</div>
             <div id="finishRankStamp" class="rank-stamp">S</div>
             <div style="font-size:11px; font-weight:bold; color:#fff; letter-spacing:0.5px; margin-top:4px; text-align:center;">行動評級 (Operation Rank)</div>
           </div>
           
-          <!-- 右欄：收益數據卡片 -->
           <div style="flex: 1.3; display:flex; flex-direction:column; gap:10px; align-items:stretch;">
             <div style="display:flex; align-items:center; justify-content:space-between; background:rgba(0,229,255,0.08); border:1px solid rgba(0,229,255,0.3); border-radius:12px; padding:8px 12px;">
               <span style="font-size:12px; color:#aaa; font-weight:bold;">💰 信用點 (Coins)</span>
@@ -616,6 +730,7 @@
       var targetCurrentAnswer = "", currentListeningScript = "", isQuestionLocked = false, currentBadge = ""; 
       var currentLBData = null, isMissionActive = false, confettiAnimationId = null;
       var currentCombo = 0, wrongQuestionsList = [];
+      var gachaRevealQueue = [], gachaIntervalId = null;
 
       var bgmPlayer = document.getElementById('bgm-player'), sePlayer = document.getElementById('se-player'), elevenPlayer = document.getElementById('eleven-player');
       var bgmSelect = document.getElementById('bgmSelect'), sysMsgBox = document.getElementById('sysMsgBox');
@@ -790,7 +905,7 @@
       }
 
       // ==========================================
-      // 🚀 4. 系統介面與登入邏輯 (完全由神經躍遷過場接管)
+      // 🚀 4. 系統介面與登入邏輯
       // ==========================================
       function unlockSystemMedia() {
         document.querySelectorAll('.bg-vid').forEach(function(vid) { vid.play().catch(function(){}); });
@@ -827,7 +942,6 @@
             document.getElementById('bgmToggleBtn').innerText = "🔊"; bgmPlayer.volume = 0.05; bgmPlayer.play().catch(function(){}); 
         }
         
-        // 🚀 登入即刻呼叫全息躍遷畫面代替死板 Loading
         var transOverlay = document.getElementById('loginTransitionOverlay');
         var progFill = document.getElementById('syncProgressFill');
         var titleEl = document.getElementById('transitionMainTitle');
@@ -881,6 +995,7 @@
         document.getElementById('dashCoins').innerText = currentUserData.coins;
         document.getElementById('dashExp').innerText = currentUserData.totalExp;
         document.getElementById('roomCoins').innerText = currentUserData.coins;
+        document.getElementById('gachaCoinsDisplay').innerText = currentUserData.coins;
         document.getElementById('roomGreeting').innerText = (currentUserData.name || "隊長");
         document.getElementById('dashTotalMissions').innerText = currentUserData.totalMissions || 0;
         document.getElementById('dashTotalQuestions').innerText = currentUserData.totalQuestions || 0;
@@ -909,7 +1024,153 @@
       }
 
       // ==========================================
-      // 🎉 多鄰國式粒子噴發與彈窗控制系統 (科技冷藍主題)
+      // 🎲 招募終端控制函數 (Gacha System Logic)
+      // ==========================================
+      function openGachaScreen() {
+        playSFX('click');
+        updateUI();
+        navTo('gachaScreen');
+      }
+
+      function startRecruit(pullCount) {
+        var cost = (pullCount === 10) ? 900 : 100;
+        if ((currentUserData.coins || 0) < cost) {
+          playSFX('wrong');
+          return showSysMsg("⚠️ 信用點不足！需要 " + cost + " 點，當前僅持有 " + currentUserData.coins + " 點", true);
+        }
+
+        playSFX('click');
+        document.getElementById('loadingOverlay').style.display = 'flex';
+        document.getElementById('loadingText').innerText = "CONNECTING RECRUITMENT NODE...";
+
+        fetch(API_URL, {
+          method: 'POST', headers: { 'Content-Type': 'text/plain' },
+          body: JSON.stringify({
+            action: 'recruitOperators',
+            studentId: currentUserData.studentId,
+            pullCount: pullCount
+          })
+        })
+        .then(res => res.json())
+        .then(res => {
+          document.getElementById('loadingOverlay').style.display = 'none';
+          if (res && res.success) {
+            // 更新本機信用點
+            currentUserData.coins = res.remainingCoins;
+            updateUI();
+
+            // 執行開箱震撼動效
+            playGachaAnimation(res.pulledCards, pullCount);
+          } else {
+            showSysMsg("📡 招募節點拒絕：" + (res ? res.message : "未知錯誤"), true);
+          }
+        })
+        .catch(err => {
+          document.getElementById('loadingOverlay').style.display = 'none';
+          showSysMsg("🚨 網絡連線崩潰", true);
+        });
+      }
+
+      function playGachaAnimation(cards, pullCount) {
+        var overlay = document.getElementById('gachaOverlay');
+        var portal = document.getElementById('gachaPortal');
+        var cardsContainer = document.getElementById('gachaCardsContainer');
+        var closeBtn = document.getElementById('gachaCloseBtn');
+        var skipBtn = document.getElementById('gachaSkipBtn');
+
+        cardsContainer.innerHTML = "";
+        closeBtn.style.display = "none";
+        skipBtn.style.display = "block";
+        overlay.style.display = "flex";
+
+        // 判定最高稀有度
+        var hasSSR = cards.some(c => c.rarity === "SSR");
+        var hasSR = cards.some(c => c.rarity === "SR");
+
+        portal.style.display = "block";
+        portal.className = "gacha-portal " + (hasSSR ? "gold" : (hasSR ? "purple" : ""));
+
+        playSFX('rank_up');
+        if (hasSSR) {
+          setTimeout(() => playSFX('promotion'), 600);
+        }
+
+        gachaRevealQueue = cards.slice();
+
+        // 1 秒聚能後開始翻出卡片
+        setTimeout(function() {
+          portal.style.display = "none";
+          revealCardsSequentially(pullCount === 1);
+        }, 1200);
+      }
+
+      function renderSingleCardHTML(c, isSingle) {
+        var cardDiv = document.createElement('div');
+        cardDiv.className = "gacha-card " + c.rarity + (isSingle ? " single" : "");
+        
+        var rarityBadge = `<div class="card-badge-rarity">${c.rarity}</div>`;
+        var statusBadge = c.isNew 
+          ? `<div class="card-badge-new">NEW!</div>` 
+          : `<div class="card-badge-break">★+1</div>`;
+        
+        var imgUrl = c.imageUrl || "https://pub-2a6f35ae1aea46f3a4762ecf8c1a6eae.r2.dev/Cards/placeholder.png";
+        var nameText = c.nameZh || c.nameEn || "Operative";
+
+        cardDiv.innerHTML = `
+          ${rarityBadge}
+          ${statusBadge}
+          <img class="card-img" src="${imgUrl}" onerror="this.src='data:image/svg+xml;utf8,<svg xmlns=\\'http://www.w3.org/2000/svg\\' viewBox=\\'0 0 24 24\\' fill=\\'%23555\\'><path d=\\'M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z\\'/></svg>'">
+          <div class="card-name-bar">${nameText}</div>
+        `;
+        return cardDiv;
+      }
+
+      function revealCardsSequentially(isSingle) {
+        var container = document.getElementById('gachaCardsContainer');
+        var closeBtn = document.getElementById('gachaCloseBtn');
+        var skipBtn = document.getElementById('gachaSkipBtn');
+
+        if (gachaIntervalId) clearInterval(gachaIntervalId);
+
+        gachaIntervalId = setInterval(function() {
+          if (gachaRevealQueue.length > 0) {
+            var c = gachaRevealQueue.shift();
+            playSFX(c.rarity === 'SSR' ? 'promotion' : (c.rarity === 'SR' ? 'clear' : 'click'));
+            var cardEl = renderSingleCardHTML(c, isSingle);
+            container.appendChild(cardEl);
+          } else {
+            clearInterval(gachaIntervalId);
+            closeBtn.style.display = "block";
+            skipBtn.style.display = "none";
+          }
+        }, isSingle ? 200 : 250);
+      }
+
+      function skipGachaReveal() {
+        if (gachaIntervalId) clearInterval(gachaIntervalId);
+        var container = document.getElementById('gachaCardsContainer');
+        var closeBtn = document.getElementById('gachaCloseBtn');
+        var skipBtn = document.getElementById('gachaSkipBtn');
+
+        var isSingle = (container.children.length + gachaRevealQueue.length === 1);
+        while (gachaRevealQueue.length > 0) {
+          var c = gachaRevealQueue.shift();
+          container.appendChild(renderSingleCardHTML(c, isSingle));
+        }
+
+        playSFX('clear');
+        closeBtn.style.display = "block";
+        skipBtn.style.display = "none";
+      }
+
+      function closeGachaOverlay() {
+        playSFX('click');
+        document.getElementById('gachaOverlay').style.display = 'none';
+        document.getElementById('gachaCardsContainer').innerHTML = "";
+      }
+
+      // ==========================================
+      // 🎉 多鄰國式粒子噴發與彈窗控制系統
       // ==========================================
       function triggerDuoCelebration() {
         playSFX('clear');
@@ -940,7 +1201,6 @@
         canvas.height = window.innerHeight;
 
         var particles = [];
-        // 🚀 調整為冷藍與星光色系
         var colors = ['#00e5ff', '#3498db', '#f1c40f', '#9b59b6', '#ffffff'];
 
         for (var i = 0; i < 75; i++) {
@@ -1353,7 +1613,6 @@
                   debriefContent.innerHTML = dHtml;
                   document.getElementById('debriefContainer').style.display = 'block';
                 } else {
-                  // 🚀 4. PERFECT OPERATION 全英軍事日誌風格
                   debriefBtnText.innerText = "🌟 PERFECT OPERATION (完美行動)";
                   debriefContent.innerHTML = '<div style="color:var(--noah-cyan); font-family:monospace; font-size:13px; text-align:center; padding:5px 0;">FLAWLESS OPERATION. ALL TACTICAL OBJECTIVES SYNCHRONIZED WITH ZERO ERRORS.</div>';
                   document.getElementById('debriefContainer').style.display = 'block';
