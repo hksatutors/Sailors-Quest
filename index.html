@@ -303,55 +303,14 @@
       }
 
       /* =========================================
-         🎲 全息招募開箱動畫與卡牌矩陣 (Gacha Terminal)
+         🎲 全息招募開箱動畫與卡牌矩陣樣式
          ========================================= */
-      <!-- 🚀 兩段式全息招募終端浮層 -->
-    <div id="gachaOverlay">
-      <!-- 右上角跳過按鈕 -->
-      <button id="gachaSkipBtn" style="position:absolute; top:20px; right:20px; background:rgba(0,0,0,0.6); border:1px solid #666; color:#aaa; padding:8px 16px; border-radius:8px; font-size:13px; cursor:pointer; font-family:monospace; z-index:35010;" onclick="skipGachaToReveal()">
-        [ SKIP ⏩ ]
-      </button>
-
-      <!-- 階段一：6 秒過場與卡牌激射 (Stage 1: Cinematic Warp) -->
-      <div id="gachaStageWarp" style="display:flex; flex-direction:column; justify-content:center; align-items:center; width:100%; height:100%; position:relative; overflow:hidden;">
-        
-        <!-- 🚀 1. 這裡加入你的 6 秒過場 MP4 影片 -->
-        <video id="gachaWarpVid" playsinline muted style="position:absolute; top:0; left:0; width:100%; height:100%; object-fit:cover; z-index:1; pointer-events:none;">
-          <source src="https://pub-2a6f35ae1aea46f3a4762ecf8c1a6eae.r2.dev/Background/gacha.mp4" type="video/mp4">
-        </video>
-
-        <!-- 2. 原本的傳送門光圈 (作為底層特效保留或移除皆可) -->
-        <div id="gachaPortal" class="gacha-portal" style="z-index:2;"></div>
-        
-        <!-- 3. 文字與 UI (加上 position:relative 與 z-index:3，確保浮在影片上方) -->
-        <div style="position:relative; z-index:3; text-align:center;">
-          <div style="color:var(--noah-cyan); font-size:22px; font-weight:900; letter-spacing:4px; font-family:monospace; text-shadow:0 0 15px var(--noah-cyan);">
-            AIRLOCK UNSEALING...
-          </div>
-          <div id="gachaWarpSub" style="color:#aaa; font-size:13px; font-family:monospace; margin-top:8px; letter-spacing:1px;">
-            SYNCHRONIZING TACTICAL DATA CHIPS...
-          </div>
-        </div>
-
-        <!-- 4. 浮現的 Next 按鈕 -->
-        <button id="gachaRevealNextBtn" class="primary-btn btn-gold" style="position:relative; width:80%; max-width:320px; margin-top:40px; opacity:0; transition:opacity 0.6s ease; z-index:35008;" onclick="proceedToReveal()">
-          檢視檔案 / REVEAL ➡️
-        </button>
-      </div>
-
-      <!-- 階段二：揭卡展示畫面 (Stage 2: Card Showcase) -->
-      <div id="gachaStageReveal" style="display:none; flex-direction:column; justify-content:center; align-items:center; width:100%; height:100%; z-index:35005;">
-        <div style="color:var(--accent-gold); font-family:monospace; font-weight:900; font-size:18px; letter-spacing:3px; margin-bottom:15px; text-shadow:0 0 10px rgba(241,196,15,0.5);">
-          TACTICAL DOSSIER REVEALED
-        </div>
-        
-        <div id="gachaCardsContainer" class="gacha-cards-container"></div>
-
-        <button id="gachaCloseBtn" class="primary-btn btn-cyan" style="display:none; width:85%; max-width:380px; margin-top:20px; z-index:35010;" onclick="closeGachaAndGoBriefing()">
-          ✔ 歸隊作戰會議室 (RETURN)
-        </button>
-      </div>
-    </div>
+      #gachaOverlay {
+        position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
+        background: rgba(5, 10, 15, 0.95); backdrop-filter: blur(15px);
+        z-index: 35000; display: none; flex-direction: column;
+        justify-content: center; align-items: center; overflow: hidden;
+      }
 
       /* 躍遷能量聚能環 */
       .gacha-portal {
@@ -441,28 +400,51 @@
       </div>
     </div>
 
-    <!-- 🚀 全息招募終端展示浮層 (Gacha Result Modal) -->
+    <!-- 🚀 兩段式全息招募終端浮層 (正確定位在 body 內且預設隱藏) -->
     <div id="gachaOverlay">
-      <!-- 稀有度能量環光效 -->
-      <div id="gachaPortal" class="gacha-portal"></div>
-      
-      <!-- 頂部資訊與跳過按鈕 -->
-      <div style="position:absolute; top:20px; width:90%; max-width:460px; display:flex; justify-content:space-between; align-items:center; z-index:35005;">
-        <div style="color:var(--noah-cyan); font-family:monospace; font-weight:900; font-size:16px; letter-spacing:2px;">
-          RECRUITMENT TERMINAL
+      <!-- 右上角跳過按鈕 -->
+      <button id="gachaSkipBtn" style="position:absolute; top:20px; right:20px; background:rgba(0,0,0,0.6); border:1px solid #666; color:#aaa; padding:8px 16px; border-radius:8px; font-size:13px; cursor:pointer; font-family:monospace; z-index:35010;" onclick="skipGachaToReveal()">
+        [ SKIP ⏩ ]
+      </button>
+
+      <!-- 階段一：6 秒過場與卡牌激射 (Stage 1: Cinematic Warp) -->
+      <div id="gachaStageWarp" style="display:flex; flex-direction:column; justify-content:center; align-items:center; width:100%; height:100%; position:relative; overflow:hidden;">
+        <!-- 6 秒過場 MP4 影片 -->
+        <video id="gachaWarpVid" playsinline muted preload="auto" style="position:absolute; top:0; left:0; width:100%; height:100%; object-fit:cover; z-index:1; pointer-events:none;">
+          <source src="https://pub-2a6f35ae1aea46f3a4762ecf8c1a6eae.r2.dev/Background/gacha.mp4" type="video/mp4">
+        </video>
+
+        <!-- 傳送門光圈 -->
+        <div id="gachaPortal" class="gacha-portal" style="z-index:2;"></div>
+        
+        <!-- 文字與 UI (浮於影片上方) -->
+        <div style="position:relative; z-index:3; text-align:center;">
+          <div style="color:var(--noah-cyan); font-size:22px; font-weight:900; letter-spacing:4px; font-family:monospace; text-shadow:0 0 15px var(--noah-cyan);">
+            AIRLOCK UNSEALING...
+          </div>
+          <div id="gachaWarpSub" style="color:#aaa; font-size:13px; font-family:monospace; margin-top:8px; letter-spacing:1px;">
+            SYNCHRONIZING TACTICAL DATA CHIPS...
+          </div>
         </div>
-        <button id="gachaSkipBtn" style="background:rgba(0,0,0,0.6); border:1px solid #666; color:#aaa; padding:6px 12px; border-radius:6px; font-size:12px; cursor:pointer; font-family:monospace;" onclick="skipGachaReveal()">
-          [ SKIP ⏩ ]
+
+        <!-- 浮現的 Next 按鈕 -->
+        <button id="gachaRevealNextBtn" class="primary-btn btn-gold" style="position:relative; width:80%; max-width:320px; margin-top:40px; opacity:0; transition:opacity 0.6s ease; z-index:35008; pointer-events:none;" onclick="proceedToReveal()">
+          檢視檔案 / REVEAL ➡️
         </button>
       </div>
 
-      <!-- 招募卡牌結果陣列 -->
-      <div id="gachaCardsContainer" class="gacha-cards-container"></div>
+      <!-- 階段二：揭卡展示畫面 (Stage 2: Card Showcase) -->
+      <div id="gachaStageReveal" style="display:none; flex-direction:column; justify-content:center; align-items:center; width:100%; height:100%; z-index:35005;">
+        <div style="color:var(--accent-gold); font-family:monospace; font-weight:900; font-size:18px; letter-spacing:3px; margin-bottom:15px; text-shadow:0 0 10px rgba(241,196,15,0.5);">
+          TACTICAL DOSSIER REVEALED
+        </div>
+        
+        <div id="gachaCardsContainer" class="gacha-cards-container"></div>
 
-      <!-- 底部確認關閉按鈕 -->
-      <button id="gachaCloseBtn" class="primary-btn btn-cyan" style="display:none; width:85%; max-width:380px; margin-top:20px; z-index:35005;" onclick="closeGachaOverlay()">
-        ✔ 確認歸隊 (CONFIRM)
-      </button>
+        <button id="gachaCloseBtn" class="primary-btn btn-cyan" style="display:none; width:85%; max-width:380px; margin-top:20px; z-index:35010;" onclick="closeGachaAndGoBriefing()">
+          ✔ 歸隊作戰會議室 (RETURN)
+        </button>
+      </div>
     </div>
 
     <div id="system-unlock-screen">
@@ -579,7 +561,7 @@
           <div style="font-size:45px; margin-bottom:5px;">🛰️</div>
           <div style="color:var(--accent-gold); font-size:20px; font-weight:900; letter-spacing:3px;">NEURAL RECRUITMENT</div>
           <div style="font-size:11px; color:#aaa; font-family:monospace; margin-top:4px;">SSR 4% ｜ SR 20% ｜ R 76%</div>
-          <div style="position:absolute; bottom:8px; font-size:10px; color:var(--noah-cyan); letter-spacing:1px;">四大陣營首發 20 位幹員集結連線中</div>
+          <div style="position:absolute; bottom:8px; font-size:10px; color:var(--noah-cyan); letter-spacing:1px;">四大陣營 28 位幹員集結連線中</div>
         </div>
 
         <!-- 招募操作按鈕 -->
@@ -744,7 +726,17 @@
       };
 
       var MEDIA = {
-        videos: { loginScreen: "vid-login", dashboardScreen: "vid-dashboard", vocab_basic: "vid-vocab_basic", vocab_adv: "vid-vocab_adv", grammar: "vid-grammar", listening: "vid-listening", briefingRoom: "vid-briefingRoom", finishScreen: "vid-finishScreen" },
+        videos: { 
+          loginScreen: "vid-login", 
+          dashboardScreen: "vid-dashboard", 
+          vocab_basic: "vid-vocab_basic", 
+          vocab_adv: "vid-vocab_adv", 
+          grammar: "vid-grammar", 
+          listening: "vid-listening", 
+          briefingRoom: "vid-briefingRoom", 
+          finishScreen: "vid-finishScreen",
+          gachaScreen: "vid-briefingRoom"
+        },
         bgm: [
           {name:"電子の海", url:"https://pub-2a6f35ae1aea46f3a4762ecf8c1a6eae.r2.dev/Bgm/電子の海.mp3", type:"night"},
           {name:"Silent Walk", url:"https://pub-2a6f35ae1aea46f3a4762ecf8c1a6eae.r2.dev/Bgm/Silent_walk.mp3", type:"night"},
@@ -771,7 +763,6 @@
       var targetCurrentAnswer = "", currentListeningScript = "", isQuestionLocked = false, currentBadge = ""; 
       var currentLBData = null, isMissionActive = false, confettiAnimationId = null;
       var currentCombo = 0, wrongQuestionsList = [];
-      var gachaRevealQueue = [], gachaIntervalId = null;
 
       var bgmPlayer = document.getElementById('bgm-player'), sePlayer = document.getElementById('se-player'), elevenPlayer = document.getElementById('eleven-player');
       var bgmSelect = document.getElementById('bgmSelect'), sysMsgBox = document.getElementById('sysMsgBox');
@@ -967,7 +958,8 @@
 
       function navTo(screenId) {
         document.querySelectorAll('.screen').forEach(function(s) { s.classList.remove('active'); });
-        document.getElementById(screenId).classList.add('active');
+        var targetScreen = document.getElementById(screenId);
+        if (targetScreen) targetScreen.classList.add('active');
         
         var targetVidId = MEDIA.videos[screenId] || (screenId === 'missionScreen' ? MEDIA.videos[currentMissionType] : MEDIA.videos.dashboardScreen);
         
@@ -1065,8 +1057,14 @@
       }
 
       // ==========================================
-      // 🎲 兩段式招募終端控制邏輯 (V2.0 完整版)
+      // 🎲 兩段式招募終端控制邏輯 (V2.0 旗艦修復版)
       // ==========================================
+      function openGachaScreen() {
+        playSFX('click');
+        updateUI();
+        navTo('gachaScreen');
+      }
+
       var currentPulledCards = [];
       var gachaWarpTimeout = null;
       var gachaRevealQueue = [];
@@ -1116,12 +1114,13 @@
       function playStageOneWarp(cards, pullCount) {
         currentPulledCards = cards;
         
-        // 🚀 觸發影片播放
+        // 觸發 6 秒過場影片播放
         var warpVid = document.getElementById('gachaWarpVid');
         if (warpVid) {
-          warpVid.currentTime = 0; // 重回第 0 秒
+          warpVid.currentTime = 0;
           warpVid.play().catch(err => console.log("影片自動播放受限:", err));
         }
+
         var overlay = document.getElementById('gachaOverlay');
         var stageWarp = document.getElementById('gachaStageWarp');
         var stageReveal = document.getElementById('gachaStageReveal');
@@ -1164,8 +1163,10 @@
       // 3. 階段二：切換至揭卡展示畫面
       function proceedToReveal() {
         if (gachaWarpTimeout) clearTimeout(gachaWarpTimeout);
+        
         var warpVid = document.getElementById('gachaWarpVid');
         if (warpVid) warpVid.pause();
+
         var stageWarp = document.getElementById('gachaStageWarp');
         var stageReveal = document.getElementById('gachaStageReveal');
         var container = document.getElementById('gachaCardsContainer');
@@ -1182,13 +1183,14 @@
         revealCardsSequentially(currentPulledCards.length === 1);
       }
 
+      // 4. 右上角 Skip 按鈕直接跳過過場
       function skipGachaToReveal() {
         if (gachaWarpTimeout) clearTimeout(gachaWarpTimeout);
-        // 🚀 按 Skip 同步暫停影片
         var warpVid = document.getElementById('gachaWarpVid');
         if (warpVid) warpVid.pause();
+
         var stageWarp = document.getElementById('gachaStageWarp');
-        // ... (以下原有代碼保持不變)
+        var stageReveal = document.getElementById('gachaStageReveal');
         stageWarp.style.display = "none";
         stageReveal.style.display = "flex";
         skipGachaReveal();
@@ -1262,6 +1264,10 @@
         document.getElementById('gachaOverlay').style.display = 'none';
         document.getElementById('gachaCardsContainer').innerHTML = "";
         navTo('briefingRoom');
+      }
+
+      function closeGachaOverlay() {
+        closeGachaAndGoBriefing();
       }
 
       // ==========================================
@@ -1675,7 +1681,7 @@
                     playSFX('promotion'); document.getElementById('newRankIcon').innerText = res.newRankIcon;
                     document.getElementById('newRankName').innerText = res.newRankName; document.getElementById('rankUpOverlay').style.display = 'flex';
                 } else { playSFX('clear'); setTimeout(function(){ playSFX('rank_up'); }, 800); }
-                isMissionActive = false; if(isBgmPlaying) bgmPlayer.volume = 0.3;
+                isMissionActive = false; if(isBgmPlaying) bgmPlayer.volume = 0.3; 
                 
                 var stamp = document.getElementById('finishRankStamp');
                 var acc = res.accuracy || 0;
