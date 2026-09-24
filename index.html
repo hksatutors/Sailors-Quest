@@ -469,7 +469,7 @@
         <div id="gachaStageReveal">
           <!-- 🚀 揭卡專屬背景影片 -->
           <video id="gachaRevealVid" playsinline loop muted style="position:absolute; top:0; left:0; width:100%; height:100%; object-fit:cover; z-index:1; pointer-events:none; opacity:0.85;">
-            <source src="https://pub-2a6f35ae1aea46f3a4762ecf8c1a6eae.r2.dev/Background/gacha_reveal.mp4" type="video/mp4">
+            <source src="https://pub-2a6f35ae1aea46f3a4762ecf8c1a6eae.r2.dev/Background/gacha_card_reveal.mp4" type="video/mp4">
           </video>
 
           <!-- 頂部輕量資訊列 -->
@@ -700,9 +700,9 @@
         </div>
 
         <!-- 2. 全息招募橫幅 (替換為圖片 Banner) -->
-        <div style="position:relative; width:100%; height:185px; border-radius:16px; border:2px solid var(--noah-cyan); overflow:hidden; margin-bottom:15px; box-shadow:0 0 25px rgba(0,229,255,0.25);">
+        <div style="position:relative; width:100%; aspect-ratio:3/2; max-height:270px; border-radius:16px; border:2px solid var(--noah-cyan); overflow:hidden; margin-bottom:15px; box-shadow:0 0 25px rgba(0,229,255,0.25);">
           <!-- 🚀 自訂你的招募宣傳大圖 -->
-          <img id="gachaBannerImg" src="https://pub-2a6f35ae1aea46f3a4762ecf8c1a6eae.r2.dev/Banner/gacha_banner.png" 
+          <img id="gachaBannerImg" src="https://pub-2a6f35ae1aea46f3a4762ecf8c1a6eae.r2.dev/Characters/banner/gacha_banner_1.jpg" style="width:100%; height:100%; object-fit:cover;" 
                onerror="this.src='https://pub-2a6f35ae1aea46f3a4762ecf8c1a6eae.r2.dev/Cards/OP_SSR_01.png'" 
                style="width:100%; height:100%; object-fit:cover;">
           <div style="position:absolute; bottom:0; left:0; width:100%; background:linear-gradient(transparent, rgba(4,8,14,0.95)); padding:8px 12px; display:flex; justify-content:space-between; align-items:flex-end;">
