@@ -354,7 +354,9 @@
         padding: 5px;
       }
       .gacha-card {
-        width: 82px; height: 124px; border-radius: 12px; background: rgba(8, 14, 22, 0.9);
+        width: 82px; height: 124px; border-radius: 12px;
+        /* 深色科技漸變底，防止 contain 留白突兀 */
+        background: radial-gradient(circle at center, rgba(15, 25, 40, 0.95) 0%, rgba(4, 8, 14, 0.98) 100%);
         border: 1.5px solid #444; position: relative; overflow: hidden; cursor: pointer;
         transition: transform 0.25s cubic-bezier(0.175, 0.885, 0.32, 1.275), box-shadow 0.25s;
         animation: duoSpringPop 0.45s backwards;
@@ -392,7 +394,11 @@
       }
 
       /* 🚀 補回必備樣式：卡牌圖片與底部名字標籤條 */
-      .card-img { width: 100%; height: 100%; object-fit: cover; }
+      .card-img {
+        width: 100%; height: 100%;
+        object-fit: contain;
+        object-position: center bottom; /* 讓角色腳步貼底，頭頂自然留出空間 */
+      }
       .card-name-bar {
         position: absolute; bottom: 0; left: 0; width: 100%; background: rgba(0,0,0,0.85);
         padding: 4px 2px; font-size: 10px; font-weight: bold; text-align: center;
@@ -528,7 +534,7 @@
 
       <!-- 🔍 彈窗二：幹員詳細情報檔案 (Operator Detail Dossier) -->
       <div id="operatorDetailModal" style="position:fixed; top:0; left:0; width:100vw; height:100vh; background:rgba(0,0,0,0.92); backdrop-filter:blur(22px); z-index:37000; display:none; flex-direction:column; justify-content:center; align-items:center; padding:15px;">
-        <div style="background:linear-gradient(135deg, rgba(8,18,30,0.98), rgba(4,10,16,0.98)); border:2px solid var(--noah-cyan); border-radius:24px; width:100%; max-width:430px; max-height:88vh; display:flex; flex-direction:column; overflow:hidden; box-shadow:0 0 45px rgba(0,229,255,0.35);">
+        <div style="background:linear-gradient(135deg, rgba(8,18,30,0.98), rgba(4,10,16,0.98)); border:2px solid var(--noah-cyan); border-radius:24px; width:100%; max-width:440px; max-height:88vh; display:flex; flex-direction:column; overflow:hidden; box-shadow:0 0 45px rgba(0,229,255,0.35);">
           
           <!-- 頂部關閉列 -->
           <div style="display:flex; justify-content:space-between; align-items:center; padding:12px 18px; border-bottom:1px solid rgba(255,255,255,0.1);">
@@ -538,21 +544,67 @@
 
           <!-- 內容滾動區 -->
           <div style="flex:1; overflow-y:auto; padding:16px;">
-            <!-- 立繪與基本稱號 -->
+            <!-- 立繪與基本稱號 (加入 contain 置底，保證立繪不切頭) -->
             <div style="display:flex; gap:14px; align-items:center; margin-bottom:14px;">
-              <div style="width:95px; height:135px; border-radius:12px; overflow:hidden; border:2px solid var(--noah-cyan); flex-shrink:0; background:#000;">
-                <img id="detailOpImg" src="" style="width:100%; height:100%; object-fit:cover;">
+              <div style="width:100px; height:145px; border-radius:12px; overflow:hidden; border:2px solid var(--noah-cyan); flex-shrink:0; background:radial-gradient(circle, #0c1826 0%, #030810 100%);">
+                <img id="detailOpImg" src="" style="width:100%; height:100%; object-fit:contain; object-position:center bottom;">
               </div>
               <div style="flex:1; text-align:left;">
                 <div id="detailOpRarity" class="op-detail-badge" style="margin-bottom:4px;">SSR</div>
-                <div id="detailOpNameZh" style="font-size:18px; font-weight:900; color:#fff;">【代號】姓名</div>
-                <div id="detailOpNameEn" style="font-size:12px; color:#aaa; font-family:monospace; margin-bottom:6px;">[Title] Name</div>
+                <div id="detailOpNameZh" style="font-size:18px; font-weight:900; color:#fff; line-height:1.3;">【代號】姓名</div>
+                <div id="detailOpNameEn" style="font-size:11px; color:#aaa; font-family:monospace; margin-bottom:8px;">[Title] Name</div>
                 <div style="display:flex; gap:6px; flex-wrap:wrap;">
                   <span id="detailOpFaction" class="op-detail-badge" style="background:rgba(255,255,255,0.1); color:#fff; border:1px solid #555;">陣營</span>
                   <span id="detailOpRole" class="op-detail-badge" style="background:rgba(0,229,255,0.15); color:var(--noah-cyan); border:1px solid var(--noah-cyan);">職能</span>
                 </div>
               </div>
             </div>
+
+            <!-- 🚀 5(2). 特訓階級與星級展示 (Breakthrough) -->
+            <div style="background:rgba(241,196,15,0.06); border-radius:12px; border:1px solid rgba(241,196,15,0.3); padding:10px 12px; margin-bottom:10px; text-align:left;">
+              <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:4px;">
+                <div style="color:var(--accent-gold); font-size:12px; font-weight:900; font-family:monospace;">
+                  ★ 特訓同步階段 (BREAKTHROUGH)
+                </div>
+                <div id="detailOpBreakStars" style="color:var(--accent-gold); font-size:15px; font-weight:900; letter-spacing:2px; font-family:monospace;">
+                  ★☆☆☆☆
+                </div>
+              </div>
+              <div id="detailOpBreakDesc" style="font-size:12px; color:#ddd; line-height:1.4;">
+                基礎同步：解鎖幹員專屬戰術技能與定位支援。
+              </div>
+            </div>
+
+            <!-- 🚀 3. 主動戰術 (含具體效果解釋) -->
+            <div style="background:rgba(0,0,0,0.4); border-radius:12px; border:1px solid rgba(255,255,255,0.08); padding:10px 12px; margin-bottom:10px; text-align:left;">
+              <div style="color:var(--accent-gold); font-size:12px; font-weight:900; letter-spacing:1px; margin-bottom:4px; font-family:monospace;">⚡ 主動戰術 (ACTIVE SKILL)</div>
+              <div id="detailOpActive" style="font-size:13px; color:#eee;">--</div>
+            </div>
+
+            <!-- 🚀 3. 被動共鳴 (含具體效果解釋) -->
+            <div style="background:rgba(0,0,0,0.4); border-radius:12px; border:1px solid rgba(255,255,255,0.08); padding:10px 12px; margin-bottom:10px; text-align:left;">
+              <div style="color:var(--accent-purple); font-size:12px; font-weight:900; letter-spacing:1px; margin-bottom:4px; font-family:monospace;">🔮 被動共鳴 (PASSIVE SKILL)</div>
+              <div id="detailOpPassive" style="font-size:13px; color:#eee;">--</div>
+            </div>
+
+            <!-- 領航光環 (若有) -->
+            <div id="detailOpLeaderBox" style="display:none; background:rgba(241,196,15,0.08); border-radius:12px; border:1px solid rgba(241,196,15,0.3); padding:10px 12px; margin-bottom:10px; text-align:left;">
+              <div style="color:var(--accent-gold); font-size:12px; font-weight:900; letter-spacing:1px; margin-bottom:4px; font-family:monospace;">👑 領航光環 (LEADER AURA)</div>
+              <div id="detailOpLeader" style="font-size:13px; color:#f1c40f;">--</div>
+            </div>
+
+            <!-- 人物背景 Profile -->
+            <div style="background:rgba(255,255,255,0.03); border-radius:12px; border:1px solid rgba(255,255,255,0.08); padding:12px; text-align:left;">
+              <div style="color:#888; font-size:11px; font-weight:bold; letter-spacing:1px; margin-bottom:6px; font-family:monospace;">📖 幹員履歷 (PROFILE)</div>
+              <div id="detailOpProfile" style="font-size:13px; color:#bdc3c7; line-height:1.6;">--</div>
+            </div>
+          </div>
+
+          <button class="primary-btn btn-cyan" style="margin:10px 16px 14px 16px; width:calc(100% - 32px); height:42px; font-size:14px;" onclick="closeOperatorDetailModal()">
+            返回 / RETURN
+          </button>
+        </div>
+      </div>
 
             <!-- 技能情報區 -->
             <div style="background:rgba(0,0,0,0.4); border-radius:12px; border:1px solid rgba(255,255,255,0.08); padding:10px 12px; margin-bottom:10px; text-align:left;">
@@ -699,29 +751,20 @@
           </div>
         </div>
 
-        <!-- 2. 全息招募橫幅 (替換為圖片 Banner) -->
-        <div style="position:relative; width:100%; aspect-ratio:3/2; max-height:270px; border-radius:16px; border:2px solid var(--noah-cyan); overflow:hidden; margin-bottom:15px; box-shadow:0 0 25px rgba(0,229,255,0.25);">
-          <!-- 🚀 自訂你的招募宣傳大圖 -->
-          <img id="gachaBannerImg" src="https://pub-2a6f35ae1aea46f3a4762ecf8c1a6eae.r2.dev/Characters/banner/gacha_banner_1.jpg" style="width:100%; height:100%; object-fit:cover;" 
+        <!-- 2. 全息招募橫幅 (自訂 3:2 圖片 Banner) -->
+        <div style="position:relative; width:100%; aspect-ratio:3/2; max-height:270px; border-radius:16px; border:2px solid var(--noah-cyan); overflow:hidden; margin-bottom:15px; box-shadow:0 0 25px rgba(0,229,255,0.25); background:#050b14;">
+          <img id="gachaBannerImg" 
+               src="https://pub-2a6f35ae1aea46f3a4762ecf8c1a6eae.r2.dev/Characters/banner/gacha_banner_1.jpg" 
                onerror="this.src='https://pub-2a6f35ae1aea46f3a4762ecf8c1a6eae.r2.dev/Cards/OP_SSR_01.png'" 
                style="width:100%; height:100%; object-fit:cover;">
-          <div style="position:absolute; bottom:0; left:0; width:100%; background:linear-gradient(transparent, rgba(4,8,14,0.95)); padding:8px 12px; display:flex; justify-content:space-between; align-items:flex-end;">
-            <div>
-              <div style="color:var(--accent-gold); font-size:13px; font-weight:900; letter-spacing:2px; font-family:monospace;">STANDARD RECRUITMENT</div>
-              <div style="font-size:11px; color:#ccc;">四大陣營 28 位戰術幹員集結連線中</div>
-            </div>
-            <div style="font-size:10px; color:var(--noah-cyan); font-family:monospace; background:rgba(0,229,255,0.15); border:1px solid var(--noah-cyan); padding:2px 6px; border-radius:4px;">
-              SSR 4% ｜ SR 20% ｜ R 76%
-            </div>
-          </div>
         </div>
 
         <!-- 招募操作按鈕 -->
         <button class="primary-btn btn-cyan" onclick="startRecruit(1)">
-          🧭 單次鏈接 (100 信用點)
+          🧭 單次招募 (100 信用點)
         </button>
         <button class="primary-btn btn-gold" onclick="startRecruit(10)">
-          ⚡ 十連躍遷 (900 信用點・9折)
+          ⚡ 十連招募 (900 信用點・9折)
         </button>
         
         <!-- 3. 左下角幹員一覽與返回按鈕條 -->
@@ -1454,7 +1497,61 @@
       }
 
       // ==========================================
-      // 📋 幹員檔案庫與詳細情報彈窗邏輯
+      // 📖 戰術技能百科全書 (Skill Encyclopedia)
+      // ==========================================
+      const SKILL_EFFECTS = {
+        // 主動技能
+        "超頻解析": "【戰術干預】立即鎖定並排除 2 個錯誤干擾項，本題作答時間延長 5 秒。",
+        "深度掃描": "【情報透視】高亮顯示題幹核心詞根與語法關鍵詞，降低分析盲點。",
+        "破譯直通": "【代碼穿透】破除敵方數據加密，本次任務全隊 EXP 結算提升 25%。",
+        "機率校準": "【神經超頻】下 3 題作答時，即使答錯亦不扣除神經生命值或評級。",
+        "聲軌切片": "【聲學增強】將聽力音檔精準分割為短句片段並重複播放關鍵發音。",
+        "EMP 脈衝": "【系統癱瘓】中和敵方選項遮蔽干擾，直接還原完整句子結構。",
+        "戰術撤回": "【防線重組】重置當前題目為基礎詞彙題，確保答題節奏穩定。",
+        "連擊狂潮": "【連擊放大】當前連擊數（Combo）立即 +3，提升暴擊結算加成。",
+        "逆向線索": "【詞根逆向】揭示目標生字的前綴與後綴構成，輔助推導詞義。",
+        "字根探針": "【詞源探測】將答案的首字母與尾字母直接高亮標記於輸入框。",
+        "語法藍圖": "【結構解析】在畫面上投影出該句子的五大核心句型主幹。",
+        "詞形固化": "【詞性鎖定】直接刪除所有非目標詞性的干擾選項（如排除所有名詞）。",
+        "數據透鏡": "【深層破譯】直接提供該單詞在歷屆真實真題中的高頻例句對照。",
+        "聲學濾波": "【降噪處理】消除聽力題中的環境背景雜訊，語音播放清晰度提升。",
+        "光學誘餌": "【替身防護】抵禦一次失誤判定，將答錯代價轉化為提示機會。",
+        "能量回收": "【資源調配】答對本題後額外獲取 10 點信用點（Coins）。",
+        "引力對齊": "【拼寫校準】在拼寫題中自動填入所有元音字母（A, E, I, O, U）。",
+        "全息母音": "【語音投射】以慢速 0.6x 針對該單詞的重音節進行口型慢放。",
+        "慢速聚焦": "【思維減速】作答倒數計時暫停 8 秒，給予充分思考空間。",
+        "全息錨定": "【句型固定】鎖定句子重組題的首詞與尾詞位置，大幅降低難度。",
+
+        // 被動技能
+        "護盾過載": "【重裝共鳴】答錯時自動生成 100 點數據護盾，防止小隊評價跌落 S 級以下。",
+        "文法大師": "【語法直覺】在「戰術學院」系列任務中，所有題目的基礎 EXP 獲取量提升 30%。",
+        "賞金合約": "【商業法則】全隊任務結算時，額外獲取 15% 信用點分紅。",
+        "連鎖反應": "【算力疊加】每達成 5 次連擊，立即為小隊全員充能 1 點戰術能量（SP）。",
+        "防過勞補正": "【後勤保障】每日連續執行 3 次以上任務時，精力衰減減免 50%。",
+        "聽覺特化": "【敏銳感官】聽力題答對時，額外獲得 1.5 倍經驗反饋。",
+        "詞性感知": "【語意敏銳】題目出現罕見詞性時，系統自動標記中文警示。",
+        "後綴拆解": "【構詞熟練】詞形變換題目的得分加成提升 20%。",
+        "駭客後門": "【系統漏洞】進入任務時，有 20% 機率直接自動解鎖 1 題答案。",
+        "疾速同調": "【瞬身斬擊】作答時間在 3 秒內完成且答對時，觸發雙倍暴擊評分。",
+        "能量同調": "【機械諧振】全隊技能充能速度提升 15%。",
+        "精準調頻": "【微調頻率】語音辨析題的容錯範圍拓寬，發音辨識度提升。"
+      };
+
+      // 突破星級加成文本庫
+      const BREAKTHROUGH_EFFECTS = [
+        "基礎同步：解鎖幹員專屬戰術技能與定位支援。",
+        "特訓 1 階：全隊任務結算 EXP +5%，主動戰術充能速度微量提升。",
+        "特訓 2 階：戰術護盾強度提升 20%，抵消答錯時的部分評價扣減。",
+        "特訓 3 階：主動戰術充能消耗（SP）降低 1 點。",
+        "特訓 4 階：全隊連擊（Combo）加成上限突破至 x15。",
+        "極限過載（滿階）：解鎖專屬高階戰術光環，全隊信用點與經驗結算獲取 +25%！"
+      ];
+
+      // 全域快取：向 Google Sheets 請求回來的名冊
+      var cachedOperatorRoster = null;
+
+      // ==========================================
+      // 🔍 開啟幹員詳細情報彈窗
       // ==========================================
       function openOperatorDetailModal(c) {
         playSFX('click');
@@ -1473,14 +1570,23 @@
         document.getElementById('detailOpFaction').innerText = c.faction || "中立";
         document.getElementById('detailOpRole').innerText = c.role || "戰術";
 
-        // 主動技能
+        // 🚀 5(2). 動態計算特訓星級 (如果未持有或預覽則預設 0 階)
+        var breakLevel = Number(c.breakthrough || c.breakCount || 0);
+        var filledStars = Math.min(5, breakLevel + 1);
+        var emptyStars = Math.max(0, 5 - filledStars);
+        document.getElementById('detailOpBreakStars').innerText = "★".repeat(filledStars) + "☆".repeat(emptyStars);
+        document.getElementById('detailOpBreakDesc').innerText = BREAKTHROUGH_EFFECTS[Math.min(5, breakLevel)];
+
+        // 🚀 3. 主動戰術 (名稱 + 耗能 + 效果解釋)
+        var actDesc = SKILL_EFFECTS[c.activeSkill] || "啟動後提供戰術輔助支援。";
         document.getElementById('detailOpActive').innerHTML = c.activeSkill 
-          ? `<strong>${c.activeSkill}</strong> (耗能: ${c.chargeCost || 1} SP)` 
+          ? `<strong>${c.activeSkill}</strong> <span style="color:var(--accent-gold); font-size:11px;">(耗能: ${c.chargeCost || 1} SP)</span><div style="font-size:12px; color:#aaa; margin-top:5px; line-height:1.4;">${actDesc}</div>` 
           : `<span style="color:#777;">無配置主動戰術</span>`;
 
-        // 被動技能
+        // 🚀 3. 被動共鳴 (名稱 + 效果解釋)
+        var pasDesc = SKILL_EFFECTS[c.passiveSkill] || "常駐為全隊提供屬性微調加成。";
         document.getElementById('detailOpPassive').innerHTML = c.passiveSkill 
-          ? `<strong>${c.passiveSkill}</strong>` 
+          ? `<strong>${c.passiveSkill}</strong><div style="font-size:12px; color:#aaa; margin-top:5px; line-height:1.4;">${pasDesc}</div>` 
           : `<span style="color:#777;">無配置被動共鳴</span>`;
 
         // 領航光環
@@ -1503,18 +1609,79 @@
         document.getElementById('operatorDetailModal').style.display = "none";
       }
 
-      // 開啟幹員名冊與機率一覽
+      // ==========================================
+      // 📋 動態從 Google Sheets 取得幹員名冊（零硬編碼）
+      // ==========================================
       function openOperatorArchiveModal() {
         playSFX('click');
+        var modal = document.getElementById('operatorArchiveModal');
+        var listContainer = document.getElementById('archiveRosterList');
+
+        // 1. 若本機已有快取，直接瞬間渲染
+        if (cachedOperatorRoster && cachedOperatorRoster.length > 0) {
+          renderArchiveList(cachedOperatorRoster);
+          modal.style.display = "flex";
+          return;
+        }
+
+        // 2. 首次點擊：向後端請求 Google Sheets 的最新幹員名單
+        listContainer.innerHTML = "<div style='color:var(--noah-cyan); font-size:13px; padding:30px; text-align:center; font-family:monospace;'>🛰️ 正在從聖域資料庫同步最新幹員名冊...</div>";
+        modal.style.display = "flex";
+
+        fetch(API_URL, {
+          method: 'POST',
+          headers: { 'Content-Type': 'text/plain' },
+          body: JSON.stringify({ action: 'getOperatorPool' })
+        })
+        .then(res => res.json())
+        .then(res => {
+          if (res && res.success && res.operators) {
+            cachedOperatorRoster = res.operators;
+            renderArchiveList(cachedOperatorRoster);
+          } else {
+            listContainer.innerHTML = "<div style='color:var(--accent-red); font-size:13px; padding:20px; text-align:center;'>⚠️ 同步失敗，請稍後重試</div>";
+          }
+        })
+        .catch(err => {
+          listContainer.innerHTML = "<div style='color:var(--accent-red); font-size:13px; padding:20px; text-align:center;'>🚨 網絡連線異常</div>";
+        });
+      }
+
+      // 渲染分類卡牌列表
+      function renderArchiveList(roster) {
         var listContainer = document.getElementById('archiveRosterList');
         listContainer.innerHTML = "";
 
-        // 如果本機有緩存過卡池就使用，若無則展示提示
-        if (!currentPulledCards || currentPulledCards.length === 0) {
-          listContainer.innerHTML = "<div style='color:#aaa; font-size:13px; padding:20px; text-align:center;'>🛰️ 請先進行一次招募以同步最新幹員離線數據庫...</div>";
-        }
+        ['SSR', 'SR', 'R'].forEach(rarity => {
+          var ops = roster.filter(o => o.rarity === rarity);
+          if (ops.length === 0) return;
 
-        document.getElementById('operatorArchiveModal').style.display = "flex";
+          var groupTitle = document.createElement('div');
+          groupTitle.style.cssText = "color:var(--text-main); font-weight:900; font-size:12px; margin:12px 0 6px 0; display:flex; align-items:center; gap:6px; font-family:monospace;";
+          var color = (rarity==='SSR')?'var(--accent-gold)':((rarity==='SR')?'var(--accent-purple)':'var(--noah-cyan)');
+          groupTitle.innerHTML = `<span style="background:${color}; color:#000; padding:1px 6px; border-radius:4px; font-size:10px;">${rarity}</span> 機率池幹員名冊 (${ops.length}人)`;
+          listContainer.appendChild(groupTitle);
+
+          var grid = document.createElement('div');
+          grid.style.cssText = "display:grid; grid-template-columns:repeat(4, 1fr); gap:8px; margin-bottom:12px;";
+
+          ops.forEach(op => {
+            var item = document.createElement('div');
+            item.style.cssText = "background:rgba(0,0,0,0.5); border:1px solid #333; border-radius:8px; padding:4px; cursor:pointer; text-align:center; transition:0.2s;";
+            var imgUrl = op.imageUrl || ("https://pub-2a6f35ae1aea46f3a4762ecf8c1a6eae.r2.dev/Cards/" + op.cardId + ".png");
+            item.innerHTML = `
+              <div style="width:100%; aspect-ratio:2/3; border-radius:6px; overflow:hidden; background:#050a10; margin-bottom:4px;">
+                <img src="${imgUrl}" style="width:100%; height:100%; object-fit:contain; object-position:center bottom;">
+              </div>
+              <div style="font-size:10px; font-weight:bold; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; color:#ddd;">${op.nameZh.replace(/【.*?】/, '')}</div>
+            `;
+            item.onclick = function() {
+              openOperatorDetailModal(op);
+            };
+            grid.appendChild(item);
+          });
+          listContainer.appendChild(grid);
+        });
       }
 
       function closeOperatorArchiveModal() {
