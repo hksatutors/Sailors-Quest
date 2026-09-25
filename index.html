@@ -355,7 +355,6 @@
       }
       .gacha-card {
         width: 82px; height: 124px; border-radius: 12px;
-        /* 深色科技漸變底，防止 contain 留白突兀 */
         background: radial-gradient(circle at center, rgba(15, 25, 40, 0.95) 0%, rgba(4, 8, 14, 0.98) 100%);
         border: 1.5px solid #444; position: relative; overflow: hidden; cursor: pointer;
         transition: transform 0.25s cubic-bezier(0.175, 0.885, 0.32, 1.275), box-shadow 0.25s;
@@ -393,11 +392,11 @@
         padding: 2px 4px; border-radius: 4px; z-index: 3;
       }
 
-      /* 🚀 補回必備樣式：卡牌圖片與底部名字標籤條 */
+      /* 🚀 必備樣式：卡牌圖片與底部名字標籤條 */
       .card-img {
         width: 100%; height: 100%;
         object-fit: contain;
-        object-position: center bottom; /* 讓角色腳步貼底，頭頂自然留出空間 */
+        object-position: center bottom;
       }
       .card-name-bar {
         position: absolute; bottom: 0; left: 0; width: 100%; background: rgba(0,0,0,0.85);
@@ -439,202 +438,172 @@
       </div>
     </div>
 
-    <!-- 🚀 兩段式全息招募終端浮層 (正確定位在 body 內且預設隱藏) -->
+    <!-- 🚀 兩段式全息招募終端浮層 -->
     <div id="gachaOverlay">
-        <button id="gachaSkipBtn" style="position:absolute; top:18px; right:18px; background:rgba(0,0,0,0.75); border:1px solid #666; color:#aaa; padding:8px 16px; border-radius:8px; font-size:13px; cursor:pointer; font-family:monospace; z-index:35010;" onclick="skipGachaToReveal()">
-          [ SKIP ⏩ ]
+      <button id="gachaSkipBtn" style="position:absolute; top:18px; right:18px; background:rgba(0,0,0,0.75); border:1px solid #666; color:#aaa; padding:8px 16px; border-radius:8px; font-size:13px; cursor:pointer; font-family:monospace; z-index:35010;" onclick="skipGachaToReveal()">
+        [ SKIP ⏩ ]
+      </button>
+
+      <!-- 階段一：6 秒過場演出 (Stage 1: Cinematic Warp) -->
+      <div id="gachaStageWarp" style="display:flex; flex-direction:column; justify-content:center; align-items:center; width:100%; height:100%; position:relative; overflow:hidden;">
+        <video id="gachaWarpVid" playsinline muted preload="auto" style="position:absolute; top:0; left:0; width:100%; height:100%; object-fit:cover; z-index:1; pointer-events:none;">
+          <source src="https://pub-2a6f35ae1aea46f3a4762ecf8c1a6eae.r2.dev/Background/gacha.mp4" type="video/mp4">
+        </video>
+
+        <!-- 實心多層漸變光圈 -->
+        <div id="gachaPortal" class="gacha-portal" style="z-index:2;"></div>
+        
+        <!-- 實心防透光文字資訊盒 -->
+        <div style="position:relative; z-index:3; text-align:center; background:rgba(5, 12, 22, 0.94); border:1.5px solid var(--noah-cyan); padding:20px 28px; border-radius:20px; box-shadow:0 15px 40px rgba(0,0,0,0.9);">
+          <div style="font-size:42px; margin-bottom:8px;">🚪</div>
+          <div style="color:var(--noah-cyan); font-size:22px; font-weight:900; letter-spacing:4px; font-family:monospace; text-shadow:0 0 15px var(--noah-cyan);">
+            AIRLOCK UNSEALING...
+          </div>
+          <div id="gachaWarpSub" style="color:#bdc3c7; font-size:13px; font-family:monospace; margin-top:8px; letter-spacing:1px;">
+            SYNCHRONIZING TACTICAL DATA CHIPS...
+          </div>
+        </div>
+
+        <!-- 實心琥珀金漸變 Next 按鈕 -->
+        <button id="gachaRevealNextBtn" class="primary-btn btn-gacha-solid-gold" style="position:relative; width:80%; max-width:320px; margin-top:35px; opacity:0; transition:opacity 0.6s ease; z-index:35008; pointer-events:none;" onclick="proceedToReveal()">
+          檢視檔案 / REVEAL ➡️
         </button>
-
-        <!-- 階段一：6 秒過場演出 (Stage 1: Cinematic Warp) -->
-        <div id="gachaStageWarp" style="display:flex; flex-direction:column; justify-content:center; align-items:center; width:100%; height:100%; position:relative; overflow:hidden;">
-          <video id="gachaWarpVid" playsinline muted preload="auto" style="position:absolute; top:0; left:0; width:100%; height:100%; object-fit:cover; z-index:1; pointer-events:none;">
-            <source src="https://pub-2a6f35ae1aea46f3a4762ecf8c1a6eae.r2.dev/Background/gacha.mp4" type="video/mp4">
-          </video>
-
-          <!-- 實心多層漸變光圈 -->
-          <div id="gachaPortal" class="gacha-portal" style="z-index:2;"></div>
-          
-          <!-- 實心防透光文字資訊盒 -->
-          <div style="position:relative; z-index:3; text-align:center; background:rgba(5, 12, 22, 0.94); border:1.5px solid var(--noah-cyan); padding:20px 28px; border-radius:20px; box-shadow:0 15px 40px rgba(0,0,0,0.9);">
-            <div style="font-size:42px; margin-bottom:8px;">🚪</div>
-            <div style="color:var(--noah-cyan); font-size:22px; font-weight:900; letter-spacing:4px; font-family:monospace; text-shadow:0 0 15px var(--noah-cyan);">
-              AIRLOCK UNSEALING...
-            </div>
-            <div id="gachaWarpSub" style="color:#bdc3c7; font-size:13px; font-family:monospace; margin-top:8px; letter-spacing:1px;">
-              SYNCHRONIZING TACTICAL DATA CHIPS...
-            </div>
-          </div>
-
-          <!-- 實心琥珀金漸變 Next 按鈕 -->
-          <button id="gachaRevealNextBtn" class="primary-btn btn-gacha-solid-gold" style="position:relative; width:80%; max-width:320px; margin-top:35px; opacity:0; transition:opacity 0.6s ease; z-index:35008; pointer-events:none;" onclick="proceedToReveal()">
-            檢視檔案 / REVEAL ➡️
-          </button>
-        </div>
-
-        <!-- 階段二：揭卡展示畫面 (Stage 2: Full-Bleed Card Showcase) -->
-        <div id="gachaStageReveal">
-          <!-- 🚀 揭卡專屬背景影片 -->
-          <video id="gachaRevealVid" playsinline loop muted style="position:absolute; top:0; left:0; width:100%; height:100%; object-fit:cover; z-index:1; pointer-events:none; opacity:0.85;">
-            <source src="https://pub-2a6f35ae1aea46f3a4762ecf8c1a6eae.r2.dev/Background/gacha_card_reveal.mp4" type="video/mp4">
-          </video>
-
-          <!-- 頂部輕量資訊列 -->
-          <div style="position:relative; z-index:2; text-align:center; padding-top:4px;">
-            <div style="color:var(--accent-gold); font-family:monospace; font-weight:900; font-size:16px; letter-spacing:3px; text-shadow:0 0 10px rgba(241,196,15,0.6);">
-              TACTICAL DOSSIER REVEALED
-            </div>
-            <div style="font-size:11px; color:#aaa; font-family:monospace; margin-top:2px;">[ 點擊卡牌可檢視幹員詳細檔案 ]</div>
-          </div>
-          
-          <!-- 上下界拉滿的卡牌陣列 -->
-          <div id="gachaCardsContainer" class="gacha-cards-container"></div>
-
-          <!-- 底部確認按鈕 -->
-          <button id="gachaCloseBtn" class="primary-btn btn-cyan" style="position:relative; display:none; width:90%; max-width:360px; height:46px; margin:0 auto; z-index:35010; font-size:15px;" onclick="closeGachaAndGoBriefing()">
-            ✔ 歸隊作戰會議室 (RETURN)
-          </button>
-        </div>
       </div>
+
+      <!-- 階段二：揭卡展示畫面 (Stage 2: Full-Bleed Card Showcase) -->
+      <div id="gachaStageReveal">
+        <video id="gachaRevealVid" playsinline loop muted style="position:absolute; top:0; left:0; width:100%; height:100%; object-fit:cover; z-index:1; pointer-events:none; opacity:0.85;">
+          <source src="https://pub-2a6f35ae1aea46f3a4762ecf8c1a6eae.r2.dev/Background/gacha_card_reveal.mp4" type="video/mp4">
+        </video>
+
+        <!-- 頂部輕量資訊列 -->
+        <div style="position:relative; z-index:2; text-align:center; padding-top:4px;">
+          <div style="color:var(--accent-gold); font-family:monospace; font-weight:900; font-size:16px; letter-spacing:3px; text-shadow:0 0 10px rgba(241,196,15,0.6);">
+            TACTICAL DOSSIER REVEALED
+          </div>
+          <div style="font-size:11px; color:#aaa; font-family:monospace; margin-top:2px;">[ 點擊卡牌可檢視幹員詳細檔案 ]</div>
+        </div>
+        
+        <!-- 上下界拉滿的卡牌陣列 -->
+        <div id="gachaCardsContainer" class="gacha-cards-container"></div>
+
+        <!-- 底部確認按鈕 -->
+        <button id="gachaCloseBtn" class="primary-btn btn-cyan" style="position:relative; display:none; width:90%; max-width:360px; height:46px; margin:0 auto; z-index:35010; font-size:15px;" onclick="closeGachaAndGoBriefing()">
+          ✔ 歸隊作戰會議室 (RETURN)
+        </button>
+      </div>
+    </div>
+
     <!-- 📋 彈窗一：幹員一覽與招募機率檔案室 (Archive & Rates Modal) -->
-      <div id="operatorArchiveModal" style="position:fixed; top:0; left:0; width:100vw; height:100vh; background:rgba(2,6,12,0.96); backdrop-filter:blur(18px); z-index:36000; display:none; flex-direction:column; justify-content:center; align-items:center; padding:15px;">
-        <div style="background:rgba(8,16,26,0.95); border:1.5px solid var(--noah-cyan); border-radius:20px; width:100%; max-width:440px; max-height:85vh; display:flex; flex-direction:column; padding:18px; box-shadow:0 15px 40px rgba(0,0,0,0.9);">
-          
-          <div style="display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid #333; padding-bottom:10px; margin-bottom:12px;">
-            <div>
-              <div style="color:var(--noah-cyan); font-weight:900; font-size:16px;">📋 幹員名冊與躍遷機率</div>
-              <div style="font-size:10px; color:#888; font-family:monospace;">OPERATOR ARCHIVE & RATES</div>
-            </div>
-            <button onclick="closeOperatorArchiveModal()" style="background:none; border:none; color:#aaa; font-size:22px; cursor:pointer;">✕</button>
+    <div id="operatorArchiveModal" style="position:fixed; top:0; left:0; width:100vw; height:100vh; background:rgba(2,6,12,0.96); backdrop-filter:blur(18px); z-index:36000; display:none; flex-direction:column; justify-content:center; align-items:center; padding:15px;">
+      <div style="background:rgba(8,16,26,0.95); border:1.5px solid var(--noah-cyan); border-radius:20px; width:100%; max-width:440px; max-height:85vh; display:flex; flex-direction:column; padding:18px; box-shadow:0 15px 40px rgba(0,0,0,0.9);">
+        
+        <div style="display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid #333; padding-bottom:10px; margin-bottom:12px;">
+          <div>
+            <div style="color:var(--noah-cyan); font-weight:900; font-size:16px;">📋 幹員名冊與躍遷機率</div>
+            <div style="font-size:10px; color:#888; font-family:monospace;">OPERATOR ARCHIVE & RATES</div>
           </div>
-
-          <!-- 機率公佈欄 -->
-          <div style="display:grid; grid-template-columns:1fr 1fr 1fr; gap:6px; margin-bottom:12px; text-align:center;">
-            <div style="background:rgba(241,196,15,0.1); border:1px solid var(--accent-gold); padding:6px; border-radius:8px;">
-              <div style="color:var(--accent-gold); font-weight:900; font-size:14px;">SSR 4.0%</div>
-              <div style="font-size:10px; color:#aaa;">共 4 位幹員</div>
-            </div>
-            <div style="background:rgba(168,85,247,0.1); border:1px solid var(--accent-purple); padding:6px; border-radius:8px;">
-              <div style="color:var(--accent-purple); font-weight:900; font-size:14px;">SR 20.0%</div>
-              <div style="font-size:10px; color:#aaa;">共 8 位幹員</div>
-            </div>
-            <div style="background:rgba(0,229,255,0.1); border:1px solid var(--noah-cyan); padding:6px; border-radius:8px;">
-              <div style="color:var(--noah-cyan); font-weight:900; font-size:14px;">R 76.0%</div>
-              <div style="font-size:10px; color:#aaa;">共 16 位幹員</div>
-            </div>
-          </div>
-
-          <!-- 幹員清單列表 (可滑動) -->
-          <div id="archiveRosterList" style="flex:1; overflow-y:auto; padding-right:4px;"></div>
-
-          <button class="primary-btn btn-cyan" style="margin-top:12px; height:42px; font-size:14px;" onclick="closeOperatorArchiveModal()">
-            關閉檔案庫 / CLOSE
-          </button>
+          <button onclick="closeOperatorArchiveModal()" style="background:none; border:none; color:#aaa; font-size:22px; cursor:pointer;">✕</button>
         </div>
-      </div>
 
-      <!-- 🔍 彈窗二：幹員詳細情報檔案 (Operator Detail Dossier) -->
-      <div id="operatorDetailModal" style="position:fixed; top:0; left:0; width:100vw; height:100vh; background:rgba(0,0,0,0.92); backdrop-filter:blur(22px); z-index:37000; display:none; flex-direction:column; justify-content:center; align-items:center; padding:15px;">
-        <div style="background:linear-gradient(135deg, rgba(8,18,30,0.98), rgba(4,10,16,0.98)); border:2px solid var(--noah-cyan); border-radius:24px; width:100%; max-width:440px; max-height:88vh; display:flex; flex-direction:column; overflow:hidden; box-shadow:0 0 45px rgba(0,229,255,0.35);">
-          
-          <!-- 頂部關閉列 -->
-          <div style="display:flex; justify-content:space-between; align-items:center; padding:12px 18px; border-bottom:1px solid rgba(255,255,255,0.1);">
-            <div style="font-size:12px; color:var(--noah-cyan); font-family:monospace; letter-spacing:2px; font-weight:bold;">TACTICAL PERSONNEL DOSSIER</div>
-            <button onclick="closeOperatorDetailModal()" style="background:none; border:none; color:#aaa; font-size:24px; cursor:pointer;">✕</button>
+        <!-- 機率公佈欄 -->
+        <div style="display:grid; grid-template-columns:1fr 1fr 1fr; gap:6px; margin-bottom:12px; text-align:center;">
+          <div style="background:rgba(241,196,15,0.1); border:1px solid var(--accent-gold); padding:6px; border-radius:8px;">
+            <div style="color:var(--accent-gold); font-weight:900; font-size:14px;">SSR 4.0%</div>
+            <div style="font-size:10px; color:#aaa;">四大勢力頂峰</div>
           </div>
-
-          <!-- 內容滾動區 -->
-          <div style="flex:1; overflow-y:auto; padding:16px;">
-            <!-- 立繪與基本稱號 (加入 contain 置底，保證立繪不切頭) -->
-            <div style="display:flex; gap:14px; align-items:center; margin-bottom:14px;">
-              <div style="width:100px; height:145px; border-radius:12px; overflow:hidden; border:2px solid var(--noah-cyan); flex-shrink:0; background:radial-gradient(circle, #0c1826 0%, #030810 100%);">
-                <img id="detailOpImg" src="" style="width:100%; height:100%; object-fit:contain; object-position:center bottom;">
-              </div>
-              <div style="flex:1; text-align:left;">
-                <div id="detailOpRarity" class="op-detail-badge" style="margin-bottom:4px;">SSR</div>
-                <div id="detailOpNameZh" style="font-size:18px; font-weight:900; color:#fff; line-height:1.3;">【代號】姓名</div>
-                <div id="detailOpNameEn" style="font-size:11px; color:#aaa; font-family:monospace; margin-bottom:8px;">[Title] Name</div>
-                <div style="display:flex; gap:6px; flex-wrap:wrap;">
-                  <span id="detailOpFaction" class="op-detail-badge" style="background:rgba(255,255,255,0.1); color:#fff; border:1px solid #555;">陣營</span>
-                  <span id="detailOpRole" class="op-detail-badge" style="background:rgba(0,229,255,0.15); color:var(--noah-cyan); border:1px solid var(--noah-cyan);">職能</span>
-                </div>
-              </div>
-            </div>
-
-            <!-- 🚀 5(2). 特訓階級與星級展示 (Breakthrough) -->
-            <div style="background:rgba(241,196,15,0.06); border-radius:12px; border:1px solid rgba(241,196,15,0.3); padding:10px 12px; margin-bottom:10px; text-align:left;">
-              <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:4px;">
-                <div style="color:var(--accent-gold); font-size:12px; font-weight:900; font-family:monospace;">
-                  ★ 特訓同步階段 (BREAKTHROUGH)
-                </div>
-                <div id="detailOpBreakStars" style="color:var(--accent-gold); font-size:15px; font-weight:900; letter-spacing:2px; font-family:monospace;">
-                  ★☆☆☆☆
-                </div>
-              </div>
-              <div id="detailOpBreakDesc" style="font-size:12px; color:#ddd; line-height:1.4;">
-                基礎同步：解鎖幹員專屬戰術技能與定位支援。
-              </div>
-            </div>
-
-            <!-- 🚀 3. 主動戰術 (含具體效果解釋) -->
-            <div style="background:rgba(0,0,0,0.4); border-radius:12px; border:1px solid rgba(255,255,255,0.08); padding:10px 12px; margin-bottom:10px; text-align:left;">
-              <div style="color:var(--accent-gold); font-size:12px; font-weight:900; letter-spacing:1px; margin-bottom:4px; font-family:monospace;">⚡ 主動戰術 (ACTIVE SKILL)</div>
-              <div id="detailOpActive" style="font-size:13px; color:#eee;">--</div>
-            </div>
-
-            <!-- 🚀 3. 被動共鳴 (含具體效果解釋) -->
-            <div style="background:rgba(0,0,0,0.4); border-radius:12px; border:1px solid rgba(255,255,255,0.08); padding:10px 12px; margin-bottom:10px; text-align:left;">
-              <div style="color:var(--accent-purple); font-size:12px; font-weight:900; letter-spacing:1px; margin-bottom:4px; font-family:monospace;">🔮 被動共鳴 (PASSIVE SKILL)</div>
-              <div id="detailOpPassive" style="font-size:13px; color:#eee;">--</div>
-            </div>
-
-            <!-- 領航光環 (若有) -->
-            <div id="detailOpLeaderBox" style="display:none; background:rgba(241,196,15,0.08); border-radius:12px; border:1px solid rgba(241,196,15,0.3); padding:10px 12px; margin-bottom:10px; text-align:left;">
-              <div style="color:var(--accent-gold); font-size:12px; font-weight:900; letter-spacing:1px; margin-bottom:4px; font-family:monospace;">👑 領航光環 (LEADER AURA)</div>
-              <div id="detailOpLeader" style="font-size:13px; color:#f1c40f;">--</div>
-            </div>
-
-            <!-- 人物背景 Profile -->
-            <div style="background:rgba(255,255,255,0.03); border-radius:12px; border:1px solid rgba(255,255,255,0.08); padding:12px; text-align:left;">
-              <div style="color:#888; font-size:11px; font-weight:bold; letter-spacing:1px; margin-bottom:6px; font-family:monospace;">📖 幹員履歷 (PROFILE)</div>
-              <div id="detailOpProfile" style="font-size:13px; color:#bdc3c7; line-height:1.6;">--</div>
-            </div>
+          <div style="background:rgba(168,85,247,0.1); border:1px solid var(--accent-purple); padding:6px; border-radius:8px;">
+            <div style="color:var(--accent-purple); font-weight:900; font-size:14px;">SR 20.0%</div>
+            <div style="font-size:10px; color:#aaa;">精銳特擊隊員</div>
           </div>
-
-          <button class="primary-btn btn-cyan" style="margin:10px 16px 14px 16px; width:calc(100% - 32px); height:42px; font-size:14px;" onclick="closeOperatorDetailModal()">
-            返回 / RETURN
-          </button>
+          <div style="background:rgba(0,229,255,0.1); border:1px solid var(--noah-cyan); padding:6px; border-radius:8px;">
+            <div style="color:var(--noah-cyan); font-weight:900; font-size:14px;">R 76.0%</div>
+            <div style="font-size:10px; color:#aaa;">常備戰術幹員</div>
+          </div>
         </div>
+
+        <!-- 幹員清單列表 (可滑動) -->
+        <div id="archiveRosterList" style="flex:1; overflow-y:auto; padding-right:4px;"></div>
+
+        <button class="primary-btn btn-cyan" style="margin-top:12px; height:42px; font-size:14px;" onclick="closeOperatorArchiveModal()">
+          關閉檔案庫 / CLOSE
+        </button>
       </div>
+    </div>
 
-            <!-- 技能情報區 -->
-            <div style="background:rgba(0,0,0,0.4); border-radius:12px; border:1px solid rgba(255,255,255,0.08); padding:10px 12px; margin-bottom:10px; text-align:left;">
-              <div style="color:var(--accent-gold); font-size:12px; font-weight:900; letter-spacing:1px; margin-bottom:4px; font-family:monospace;">⚡ 主動戰術 (ACTIVE SKILL)</div>
-              <div id="detailOpActive" style="font-size:13px; color:#eee;">--</div>
+    <!-- 🔍 彈窗二：幹員詳細情報檔案 (Operator Detail Dossier) -->
+    <div id="operatorDetailModal" style="position:fixed; top:0; left:0; width:100vw; height:100vh; background:rgba(0,0,0,0.92); backdrop-filter:blur(22px); z-index:37000; display:none; flex-direction:column; justify-content:center; align-items:center; padding:15px;">
+      <div style="background:linear-gradient(135deg, rgba(8,18,30,0.98), rgba(4,10,16,0.98)); border:2px solid var(--noah-cyan); border-radius:24px; width:100%; max-width:440px; max-height:88vh; display:flex; flex-direction:column; overflow:hidden; box-shadow:0 0 45px rgba(0,229,255,0.35);">
+        
+        <!-- 頂部關閉列 -->
+        <div style="display:flex; justify-content:space-between; align-items:center; padding:12px 18px; border-bottom:1px solid rgba(255,255,255,0.1);">
+          <div style="font-size:12px; color:var(--noah-cyan); font-family:monospace; letter-spacing:2px; font-weight:bold;">TACTICAL PERSONNEL DOSSIER</div>
+          <button onclick="closeOperatorDetailModal()" style="background:none; border:none; color:#aaa; font-size:24px; cursor:pointer;">✕</button>
+        </div>
+
+        <!-- 內容滾動區 -->
+        <div style="flex:1; overflow-y:auto; padding:16px;">
+          <!-- 立繪與基本稱號 (contain 置底不切頭) -->
+          <div style="display:flex; gap:14px; align-items:center; margin-bottom:14px;">
+            <div style="width:100px; height:145px; border-radius:12px; overflow:hidden; border:2px solid var(--noah-cyan); flex-shrink:0; background:radial-gradient(circle, #0c1826 0%, #030810 100%);">
+              <img id="detailOpImg" src="" style="width:100%; height:100%; object-fit:contain; object-position:center bottom;">
             </div>
-
-            <div style="background:rgba(0,0,0,0.4); border-radius:12px; border:1px solid rgba(255,255,255,0.08); padding:10px 12px; margin-bottom:10px; text-align:left;">
-              <div style="color:var(--accent-purple); font-size:12px; font-weight:900; letter-spacing:1px; margin-bottom:4px; font-family:monospace;">🔮 被動共鳴 (PASSIVE SKILL)</div>
-              <div id="detailOpPassive" style="font-size:13px; color:#eee;">--</div>
-            </div>
-
-            <!-- 隊長光環 (若有) -->
-            <div id="detailOpLeaderBox" style="display:none; background:rgba(241,196,15,0.08); border-radius:12px; border:1px solid rgba(241,196,15,0.3); padding:10px 12px; margin-bottom:10px; text-align:left;">
-              <div style="color:var(--accent-gold); font-size:12px; font-weight:900; letter-spacing:1px; margin-bottom:4px; font-family:monospace;">👑 領航光環 (LEADER AURA)</div>
-              <div id="detailOpLeader" style="font-size:13px; color:#f1c40f;">--</div>
-            </div>
-
-            <!-- 人物背景 Profile -->
-            <div style="background:rgba(255,255,255,0.03); border-radius:12px; border:1px solid rgba(255,255,255,0.08); padding:12px; text-align:left;">
-              <div style="color:#888; font-size:11px; font-weight:bold; letter-spacing:1px; margin-bottom:6px; font-family:monospace;">📖 幹員履歷 (PROFILE)</div>
-              <div id="detailOpProfile" style="font-size:13px; color:#bdc3c7; line-height:1.6;">--</div>
+            <div style="flex:1; text-align:left;">
+              <div id="detailOpRarity" class="op-detail-badge" style="margin-bottom:4px;">SSR</div>
+              <div id="detailOpNameZh" style="font-size:18px; font-weight:900; color:#fff; line-height:1.3;">【代號】姓名</div>
+              <div id="detailOpNameEn" style="font-size:11px; color:#aaa; font-family:monospace; margin-bottom:8px;">[Title] Name</div>
+              <div style="display:flex; gap:6px; flex-wrap:wrap;">
+                <span id="detailOpFaction" class="op-detail-badge" style="background:rgba(255,255,255,0.1); color:#fff; border:1px solid #555;">陣營</span>
+                <span id="detailOpRole" class="op-detail-badge" style="background:rgba(0,229,255,0.15); color:var(--noah-cyan); border:1px solid var(--noah-cyan);">職能</span>
+              </div>
             </div>
           </div>
 
-          <button class="primary-btn btn-cyan" style="margin:10px 16px 14px 16px; width:calc(100% - 32px); height:42px; font-size:14px;" onclick="closeOperatorDetailModal()">
-            返回 / RETURN
-          </button>
+          <!-- 特訓階級與星級展示 (Breakthrough) -->
+          <div style="background:rgba(241,196,15,0.06); border-radius:12px; border:1px solid rgba(241,196,15,0.3); padding:10px 12px; margin-bottom:10px; text-align:left;">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:4px;">
+              <div style="color:var(--accent-gold); font-size:12px; font-weight:900; font-family:monospace;">
+                ★ 特訓同步階段 (BREAKTHROUGH)
+              </div>
+              <div id="detailOpBreakStars" style="color:var(--accent-gold); font-size:15px; font-weight:900; letter-spacing:2px; font-family:monospace;">
+                ★☆☆☆☆
+              </div>
+            </div>
+            <div id="detailOpBreakDesc" style="font-size:12px; color:#ddd; line-height:1.4;">
+              基礎同步：解鎖幹員專屬戰術技能與定位支援。
+            </div>
+          </div>
+
+          <!-- 主動戰術 (含具體效果解釋) -->
+          <div style="background:rgba(0,0,0,0.4); border-radius:12px; border:1px solid rgba(255,255,255,0.08); padding:10px 12px; margin-bottom:10px; text-align:left;">
+            <div style="color:var(--accent-gold); font-size:12px; font-weight:900; letter-spacing:1px; margin-bottom:4px; font-family:monospace;">⚡ 主動戰術 (ACTIVE SKILL)</div>
+            <div id="detailOpActive" style="font-size:13px; color:#eee;">--</div>
+          </div>
+
+          <!-- 被動共鳴 (含具體效果解釋) -->
+          <div style="background:rgba(0,0,0,0.4); border-radius:12px; border:1px solid rgba(255,255,255,0.08); padding:10px 12px; margin-bottom:10px; text-align:left;">
+            <div style="color:var(--accent-purple); font-size:12px; font-weight:900; letter-spacing:1px; margin-bottom:4px; font-family:monospace;">🔮 被動共鳴 (PASSIVE SKILL)</div>
+            <div id="detailOpPassive" style="font-size:13px; color:#eee;">--</div>
+          </div>
+
+          <!-- 領航光環 (若有) -->
+          <div id="detailOpLeaderBox" style="display:none; background:rgba(241,196,15,0.08); border-radius:12px; border:1px solid rgba(241,196,15,0.3); padding:10px 12px; margin-bottom:10px; text-align:left;">
+            <div style="color:var(--accent-gold); font-size:12px; font-weight:900; letter-spacing:1px; margin-bottom:4px; font-family:monospace;">👑 領航光環 (LEADER AURA)</div>
+            <div id="detailOpLeader" style="font-size:13px; color:#f1c40f;">--</div>
+          </div>
+
+          <!-- 人物背景 Profile -->
+          <div style="background:rgba(255,255,255,0.03); border-radius:12px; border:1px solid rgba(255,255,255,0.08); padding:12px; text-align:left;">
+            <div style="color:#888; font-size:11px; font-weight:bold; letter-spacing:1px; margin-bottom:6px; font-family:monospace;">📖 幹員履歷 (PROFILE)</div>
+            <div id="detailOpProfile" style="font-size:13px; color:#bdc3c7; line-height:1.6;">--</div>
+          </div>
         </div>
+
+        <button class="primary-btn btn-cyan" style="margin:10px 16px 14px 16px; width:calc(100% - 32px); height:42px; font-size:14px;" onclick="closeOperatorDetailModal()">
+          返回 / RETURN
+        </button>
       </div>
+    </div>
 
     <div id="system-unlock-screen">
       <div style="text-align: center; margin-bottom: 40px;">
@@ -1259,9 +1228,6 @@
       }
 
       // ==========================================
-      // 🎲 兩段式招募終端控制邏輯 (V2.0 旗艦修復版)
-      // ==========================================
-      // ==========================================
       // 🎲 兩段式招募終端控制邏輯 (V2.2 旗艦完整版)
       // ==========================================
       function openGachaScreen() {
@@ -1341,8 +1307,8 @@
         overlay.style.display = "flex";
 
         // 判定最高稀有度
-        var hasSSR = cards.some(c => c.rarity === "SSR");
-        var hasSR = cards.some(c => c.rarity === "SR");
+        var hasSSR = cards.some(c => (c.rarity || c.Rarity) === "SSR");
+        var hasSR = cards.some(c => (c.rarity || c.Rarity) === "SR");
 
         portal.style.display = "block";
         portal.className = "gacha-portal " + (hasSSR ? "gold" : (hasSR ? "purple" : ""));
@@ -1413,18 +1379,20 @@
         skipGachaReveal();
       }
 
-      // 5. 單張卡牌渲染 (綁定點擊詳細事件)
+      // 5. 單張卡牌渲染 (綁定點擊詳細事件 + 防呆取值)
       function renderSingleCardHTML(c, isSingle) {
         var cardDiv = document.createElement('div');
-        cardDiv.className = "gacha-card " + c.rarity + (isSingle ? " single" : "");
+        var rarity = c.rarity || c.Rarity || "R";
+        cardDiv.className = "gacha-card " + rarity + (isSingle ? " single" : "");
         
-        var rarityBadge = `<div class="card-badge-rarity">${c.rarity}</div>`;
+        var rarityBadge = `<div class="card-badge-rarity">${rarity}</div>`;
         var statusBadge = c.isNew 
           ? `<div class="card-badge-new">NEW!</div>` 
           : `<div class="card-badge-break">★+1</div>`;
         
-        var imgUrl = c.imageUrl || ("https://pub-2a6f35ae1aea46f3a4762ecf8c1a6eae.r2.dev/Cards/" + c.cardId + ".png");
-        var nameText = c.nameZh || c.nameEn || "Operative";
+        var cardId = c.cardId || c.Card_ID || c.id || "OP_R_01";
+        var imgUrl = c.imageUrl || c.Image_URL || ("https://pub-2a6f35ae1aea46f3a4762ecf8c1a6eae.r2.dev/Cards/" + cardId + ".png");
+        var nameText = c.nameZh || c.Name_ZH || c.nameEn || c.Name_EN || "Operative";
 
         cardDiv.innerHTML = `
           ${rarityBadge}
@@ -1433,7 +1401,6 @@
           <div class="card-name-bar">${nameText}</div>
         `;
 
-        // 🚀 綁定點擊查看幹員詳細情報
         cardDiv.onclick = function() {
           openOperatorDetailModal(c);
         };
@@ -1452,7 +1419,8 @@
         gachaIntervalId = setInterval(function() {
           if (gachaRevealQueue.length > 0) {
             var c = gachaRevealQueue.shift();
-            playSFX(c.rarity === 'SSR' ? 'promotion' : (c.rarity === 'SR' ? 'clear' : 'click'));
+            var rarity = c.rarity || c.Rarity || "R";
+            playSFX(rarity === 'SSR' ? 'promotion' : (rarity === 'SR' ? 'clear' : 'click'));
             var cardEl = renderSingleCardHTML(c, isSingle);
             container.appendChild(cardEl);
           } else {
@@ -1557,49 +1525,55 @@
         playSFX('click');
         var modal = document.getElementById('operatorDetailModal');
         
-        var imgUrl = c.imageUrl || ("https://pub-2a6f35ae1aea46f3a4762ecf8c1a6eae.r2.dev/Cards/" + c.cardId + ".png");
+        var cardId = c.cardId || c.Card_ID || c.id || "OP_R_01";
+        var imgUrl = c.imageUrl || c.Image_URL || ("https://pub-2a6f35ae1aea46f3a4762ecf8c1a6eae.r2.dev/Cards/" + cardId + ".png");
         document.getElementById('detailOpImg').src = imgUrl;
 
+        var rarity = c.rarity || c.Rarity || "R";
         var rBadge = document.getElementById('detailOpRarity');
-        rBadge.innerText = c.rarity;
-        rBadge.style.background = (c.rarity === 'SSR') ? 'var(--accent-gold)' : ((c.rarity === 'SR') ? 'var(--accent-purple)' : 'var(--noah-cyan)');
-        rBadge.style.color = (c.rarity === 'SSR' || c.rarity === 'R') ? '#000' : '#fff';
+        rBadge.innerText = rarity;
+        rBadge.style.background = (rarity === 'SSR') ? 'var(--accent-gold)' : ((rarity === 'SR') ? 'var(--accent-purple)' : 'var(--noah-cyan)');
+        rBadge.style.color = (rarity === 'SSR' || rarity === 'R') ? '#000' : '#fff';
 
-        document.getElementById('detailOpNameZh').innerText = c.nameZh || "幹員";
-        document.getElementById('detailOpNameEn').innerText = c.nameEn || "Operative";
-        document.getElementById('detailOpFaction').innerText = c.faction || "中立";
-        document.getElementById('detailOpRole').innerText = c.role || "戰術";
+        document.getElementById('detailOpNameZh').innerText = c.nameZh || c.Name_ZH || "幹員";
+        document.getElementById('detailOpNameEn').innerText = c.nameEn || c.Name_EN || "Operative";
+        document.getElementById('detailOpFaction').innerText = c.faction || c.Faction || "中立";
+        document.getElementById('detailOpRole').innerText = c.role || c.Role || "戰術";
 
-        // 🚀 5(2). 動態計算特訓星級 (如果未持有或預覽則預設 0 階)
+        // 動態計算特訓星級 (0 階為 1 顆實星，4 顆空星)
         var breakLevel = Number(c.breakthrough || c.breakCount || 0);
         var filledStars = Math.min(5, breakLevel + 1);
         var emptyStars = Math.max(0, 5 - filledStars);
         document.getElementById('detailOpBreakStars').innerText = "★".repeat(filledStars) + "☆".repeat(emptyStars);
         document.getElementById('detailOpBreakDesc').innerText = BREAKTHROUGH_EFFECTS[Math.min(5, breakLevel)];
 
-        // 🚀 3. 主動戰術 (名稱 + 耗能 + 效果解釋)
-        var actDesc = SKILL_EFFECTS[c.activeSkill] || "啟動後提供戰術輔助支援。";
-        document.getElementById('detailOpActive').innerHTML = c.activeSkill 
-          ? `<strong>${c.activeSkill}</strong> <span style="color:var(--accent-gold); font-size:11px;">(耗能: ${c.chargeCost || 1} SP)</span><div style="font-size:12px; color:#aaa; margin-top:5px; line-height:1.4;">${actDesc}</div>` 
+        // 主動戰術
+        var activeSkill = c.activeSkill || c.Active_Skill || "";
+        var chargeCost = c.chargeCost || c.Charge_Cost || 1;
+        var actDesc = SKILL_EFFECTS[activeSkill] || "啟動後提供戰術輔助支援。";
+        document.getElementById('detailOpActive').innerHTML = activeSkill 
+          ? `<strong>${activeSkill}</strong> <span style="color:var(--accent-gold); font-size:11px;">(耗能: ${chargeCost} SP)</span><div style="font-size:12px; color:#aaa; margin-top:5px; line-height:1.4;">${actDesc}</div>` 
           : `<span style="color:#777;">無配置主動戰術</span>`;
 
-        // 🚀 3. 被動共鳴 (名稱 + 效果解釋)
-        var pasDesc = SKILL_EFFECTS[c.passiveSkill] || "常駐為全隊提供屬性微調加成。";
-        document.getElementById('detailOpPassive').innerHTML = c.passiveSkill 
-          ? `<strong>${c.passiveSkill}</strong><div style="font-size:12px; color:#aaa; margin-top:5px; line-height:1.4;">${pasDesc}</div>` 
+        // 被動共鳴
+        var passiveSkill = c.passiveSkill || c.Passive_Skill || "";
+        var pasDesc = SKILL_EFFECTS[passiveSkill] || "常駐為全隊提供屬性微調加成。";
+        document.getElementById('detailOpPassive').innerHTML = passiveSkill 
+          ? `<strong>${passiveSkill}</strong><div style="font-size:12px; color:#aaa; margin-top:5px; line-height:1.4;">${pasDesc}</div>` 
           : `<span style="color:#777;">無配置被動共鳴</span>`;
 
         // 領航光環
+        var leaderAura = c.leaderAura || c.Leader_Aura || "";
         var leaderBox = document.getElementById('detailOpLeaderBox');
-        if (c.leaderAura) {
+        if (leaderAura) {
           leaderBox.style.display = "block";
-          document.getElementById('detailOpLeader').innerText = c.leaderAura;
+          document.getElementById('detailOpLeader').innerText = leaderAura;
         } else {
           leaderBox.style.display = "none";
         }
 
         // 人物背景 Profile
-        document.getElementById('detailOpProfile').innerText = c.profile || "檔案載入中...";
+        document.getElementById('detailOpProfile').innerText = c.profile || c.Profile || "檔案載入中...";
 
         modal.style.display = "flex";
       }
@@ -1653,7 +1627,7 @@
         listContainer.innerHTML = "";
 
         ['SSR', 'SR', 'R'].forEach(rarity => {
-          var ops = roster.filter(o => o.rarity === rarity);
+          var ops = roster.filter(o => (o.rarity || o.Rarity) === rarity);
           if (ops.length === 0) return;
 
           var groupTitle = document.createElement('div');
@@ -1668,12 +1642,15 @@
           ops.forEach(op => {
             var item = document.createElement('div');
             item.style.cssText = "background:rgba(0,0,0,0.5); border:1px solid #333; border-radius:8px; padding:4px; cursor:pointer; text-align:center; transition:0.2s;";
-            var imgUrl = op.imageUrl || ("https://pub-2a6f35ae1aea46f3a4762ecf8c1a6eae.r2.dev/Cards/" + op.cardId + ".png");
+            var cardId = op.cardId || op.Card_ID || op.id || "OP_R_01";
+            var imgUrl = op.imageUrl || op.Image_URL || ("https://pub-2a6f35ae1aea46f3a4762ecf8c1a6eae.r2.dev/Cards/" + cardId + ".png");
+            var nameZh = op.nameZh || op.Name_ZH || "幹員";
+            
             item.innerHTML = `
               <div style="width:100%; aspect-ratio:2/3; border-radius:6px; overflow:hidden; background:#050a10; margin-bottom:4px;">
                 <img src="${imgUrl}" style="width:100%; height:100%; object-fit:contain; object-position:center bottom;">
               </div>
-              <div style="font-size:10px; font-weight:bold; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; color:#ddd;">${op.nameZh.replace(/【.*?】/, '')}</div>
+              <div style="font-size:10px; font-weight:bold; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; color:#ddd;">${nameZh.replace(/【.*?】/, '')}</div>
             `;
             item.onclick = function() {
               openOperatorDetailModal(op);
@@ -1819,9 +1796,9 @@
                 showSysMsg("📡 無法載入任務：" + (res ? res.message : "未知錯誤"), true); 
             }
         })
-        .catch(err => {
-            document.getElementById('loadingOverlay').style.display = 'none';
-            showSysMsg("🚨 網絡連線崩潰", true);
+        .catch(err => { 
+            document.getElementById('loadingOverlay').style.display = 'none'; 
+            showSysMsg("🚨 網絡連線崩潰", true); 
         });
       }
 
