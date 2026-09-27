@@ -63,6 +63,7 @@
       #app-container.visible { opacity: 1; }
       .screen { display: none; opacity: 0; text-align: center; }
       .screen.active { display: block; animation: screenIn 0.5s forwards; }
+      #gachaScreen.active { display: flex !important; }
       @keyframes screenIn { from { opacity: 0; transform: scale(0.95); } to { opacity: 1; transform: scale(1); } }
       
       @keyframes screenJolt {
@@ -836,44 +837,48 @@
         <button class="primary-btn" style="background:transparent; color:#888;" onclick="navTo('dashboardScreen')">⬅ 返回大廳</button>
       </div>
 
-      <!-- 🎲 幹員招募終端介面 (Gacha Screen) -->
-      <div id="gachaScreen" class="screen">
-        <!-- 1. 雙語對照標題 -->
-        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px; border-bottom:1px solid #333; padding-bottom:8px;">
+      <!-- 🎲 幹員招募終端介面 (Gacha Screen - 全高縱向滿版拉闊版) -->
+      <div id="gachaScreen" class="screen" style="display:none; flex-direction:column; justify-content:space-between; min-height:calc(88vh - 40px); height:100%; padding:4px 0 10px 0;">
+        
+        <!-- 1. 頂部雙語標題與資產列 -->
+        <div style="display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid rgba(0,229,255,0.25); padding-bottom:10px; margin-bottom:10px; flex-shrink:0;">
           <div style="text-align:left;">
-            <div style="font-weight:900; color:var(--noah-cyan); font-size:18px; letter-spacing:1px;">🎲 幹員招募終端</div>
+            <div style="font-weight:900; color:var(--noah-cyan); font-size:19px; letter-spacing:1px;">🎲 幹員招募終端</div>
             <div style="font-size:11px; color:#888; font-family:monospace; letter-spacing:1px;">RECRUITMENT TERMINAL</div>
           </div>
-          <div style="color:var(--accent-gold); font-weight:bold; font-family:monospace; font-size:16px;">
+          <div style="color:var(--accent-gold); font-weight:bold; font-family:monospace; font-size:18px; background:rgba(0,0,0,0.4); padding:4px 10px; border-radius:8px; border:1px solid rgba(241,196,15,0.3);">
             💰 <span id="gachaCoinsDisplay">0</span>
           </div>
         </div>
 
-        <!-- 2. 全息招募橫幅 (自訂 3:2 圖片 Banner) -->
-        <div style="position:relative; width:100%; aspect-ratio:3/2; max-height:270px; border-radius:16px; border:2px solid var(--noah-cyan); overflow:hidden; margin-bottom:15px; box-shadow:0 0 25px rgba(0,229,255,0.25); background:#050b14;">
+        <!-- 2. 全息招募橫幅 (自適應拉高，填補中央留白) -->
+        <div style="position:relative; width:100%; aspect-ratio:3/2; max-height:min(340px, 38vh); border-radius:18px; border:2px solid var(--noah-cyan); overflow:hidden; margin:8px 0 14px 0; box-shadow:0 0 30px rgba(0,229,255,0.25); background:#050b14; flex-shrink:0;">
           <img id="gachaBannerImg" 
                src="https://pub-2a6f35ae1aea46f3a4762ecf8c1a6eae.r2.dev/Characters/banner/gacha_banner_1.jpg" 
                onerror="this.src='https://pub-2a6f35ae1aea46f3a4762ecf8c1a6eae.r2.dev/Cards/OP_SSR_01.png'" 
                style="width:100%; height:100%; object-fit:cover;">
         </div>
 
-        <!-- 招募操作按鈕 -->
-        <button class="primary-btn btn-cyan" onclick="startRecruit(1)">
-          🧭 單次招募 (100 信用點)
-        </button>
-        <button class="primary-btn btn-gold" onclick="startRecruit(10)">
-          ⚡ 十連招募 (900 信用點・9折)
-        </button>
+        <!-- 3. 招募核心操作區 (適度放大按鈕高度，增強點擊手感) -->
+        <div style="display:flex; flex-direction:column; gap:12px; margin-bottom:12px; flex-shrink:0;">
+          <button class="primary-btn btn-cyan" style="margin-top:0; padding:17px; font-size:17px; box-shadow:0 4px 15px rgba(0,229,255,0.2);" onclick="startRecruit(1)">
+            🧭 單次招募 (100 信用點)
+          </button>
+          <button class="primary-btn btn-gold" style="margin-top:0; padding:17px; font-size:17px; box-shadow:0 4px 18px rgba(241,196,15,0.25);" onclick="startRecruit(10)">
+            ⚡ 十連招募 (900 信用點・9折)
+          </button>
+        </div>
         
-        <!-- 3. 左下角幹員一覽與返回按鈕條 -->
-        <div style="display:flex; gap:8px; margin-top:10px;">
-          <button class="primary-btn" style="flex:1.2; margin-top:0; background:rgba(255,255,255,0.06); border:1px solid #555; color:#ddd; font-size:13px; padding:12px 5px;" onclick="openOperatorArchiveModal()">
+        <!-- 4. 底部功能欄 (貼底分流) -->
+        <div style="display:flex; gap:10px; flex-shrink:0;">
+          <button class="primary-btn" style="flex:1.2; margin-top:0; background:rgba(255,255,255,0.06); border:1px solid #555; color:#ddd; font-size:13px; padding:13px 5px;" onclick="openOperatorArchiveModal()">
             📋 幹員一覽與機率 (RATES)
           </button>
-          <button class="primary-btn" style="flex:1; margin-top:0; background:transparent; border:1px solid #444; color:#888; font-size:13px; padding:12px 5px;" onclick="navTo('briefingRoom')">
+          <button class="primary-btn" style="flex:1; margin-top:0; background:transparent; border:1px solid #444; color:#888; font-size:13px; padding:13px 5px;" onclick="navTo('briefingRoom')">
             ⬅ 返回作戰室
           </button>
         </div>
+
       </div>
 
       <div id="preMissionScreen" class="screen">
