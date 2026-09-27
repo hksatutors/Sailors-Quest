@@ -353,26 +353,85 @@
         max-height: calc(100vh - 120px); overflow-y: auto; z-index: 35002;
         padding: 5px;
       }
-      .gacha-card {
-        width: 82px; height: 124px; border-radius: 12px;
-        background: radial-gradient(circle at center, rgba(15, 25, 40, 0.95) 0%, rgba(4, 8, 14, 0.98) 100%);
-        border: 1.5px solid #444; position: relative; overflow: hidden; cursor: pointer;
-        transition: transform 0.25s cubic-bezier(0.175, 0.885, 0.32, 1.275), box-shadow 0.25s;
-        animation: duoSpringPop 0.45s backwards;
+      /* =========================================
+         🎲 3D 互動立體翻卡系統 (已整合所有必備標籤)
+         ========================================= */
+      .gacha-card-wrapper {
+        width: 82px; height: 124px;
+        perspective: 900px;
+        cursor: pointer;
+        user-select: none;
       }
-      .gacha-card:hover { transform: scale(1.08) translateY(-4px); z-index: 5; }
-      .gacha-card.single { width: 190px; height: 280px; border-radius: 18px; }
+      .gacha-card-wrapper.single {
+        width: 190px; height: 280px;
+      }
 
-      /* 幹員詳細彈窗通用標籤 */
+      .gacha-card-inner {
+        position: relative; width: 100%; height: 100%;
+        transform-style: preserve-3d;
+        transition: transform 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+      }
+      .gacha-card-wrapper.is-flipped .gacha-card-inner {
+        transform: rotateY(180deg);
+      }
+
+      .gacha-card-face {
+        position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+        backface-visibility: hidden;
+        -webkit-backface-visibility: hidden;
+        border-radius: 12px;
+        overflow: hidden;
+      }
+
+      /* 🎴 全息未翻開卡背 (未解密狀態) */
+      .gacha-card-back {
+        background: radial-gradient(circle at center, #0f2030 0%, #050b14 100%);
+        border: 2px solid var(--noah-cyan);
+        box-shadow: 0 0 10px rgba(0, 229, 255, 0.25);
+        display: flex; flex-direction: column;
+        align-items: center; justify-content: center;
+        transition: transform 0.2s, box-shadow 0.2s;
+      }
+      .gacha-card-wrapper:hover .gacha-card-back {
+        transform: translateY(-4px) scale(1.04);
+      }
+      /* 卡背稀有度預示微光 */
+      .gacha-card-wrapper.SSR .gacha-card-back {
+        border-color: var(--accent-gold);
+        box-shadow: 0 0 16px rgba(241, 196, 15, 0.5), inset 0 0 10px rgba(241, 196, 15, 0.3);
+        animation: pulse 1.8s infinite;
+      }
+      .gacha-card-wrapper.SR .gacha-card-back {
+        border-color: var(--accent-purple);
+        box-shadow: 0 0 14px rgba(168, 85, 247, 0.4);
+      }
+
+      /* 🃏 翻開後的卡牌正面 (解密狀態) */
+      .gacha-card-front {
+        transform: rotateY(180deg);
+        background: radial-gradient(circle at center, rgba(15, 25, 40, 0.95) 0%, rgba(4, 8, 14, 0.98) 100%);
+        border: 1.5px solid #444;
+      }
+      .gacha-card-wrapper.SSR .gacha-card-front {
+        border-color: var(--accent-gold);
+        box-shadow: 0 0 22px rgba(241, 196, 15, 0.55);
+      }
+      .gacha-card-wrapper.SR .gacha-card-front {
+        border-color: var(--accent-purple);
+        box-shadow: 0 0 16px rgba(168, 85, 247, 0.45);
+      }
+      .gacha-card-wrapper.R .gacha-card-front {
+        border-color: var(--noah-cyan);
+        box-shadow: 0 0 10px rgba(0, 229, 255, 0.3);
+      }
+
+      /* 🚀 幹員詳細彈窗通用標籤 (必須保留) */
       .op-detail-badge {
         display: inline-block; padding: 2px 8px; border-radius: 6px; font-size: 11px;
         font-weight: 900; font-family: monospace; letter-spacing: 1px;
       }
 
-      .gacha-card.SSR { border-color: var(--accent-gold); box-shadow: 0 0 20px rgba(241,196,15,0.4); }
-      .gacha-card.SR { border-color: var(--accent-purple); box-shadow: 0 0 15px rgba(168,85,247,0.4); }
-      .gacha-card.R { border-color: var(--noah-cyan); box-shadow: 0 0 10px rgba(0,229,255,0.3); }
-
+      /* 🚀 卡面徽章：稀有度標籤 (必須保留) */
       .card-badge-rarity {
         position: absolute; top: 4px; left: 4px; font-size: 10px; font-weight: 900;
         font-family: monospace; padding: 2px 6px; border-radius: 4px; z-index: 3;
@@ -381,6 +440,7 @@
       .SR .card-badge-rarity { background: var(--accent-purple); color: #fff; }
       .R .card-badge-rarity { background: var(--noah-cyan); color: #000; }
 
+      /* 🚀 卡面徽章：NEW! 與 特訓★+1 標籤 (必須保留) */
       .card-badge-new {
         position: absolute; top: 4px; right: 4px; font-size: 9px; font-weight: 900;
         background: var(--accent-red); color: #fff; padding: 2px 5px; border-radius: 4px; z-index: 3;
@@ -392,7 +452,7 @@
         padding: 2px 4px; border-radius: 4px; z-index: 3;
       }
 
-      /* 🚀 必備樣式：卡牌圖片與底部名字標籤條 */
+      /* 🚀 卡牌圖片與底部名字標籤條 (必須保留) */
       .card-img {
         width: 100%; height: 100%;
         object-fit: contain;
@@ -403,7 +463,7 @@
         padding: 4px 2px; font-size: 10px; font-weight: bold; text-align: center;
         white-space: nowrap; overflow: hidden; text-overflow: ellipsis; color: #fff;
       }
-      .gacha-card.single .card-name-bar { font-size: 14px; padding: 8px 4px; }
+      .gacha-card-wrapper.single .card-name-bar { font-size: 14px; padding: 8px 4px; }
     </style>
   </head>
   <body>
@@ -476,23 +536,27 @@
           <source src="https://pub-2a6f35ae1aea46f3a4762ecf8c1a6eae.r2.dev/Background/gacha_card_reveal.mp4" type="video/mp4">
         </video>
 
-        <!-- 頂部輕量資訊列 -->
-        <div style="position:relative; z-index:2; text-align:center; padding-top:4px;">
-          <div style="color:var(--accent-gold); font-family:monospace; font-weight:900; font-size:16px; letter-spacing:3px; text-shadow:0 0 10px rgba(241,196,15,0.6);">
-            TACTICAL DOSSIER REVEALED
+        <!-- 頂部輕量資訊列與一鍵翻開 -->
+        <div style="position:relative; z-index:2; width:95%; max-width:460px; display:flex; justify-content:space-between; align-items:center; padding-top:4px;">
+          <div style="text-align:left;">
+            <div style="color:var(--accent-gold); font-family:monospace; font-weight:900; font-size:15px; letter-spacing:2px; text-shadow:0 0 10px rgba(241,196,15,0.6);">
+              TACTICAL DOSSIER
+            </div>
+            <div id="gachaHintText" style="font-size:11px; color:#aaa; font-family:monospace; margin-top:2px;">[ 點擊未翻開卡牌進行解密 ]</div>
           </div>
-          <div style="font-size:11px; color:#aaa; font-family:monospace; margin-top:2px;">[ 點擊卡牌可檢視幹員詳細檔案 ]</div>
+          <button id="gachaFlipAllBtn" style="background:rgba(0,0,0,0.65); border:1px solid var(--accent-gold); color:var(--accent-gold); padding:6px 12px; border-radius:8px; font-size:11px; cursor:pointer; font-family:monospace; font-weight:bold;" onclick="flipAllCardsSequentially()">
+            ⚡ 全部翻開 / REVEAL ALL
+          </button>
         </div>
         
         <!-- 上下界拉滿的卡牌陣列 -->
         <div id="gachaCardsContainer" class="gacha-cards-container"></div>
 
-        <!-- 底部確認按鈕 -->
-        <button id="gachaCloseBtn" class="primary-btn btn-cyan" style="position:relative; display:none; width:90%; max-width:360px; height:46px; margin:0 auto; z-index:35010; font-size:15px;" onclick="closeGachaAndGoBriefing()">
+        <!-- 底部確認按鈕 (所有卡翻開後自動淡入) -->
+        <button id="gachaCloseBtn" class="primary-btn btn-cyan" style="position:relative; display:none; width:90%; max-width:360px; height:46px; margin:0 auto; z-index:35010; font-size:15px; box-shadow:0 0 25px rgba(0,229,255,0.4);" onclick="closeGachaAndGoBriefing()">
           ✔ 歸隊作戰會議室 (RETURN)
         </button>
       </div>
-    </div>
 
     <!-- 📋 彈窗一：幹員一覽與招募機率檔案室 (Archive & Rates Modal) -->
     <div id="operatorArchiveModal" style="position:fixed; top:0; left:0; width:100vw; height:100vh; background:rgba(2,6,12,0.96); backdrop-filter:blur(18px); z-index:36000; display:none; flex-direction:column; justify-content:center; align-items:center; padding:15px;">
@@ -1268,21 +1332,48 @@
       }
 
       // ==========================================
-      // 🎲 兩段式招募終端控制邏輯 (V2.3 視聽融合版)
+      // 🎲 兩段式招募終端控制邏輯 (V2.4 手遊互動翻牌旗艦版)
       // ==========================================
       var currentPulledCards = [];
       var gachaWarpTimeout = null;
-      var gachaRevealQueue = [];
-      var gachaIntervalId = null;
       var ssrStingerTimeout = null;
-      var previousBgmTrackIdx = 0; // 記錄進入抽卡前的原 BGM
+      var previousBgmTrackIdx = 0;
+      var unflippedCardCount = 0;
 
-      // 1. 開啟招募終端：切換為專屬抽卡 BGM
+      // 🔊 音訊實體快取池 (在記憶體中常駐，避免再次發起網絡請求)
+      var SFX_CACHE = {
+        flip_r: new Audio("https://pub-2a6f35ae1aea46f3a4762ecf8c1a6eae.r2.dev/SFX/gacha_flip_r.mp3"),
+        flip_sr: new Audio("https://pub-2a6f35ae1aea46f3a4762ecf8c1a6eae.r2.dev/SFX/gacha_flip_sr.mp3"),
+        flip_ssr: new Audio("https://pub-2a6f35ae1aea46f3a4762ecf8c1a6eae.r2.dev/SFX/gacha_flip_ssr.mp3"),
+        stinger: new Audio("https://pub-2a6f35ae1aea46f3a4762ecf8c1a6eae.r2.dev/SFX/gacha_ssr_stinger.mp3"),
+        dossier: new Audio("https://pub-2a6f35ae1aea46f3a4762ecf8c1a6eae.r2.dev/SFX/dossier_open.mp3")
+      };
+
+      // 預加載所有音效到記憶體
+      function preloadGachaAudio() {
+        for (var k in SFX_CACHE) {
+          SFX_CACHE[k].load();
+        }
+      }
+
+      // 專屬零延遲音效播放器
+      function playGachaSFX(type) {
+        var a = SFX_CACHE[type];
+        if (a) {
+          a.currentTime = 0;
+          a.volume = (type === 'flip_ssr' || type === 'stinger') ? 0.9 : 0.65;
+          a.play().catch(function(err) {
+            console.log("音效播放阻斷:", err);
+          });
+        }
+      }
+
+      // 1. 開啟招募終端：切換專屬 BGM 並預載音訊
       function openGachaScreen() {
         playSFX('click');
         updateUI();
+        preloadGachaAudio(); // 提前預熱
 
-        // 🎵 切換至抽卡專屬 BGM
         if (MEDIA.gachaBgm) {
           previousBgmTrackIdx = bgmSelect.value;
           bgmPlayer.src = MEDIA.gachaBgm;
@@ -1291,11 +1382,10 @@
             bgmPlayer.play().catch(function(){});
           }
         }
-
         navTo('gachaScreen');
       }
 
-      // 2. 發起招募請求
+      // 2. 發起招募請求 (利用點擊授權同步解鎖影片與音效)
       function startRecruit(pullCount) {
         var cost = (pullCount === 10) ? 900 : 100;
         if ((currentUserData.coins || 0) < cost) {
@@ -1304,6 +1394,22 @@
         }
 
         playSFX('click');
+
+        // 同步預熱升降機影片與所有音效聲道
+        var warpVid = document.getElementById('gachaWarpVid');
+        if (warpVid) {
+          warpVid.muted = false;
+          warpVid.volume = 0.9;
+          var primeP = warpVid.play();
+          if (primeP) {
+            primeP.then(function() {
+              warpVid.pause();
+              warpVid.currentTime = 0;
+            }).catch(function(){});
+          }
+        }
+        preloadGachaAudio();
+
         document.getElementById('loadingOverlay').style.display = 'flex';
         document.getElementById('loadingText').innerText = "CONNECTING RECRUITMENT NODE...";
 
@@ -1322,8 +1428,6 @@
           if (res && res.success) {
             currentUserData.coins = res.remainingCoins;
             updateUI();
-
-            // 啟動階段一：過場演出
             playStageOneWarp(res.pulledCards, pullCount);
           } else {
             showSysMsg("📡 招募節點拒絕：" + (res ? res.message : "未知錯誤"), true);
@@ -1335,27 +1439,17 @@
         });
       }
 
-      // 3. 階段一：過場演出 (專注播放影片自帶升降機音效)
+      // 3. 階段一：升降機過場 (拉長節奏，給予音效充足發揮空間)
       function playStageOneWarp(cards, pullCount) {
         currentPulledCards = cards;
-        
-        // 🎵 關鍵調度：將 BGM 音量降至極低 (0.02)，把主場留給影片自帶的升降機音效！
-        duckBGM();
+        duckBGM(); // 壓低 BGM，突出升降機影片的開門與腳步聲
 
-        // 播放自帶開門與腳步聲的升降機影片
         var warpVid = document.getElementById('gachaWarpVid');
         if (warpVid) {
           warpVid.currentTime = 0;
-          warpVid.muted = false; // 解除靜音
-          warpVid.volume = 0.9;  // 設定合適音量
-          var playPromise = warpVid.play();
-          if (playPromise) {
-            playPromise.catch(function(err) {
-              console.log("瀏覽器阻斷有聲播放，降級靜音模式:", err);
-              warpVid.muted = true;
-              warpVid.play();
-            });
-          }
+          warpVid.muted = false;
+          warpVid.volume = 0.9;
+          warpVid.play().catch(function(){});
         }
 
         var overlay = document.getElementById('gachaOverlay');
@@ -1372,46 +1466,43 @@
         skipBtn.style.display = "block";
         overlay.style.display = "flex";
 
-        // 判定最高稀有度
         var hasSSR = cards.some(c => (c.rarity || c.Rarity) === "SSR");
         var hasSR = cards.some(c => (c.rarity || c.Rarity) === "SR");
 
         portal.style.display = "block";
         portal.className = "gacha-portal " + (hasSSR ? "gold" : (hasSR ? "purple" : ""));
 
-        // 🎵 若抽中 SSR，在第 3.2 秒（門剛打開、金光透出時）疊加一道清脆的水晶預警音
+        // 🎵 若有 SSR，在門完全打開時 (3.2秒) 響起水晶金光預警聲
         if (ssrStingerTimeout) clearTimeout(ssrStingerTimeout);
         if (hasSSR) {
           ssrStingerTimeout = setTimeout(function() {
-            playSFXMulti('gacha_ssr_stinger', 'promotion');
+            playGachaSFX('stinger');
           }, 3200);
         }
 
-        // 動畫播至第 3.5 秒淡入 Next 按鈕
+        // 4.2 秒浮現「檢視檔案」按鈕，讓玩家看清楚黑影走出
         setTimeout(function() {
           nextBtn.style.opacity = "1";
           nextBtn.style.pointerEvents = "auto";
-        }, 3500);
+        }, 4200);
 
+        // 自動過渡時間延長至 7 秒，避免匆忙掐斷
         if (gachaWarpTimeout) clearTimeout(gachaWarpTimeout);
         gachaWarpTimeout = setTimeout(function() {
           proceedToReveal();
-        }, 6000);
+        }, 7000);
       }
 
-      // 4. 階段二：切換至揭卡展示畫面
+      // 4. 階段二：生成蓋著的 3D 卡牌陣列
       function proceedToReveal() {
         if (gachaWarpTimeout) clearTimeout(gachaWarpTimeout);
         if (ssrStingerTimeout) clearTimeout(ssrStingerTimeout);
         
-        // 暫停過場影片（音效隨之自然結束）
         var warpVid = document.getElementById('gachaWarpVid');
         if (warpVid) warpVid.pause();
 
-        // 🎵 恢復抽卡 BGM 音量，伴隨展示畫面
-        unduckBGM();
+        unduckBGM(); // 恢復抽卡 BGM 伴奏
 
-        // 播放揭卡背景動態影片 (循環靜音)
         var revealVid = document.getElementById('gachaRevealVid');
         if (revealVid) {
           revealVid.currentTime = 0;
@@ -1422,99 +1513,130 @@
         var stageReveal = document.getElementById('gachaStageReveal');
         var container = document.getElementById('gachaCardsContainer');
         var closeBtn = document.getElementById('gachaCloseBtn');
-        var skipBtn = document.getElementById('gachaSkipBtn');
+        var flipAllBtn = document.getElementById('gachaFlipAllBtn');
+        var hintText = document.getElementById('gachaHintText');
 
         stageWarp.style.display = "none";
         stageReveal.style.display = "flex";
         container.innerHTML = "";
         closeBtn.style.display = "none";
-        skipBtn.style.display = "block";
+        flipAllBtn.style.display = "block";
+        hintText.innerText = "[ 點擊未翻開卡牌進行解密 ]";
 
-        gachaRevealQueue = currentPulledCards.slice();
-        revealCardsSequentially(currentPulledCards.length === 1);
+        var isSingle = (currentPulledCards.length === 1);
+        unflippedCardCount = currentPulledCards.length;
+
+        // 生成帶有 3D 卡背的卡牌元素
+        currentPulledCards.forEach(function(cardData, idx) {
+          var wrapper = createInteractiveCardElement(cardData, isSingle, idx);
+          container.appendChild(wrapper);
+        });
       }
 
-      // 5. 右上角 Skip 按鈕
-      function skipGachaToReveal() {
-        if (gachaWarpTimeout) clearTimeout(gachaWarpTimeout);
-        if (ssrStingerTimeout) clearTimeout(ssrStingerTimeout);
-        
-        var warpVid = document.getElementById('gachaWarpVid');
-        if (warpVid) warpVid.pause();
+      // 建立可翻轉的卡牌 DOM (卡背 + 卡面)
+      function createInteractiveCardElement(c, isSingle, index) {
+        var rarity = c.rarity || c.Rarity || "R";
+        var wrapper = document.createElement('div');
+        wrapper.className = "gacha-card-wrapper " + rarity + (isSingle ? " single" : "");
+        wrapper.id = "cardWrap_" + index;
 
-        unduckBGM();
+        var cardId = c.cardId || c.Card_ID || c.id || "OP_R_01";
+        var imgUrl = c.imageUrl || c.Image_URL || ("https://pub-2a6f35ae1aea46f3a4762ecf8c1a6eae.r2.dev/Cards/" + cardId + ".png");
+        var nameText = c.nameZh || c.Name_ZH || c.nameEn || c.Name_EN || "Operative";
+        var statusBadge = c.isNew ? `<div class="card-badge-new">NEW!</div>` : `<div class="card-badge-break">★+1</div>`;
 
-        var revealVid = document.getElementById('gachaRevealVid');
-        if (revealVid) {
-          revealVid.currentTime = 0;
-          revealVid.play().catch(function(){});
-        }
+        wrapper.innerHTML = `
+          <div class="gacha-card-inner">
+            <!-- 🎴 卡背 (未翻開) -->
+            <div class="gacha-card-face gacha-card-back">
+              <div style="font-size:24px; opacity:0.8; filter:drop-shadow(0 0 5px var(--noah-cyan));">🛰️</div>
+              <div style="font-family:monospace; font-size:10px; color:var(--noah-cyan); margin-top:6px; letter-spacing:1px; font-weight:bold;">N.O.A.H.</div>
+              <div style="font-size:8px; color:#666; margin-top:2px;">[ ENCRYPTED ]</div>
+            </div>
 
-        var stageWarp = document.getElementById('gachaStageWarp');
-        var stageReveal = document.getElementById('gachaStageReveal');
-        stageWarp.style.display = "none";
-        stageReveal.style.display = "flex";
-        skipGachaReveal();
-      }
+            <!-- 🃏 卡面 (翻開後) -->
+            <div class="gacha-card-face gacha-card-front">
+              <div class="card-badge-rarity">${rarity}</div>
+              ${statusBadge}
+              <img class="card-img" src="${imgUrl}" onerror="this.src='data:image/svg+xml;utf8,<svg xmlns=\\'http://www.w3.org/2000/svg\\' viewBox=\\'0 0 24 24\\' fill=\\'%23555\\'><path d=\\'M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z\\'/></svg>'">
+              <div class="card-name-bar">${nameText}</div>
+            </div>
+          </div>
+        `;
 
-      // 6. 逐張翻開 (多聲道獨立觸發不同稀有度音效)
-      function revealCardsSequentially(isSingle) {
-        var container = document.getElementById('gachaCardsContainer');
-        var closeBtn = document.getElementById('gachaCloseBtn');
-        var skipBtn = document.getElementById('gachaSkipBtn');
-
-        if (gachaIntervalId) clearInterval(gachaIntervalId);
-
-        gachaIntervalId = setInterval(function() {
-          if (gachaRevealQueue.length > 0) {
-            var c = gachaRevealQueue.shift();
-            var rarity = c.rarity || c.Rarity || "R";
-
-            // 🎵 依據稀有度播放不同質感的翻牌打擊音
-            if (rarity === 'SSR') {
-              playSFXMulti('gacha_flip_ssr', 'promotion');
-            } else if (rarity === 'SR') {
-              playSFXMulti('gacha_flip_sr', 'clear');
-            } else {
-              playSFXMulti('gacha_flip_r', 'click');
-            }
-
-            var cardEl = renderSingleCardHTML(c, isSingle);
-            container.appendChild(cardEl);
+        // 綁定點擊事件：未翻開則翻開；翻開後再次點擊則查看詳細情報
+        wrapper.onclick = function() {
+          if (!wrapper.classList.contains('is-flipped')) {
+            flipSingleCard(wrapper, c);
           } else {
-            clearInterval(gachaIntervalId);
-            closeBtn.style.display = "block";
-            skipBtn.style.display = "none";
+            openOperatorDetailModal(c);
           }
-        }, isSingle ? 200 : 250);
+        };
+
+        return wrapper;
       }
 
-      // 7. 一鍵全部翻開
-      function skipGachaReveal() {
-        if (gachaIntervalId) clearInterval(gachaIntervalId);
-        var container = document.getElementById('gachaCardsContainer');
-        var closeBtn = document.getElementById('gachaCloseBtn');
-        var skipBtn = document.getElementById('gachaSkipBtn');
+      // 翻轉單張卡牌並觸發專屬音效
+      function flipSingleCard(wrapper, c) {
+        var rarity = (c.rarity || c.Rarity || "R").toUpperCase();
+        wrapper.classList.add('is-flipped');
 
-        var isSingle = (container.children.length + gachaRevealQueue.length === 1);
-        var hasSSR = gachaRevealQueue.some(c => (c.rarity || c.Rarity) === "SSR");
-
-        while (gachaRevealQueue.length > 0) {
-          var c = gachaRevealQueue.shift();
-          container.appendChild(renderSingleCardHTML(c, isSingle));
-        }
-
-        if (hasSSR) {
-          playSFXMulti('gacha_flip_ssr', 'promotion');
+        // 🎵 根據稀有度精準播放預載音效
+        if (rarity === 'SSR') {
+          playGachaSFX('flip_ssr');
+        } else if (rarity === 'SR') {
+          playGachaSFX('flip_sr');
         } else {
-          playSFX('clear');
+          playGachaSFX('flip_r');
         }
 
-        closeBtn.style.display = "block";
-        skipBtn.style.display = "none";
+        unflippedCardCount--;
+        checkIfAllCardsRevealed();
       }
 
-      // 8. 關閉抽卡浮層並返回作戰室：恢復大廳 BGM
+      // 一鍵全部依序翻開
+      function flipAllCardsSequentially() {
+        var wrappers = document.querySelectorAll('.gacha-card-wrapper:not(.is-flipped)');
+        if (wrappers.length === 0) return;
+
+        document.getElementById('gachaFlipAllBtn').style.display = "none";
+        var flipIdx = 0;
+
+        var interval = setInterval(function() {
+          if (flipIdx < wrappers.length) {
+            var wrap = wrappers[flipIdx];
+            var dataIdx = parseInt(wrap.id.replace('cardWrap_', ''), 10);
+            var cardData = currentPulledCards[dataIdx];
+            flipSingleCard(wrap, cardData);
+            flipIdx++;
+          } else {
+            clearInterval(interval);
+          }
+        }, 180);
+      }
+
+      // 檢查是否全部卡牌已翻開，若完成則浮現「歸隊」按鈕
+      function checkIfAllCardsRevealed() {
+        if (unflippedCardCount <= 0) {
+          document.getElementById('gachaFlipAllBtn').style.display = "none";
+          document.getElementById('gachaHintText').innerText = "[ 點擊已翻開卡牌可檢視幹員檔案 ]";
+          
+          var closeBtn = document.getElementById('gachaCloseBtn');
+          closeBtn.style.display = "block";
+          closeBtn.style.opacity = "0";
+          setTimeout(() => {
+            closeBtn.style.transition = "opacity 0.5s ease";
+            closeBtn.style.opacity = "1";
+          }, 100);
+        }
+      }
+
+      // 跳過過場直接進入展卡
+      function skipGachaToReveal() {
+        proceedToReveal();
+      }
+
+      // 5. 關閉抽卡浮層並返回作戰室
       function closeGachaAndGoBriefing() {
         playSFX('click');
 
@@ -1524,7 +1646,6 @@
         document.getElementById('gachaOverlay').style.display = 'none';
         document.getElementById('gachaCardsContainer').innerHTML = "";
 
-        // 🎵 離開抽卡介面時，切換回常規大廳 BGM
         if (MEDIA.gachaBgm) {
           bgmSelect.value = previousBgmTrackIdx;
           changeBGMTrack();
