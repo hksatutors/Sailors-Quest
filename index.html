@@ -8,7 +8,7 @@
     <title>⚓ Sailors' Quest</title>
     <style>
       /* =========================================
-         ⚓ Sailors' Quest (V22.2 戰場交鋒與招募升級版)
+         ⚓ Sailors' Quest (V23.0 編隊與技能差分旗艦版)
          ========================================= */
       :root {
         --noah-cyan: #00e5ff; --noah-dark: #0a0f16; --text-main: #ecf0f1; 
@@ -68,10 +68,10 @@
       
       @keyframes screenJolt {
         0% { transform: translateX(0); }
-        20% { transform: translateX(-8px) rotate(-0.5deg); }
-        40% { transform: translateX(8px) rotate(0.5deg); }
-        60% { transform: translateX(-5px); }
-        80% { transform: translateX(5px); }
+        20% { transform: translateX(-10px) rotate(-1deg); }
+        40% { transform: translateX(10px) rotate(1deg); }
+        60% { transform: translateX(-6px); }
+        80% { transform: translateX(6px); }
         100% { transform: translateX(0); }
       }
       .jolt-active { animation: screenJolt 0.35s cubic-bezier(0.36, 0.07, 0.19, 0.97) both; }
@@ -101,28 +101,31 @@
       .bg-listening { background: linear-gradient(135deg, rgba(17,120,100,0.6), rgba(26,188,156,0.6)); }
 
       /* =========================================
-         ⚔️ 戰鬥舞台與敵方立繪層次
+         ⚔️ 戰鬥舞台、特效與敵方立繪
          ========================================= */
       .q-image-box { 
-        position: relative; width: 100%; height: 210px; 
+        position: relative; width: 100%; height: 215px; 
         border-radius: 16px; border: 1.5px solid var(--noah-cyan); 
-        margin-bottom: 14px; overflow: hidden; background: #000; 
-        box-shadow: 0 0 20px rgba(0, 229, 255, 0.2);
+        margin-bottom: 14px; overflow: hidden; 
+        background: radial-gradient(circle at center, #1b2838 0%, #060c14 100%);
+        box-shadow: 0 0 25px rgba(0, 229, 255, 0.25);
         display: flex; justify-content: center; align-items: center;
       }
       .q-stage-bg { 
         position: absolute; top: 0; left: 0; width: 100%; height: 100%; 
-        object-fit: cover; filter: brightness(0.85); opacity: 0; transition: opacity 0.5s ease; z-index: 1;
+        object-fit: cover; 
+        filter: brightness(1.1) contrast(0.92);
+        opacity: 0; transition: opacity 0.5s ease; z-index: 1;
       }
-      .q-stage-bg.loaded { opacity: 1; }
+      .q-stage-bg.loaded { opacity: 0.92; }
 
       .enemy-sprite {
         position: absolute; bottom: 2px; left: 50%;
         transform: translateX(-50%);
-        height: 82%; width: auto; max-width: 85%;
+        height: 84%; width: auto; max-width: 86%;
         object-fit: contain; object-position: center bottom;
         z-index: 3; pointer-events: none;
-        filter: drop-shadow(0 0 12px rgba(255, 51, 102, 0.7));
+        filter: drop-shadow(0 0 14px rgba(255, 51, 102, 0.85));
         transition: transform 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275), filter 0.2s, opacity 0.4s;
         animation: enemyFloat 3s ease-in-out infinite alternate;
       }
@@ -130,41 +133,72 @@
         0% { transform: translateX(-50%) translateY(0px); }
         100% { transform: translateX(-50%) translateY(-6px); }
       }
+      
+      .attack-slash-line {
+        position: absolute; top: -50%; left: -20%; width: 140%; height: 200%;
+        background: linear-gradient(45deg, transparent 46%, rgba(255,255,255,0.95) 49%, var(--noah-cyan) 50%, rgba(0,229,255,0.8) 52%, transparent 55%);
+        z-index: 6; pointer-events: none; opacity: 0;
+      }
+      @keyframes slashCutAnim {
+        0% { opacity: 0; transform: translate(-20%, -20%) rotate(-15deg); }
+        30% { opacity: 1; }
+        100% { opacity: 0; transform: translate(20%, 20%) rotate(-15deg); }
+      }
+      .slash-active { animation: slashCutAnim 0.35s cubic-bezier(0.1, 0.9, 0.2, 1) forwards; }
+
       .enemy-hit {
-        animation: enemyHurt 0.3s ease !important;
-        filter: brightness(2.5) drop-shadow(0 0 25px #ff3366) !important;
+        animation: enemyHurt 0.35s ease !important;
+        filter: brightness(3.0) drop-shadow(0 0 35px #ff3366) !important;
       }
       @keyframes enemyHurt {
         0%, 100% { transform: translateX(-50%) scale(1); }
-        25% { transform: translateX(-54%) scale(0.92); }
-        75% { transform: translateX(-46%) scale(1.05); }
+        25% { transform: translateX(-55%) scale(0.9); }
+        75% { transform: translateX(-45%) scale(1.1); }
       }
       .enemy-dissolve {
         opacity: 0 !important;
-        transform: translateX(-50%) scale(0.85) !important;
-        filter: blur(8px) brightness(3) !important;
+        transform: translateX(-50%) scale(0.8) !important;
+        filter: blur(10px) brightness(4) !important;
+      }
+
+      @keyframes bossSlamIn {
+        0% { opacity: 0; transform: translateX(-50%) translateY(-60px) scale(1.4); filter: brightness(4); }
+        60% { opacity: 1; transform: translateX(-50%) translateY(4px) scale(0.95); }
+        100% { opacity: 1; transform: translateX(-50%) translateY(0px) scale(1); }
+      }
+      .boss-slam-active { animation: bossSlamIn 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards !important; }
+
+      #bossHazardBanner {
+        position: absolute; top: 40%; left: 0; width: 100%; height: 50px;
+        background: linear-gradient(90deg, rgba(255,0,50,0.9), rgba(150,0,30,0.95));
+        border-top: 2px solid #fff; border-bottom: 2px solid #fff;
+        z-index: 10; display: none; align-items: center; justify-content: center;
+        font-family: monospace; font-weight: 900; font-size: 15px; color: #fff;
+        letter-spacing: 3px; text-shadow: 0 0 10px #000;
+        animation: hazardSlide 1.2s ease forwards; pointer-events: none;
+      }
+      @keyframes hazardSlide {
+        0% { transform: scaleX(0); opacity: 0; }
+        30% { transform: scaleX(1); opacity: 1; }
+        80% { transform: scaleX(1); opacity: 1; }
+        100% { transform: scaleX(0); opacity: 0; }
       }
 
       .enemy-hp-plate {
         position: absolute; top: 10px; right: 10px;
-        background: rgba(8, 14, 24, 0.85); backdrop-filter: blur(8px);
-        border: 1px solid rgba(255, 51, 102, 0.6); border-radius: 8px;
+        background: rgba(8, 14, 24, 0.88); backdrop-filter: blur(8px);
+        border: 1px solid rgba(255, 51, 102, 0.7); border-radius: 8px;
         padding: 4px 10px; z-index: 4; display: flex; align-items: center; gap: 8px;
-        box-shadow: 0 0 10px rgba(255, 51, 102, 0.3);
+        box-shadow: 0 0 12px rgba(255, 51, 102, 0.4);
       }
       .enemy-name-label { font-size: 11px; font-weight: bold; color: #fff; font-family: monospace; letter-spacing: 0.5px; }
-      .enemy-hearts { color: var(--accent-red); font-size: 13px; letter-spacing: 2px; }
+      .enemy-hearts { color: var(--accent-red); font-size: 14px; letter-spacing: 2px; }
 
-      #bossAlarmOverlay {
-        position: absolute; top: 0; left: 0; width: 100%; height: 100%;
-        border: 3px solid var(--accent-red); box-shadow: inset 0 0 35px var(--accent-red);
-        z-index: 5; pointer-events: none; opacity: 0; display: none;
-        animation: bossAlarmPulse 1.2s infinite ease-in-out;
+      .player-sync-hp {
+        display: flex; align-items: center; gap: 4px; font-family: monospace; font-size: 12px; font-weight: 900;
+        background: rgba(0, 229, 255, 0.1); border: 1px solid var(--noah-cyan); padding: 2px 8px; border-radius: 6px;
       }
-      @keyframes bossAlarmPulse {
-        0%, 100% { opacity: 0.2; }
-        50% { opacity: 0.85; }
-      }
+      .player-hearts { color: var(--accent-red); letter-spacing: 2px; }
 
       .q-badge { position: absolute; top: 10px; left: 10px; background: rgba(0,0,0,0.75); border: 1px solid var(--noah-cyan); color: var(--noah-cyan); padding: 4px 8px; border-radius: 6px; font-size: 13px; font-weight: bold; z-index: 4; }
 
@@ -173,7 +207,7 @@
          ========================================= */
       #tacticalSquadDock {
         display: flex; justify-content: space-between; align-items: center;
-        gap: 6px; width: 100%; margin-top: 15px; padding-top: 10px;
+        gap: 6px; width: 100%; margin-top: 12px; padding-top: 8px;
         border-top: 1px solid rgba(0, 229, 255, 0.2);
       }
       .squad-slot {
@@ -181,27 +215,25 @@
         border: 1.5px solid #334; border-radius: 10px; position: relative;
         overflow: hidden; cursor: pointer; transition: 0.2s;
       }
+      .squad-slot.is-leader {
+        border-color: var(--accent-gold);
+      }
       .squad-slot.is-ready {
         border-color: var(--accent-gold);
-        box-shadow: 0 0 15px rgba(241, 196, 15, 0.6);
-        animation: slotPulse 1.5s infinite alternate;
+        box-shadow: 0 0 15px rgba(241, 196, 15, 0.7);
+        animation: slotPulse 1.2s infinite alternate;
       }
       @keyframes slotPulse {
         from { transform: translateY(0); }
-        to { transform: translateY(-3px); box-shadow: 0 0 20px rgba(241, 196, 15, 0.9); }
+        to { transform: translateY(-3px); box-shadow: 0 0 20px rgba(241, 196, 15, 1); }
       }
       .squad-slot-img {
         width: 100%; height: 100%; object-fit: cover;
         object-position: center 25%;
         filter: brightness(0.9);
       }
-      .squad-sp-gauge {
-        position: absolute; bottom: 0; left: 0; width: 100%; height: 4px;
-        background: rgba(255,255,255,0.2);
-      }
-      .squad-sp-fill {
-        height: 100%; background: var(--noah-cyan); width: 0%; transition: width 0.3s;
-      }
+      .squad-sp-gauge { position: absolute; bottom: 0; left: 0; width: 100%; height: 4px; background: rgba(255,255,255,0.2); }
+      .squad-sp-fill { height: 100%; background: var(--noah-cyan); width: 0%; transition: width 0.3s; }
       .squad-slot.is-ready .squad-sp-fill { background: var(--accent-gold); }
 
       #skillCutinOverlay {
@@ -210,7 +242,7 @@
         pointer-events: none; overflow: hidden;
       }
       .cutin-banner {
-        position: absolute; width: 130vw; height: 130px;
+        position: absolute; width: 130vw; height: 140px;
         background: linear-gradient(90deg, rgba(0,0,0,0) 0%, rgba(0,229,255,0.85) 25%, rgba(0,20,40,0.95) 75%, rgba(0,0,0,0) 100%);
         border-top: 2px solid var(--accent-gold); border-bottom: 2px solid var(--accent-gold);
         transform: rotate(-8deg); display: flex; align-items: center; justify-content: center;
@@ -222,19 +254,68 @@
         70% { transform: rotate(-8deg) translateX(0%); opacity: 1; }
         100% { transform: rotate(-8deg) translateX(100%); opacity: 0; }
       }
-      .cutin-img {
-        height: 240px; position: absolute; left: 35%; top: -60px;
-        filter: drop-shadow(0 0 25px rgba(241,196,15,0.8));
-      }
-      .cutin-text {
-        color: #fff; font-size: 22px; font-weight: 900; letter-spacing: 4px; font-family: monospace;
-        text-shadow: 0 0 15px var(--noah-cyan); position: absolute; right: 25%;
-      }
+      .cutin-img { height: 260px; position: absolute; left: 32%; top: -65px; filter: drop-shadow(0 0 25px rgba(241,196,15,0.85)); object-fit: contain; }
+      .cutin-text { color: #fff; font-size: 22px; font-weight: 900; letter-spacing: 4px; font-family: monospace; text-shadow: 0 0 15px var(--noah-cyan); position: absolute; right: 22%; }
 
-      /* 題型與回饋樣式 */
-      @keyframes correctPop {
-        0% { transform: scale(1); } 40% { transform: scale(1.08); } 70% { transform: scale(0.96); } 100% { transform: scale(1); }
+      /* =========================================
+         🛡️ 全息小隊編成 Modal (Preset & Squad Formation)
+         ========================================= */
+      #squadFormationModal {
+        position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
+        background: rgba(3, 8, 16, 0.96); backdrop-filter: blur(20px);
+        z-index: 37500; display: none; flex-direction: column;
+        justify-content: center; align-items: center; padding: 12px;
       }
+      .formation-card {
+        background: rgba(8, 16, 26, 0.96); border: 2px solid var(--noah-cyan);
+        border-radius: 24px; width: 100%; max-width: 450px; max-height: 90vh;
+        display: flex; flex-direction: column; padding: 16px;
+        box-shadow: 0 0 45px rgba(0,229,255,0.35); overflow: hidden;
+      }
+      .preset-tabs-row { display: flex; gap: 8px; margin-bottom: 12px; }
+      .preset-tab-btn {
+        flex: 1; padding: 8px 4px; border-radius: 8px; border: 1px solid #444;
+        background: rgba(0,0,0,0.5); color: #aaa; font-family: monospace; font-size: 12px;
+        font-weight: bold; cursor: pointer; transition: 0.2s;
+      }
+      .preset-tab-btn.active {
+        border-color: var(--noah-cyan); background: rgba(0, 229, 255, 0.15); color: var(--noah-cyan);
+        box-shadow: 0 0 10px rgba(0,229,255,0.3);
+      }
+      .preset-tab-btn.is-battle-active {
+        border-color: var(--accent-gold); color: var(--accent-gold);
+      }
+      .formation-slots-grid {
+        display: grid; grid-template-columns: repeat(5, 1fr); gap: 6px; margin-bottom: 14px;
+      }
+      .formation-slot-item {
+        aspect-ratio: 2 / 3; background: #050b14; border: 1.5px dashed #444; border-radius: 8px;
+        position: relative; overflow: hidden; cursor: pointer; display: flex; flex-direction: column;
+        align-items: center; justify-content: center;
+      }
+      .formation-slot-item.selected {
+        border: 2px solid var(--accent-gold); box-shadow: 0 0 12px var(--accent-gold);
+      }
+      .formation-slot-item.is-leader {
+        border-color: var(--accent-gold);
+      }
+      .formation-slot-label {
+        position: absolute; top: 2px; left: 2px; font-size: 8px; font-family: monospace;
+        background: rgba(0,0,0,0.7); padding: 1px 3px; border-radius: 3px; color: var(--accent-gold);
+      }
+      .inventory-grid-scroll {
+        flex: 1; overflow-y: auto; display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px;
+        padding: 4px; background: rgba(0,0,0,0.4); border-radius: 12px; border: 1px solid rgba(255,255,255,0.08);
+      }
+      .inv-item-card {
+        background: rgba(10, 20, 32, 0.8); border: 1px solid #334; border-radius: 8px;
+        padding: 4px; text-align: center; cursor: pointer; position: relative; transition: 0.2s;
+      }
+      .inv-item-card:hover { transform: translateY(-2px); border-color: var(--noah-cyan); }
+      .inv-item-card.equipped { opacity: 0.45; filter: grayscale(0.5); pointer-events: none; }
+
+      /* 題型樣式 */
+      @keyframes correctPop { 0% { transform: scale(1); } 40% { transform: scale(1.08); } 70% { transform: scale(0.96); } 100% { transform: scale(1); } }
       .options-grid { display: grid; gap: 10px; width: 100%; }
       .option-btn { background: rgba(255,255,255,0.05); border: 1px solid #444; color: #fff; padding: 16px; border-radius: 10px; text-align: left; cursor: pointer; transition: 0.2s; font-size: 17px; }
       .option-btn.correct { background: var(--accent-green) !important; color: #000; font-weight: bold; border-color: #fff; box-shadow: 0 0 25px rgba(46,204,113,0.8); animation: correctPop 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
@@ -242,68 +323,34 @@
       @keyframes shake { 0%,100%{transform:translateX(0);} 25%{transform:translateX(-6px);} 75%{transform:translateX(6px);} }
 
       .bug-tokens-container { display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; line-height: 2.2; margin: 15px 0; }
-      .token-chip {
-        display: inline-block; padding: 4px 10px; border-radius: 6px;
-        background: rgba(0, 229, 255, 0.08); border: 1px dashed var(--noah-cyan);
-        color: #fff; font-weight: bold; cursor: pointer; transition: 0.2s;
-      }
+      .token-chip { display: inline-block; padding: 4px 10px; border-radius: 6px; background: rgba(0, 229, 255, 0.08); border: 1px dashed var(--noah-cyan); color: #fff; font-weight: bold; cursor: pointer; transition: 0.2s; }
       .token-chip:hover { background: rgba(0, 229, 255, 0.25); transform: translateY(-2px); }
-
+      
       .word-chips-container { display: flex; flex-wrap: wrap; gap: 10px; justify-content: center; margin-top: 15px; padding: 12px; background: rgba(0,0,0,0.3); border-radius: 12px; width: 100%; }
       .chip { background: #2c3e50; border: 1px solid #555; padding: 10px 14px; border-radius: 10px; cursor: pointer; font-size: 17px; font-weight: bold; transition: 0.2s; }
       .chip:hover { transform: scale(1.05); border-color: var(--noah-cyan); }
       .chip.used { opacity: 0.3; pointer-events: none; }
       .answer-slots { display: flex; flex-wrap: wrap; gap: 10px; min-height: 55px; border-bottom: 2px solid var(--noah-cyan); margin-bottom: 15px; padding: 5px; width: 100%; }
+      
+      @keyframes floatUpScore { 0% { transform: translate(-50%, 0) scale(0.6); opacity: 0; } 20% { transform: translate(-50%, -15px) scale(1.15); opacity: 1; } 75% { transform: translate(-50%, -45px) scale(1); opacity: 1; } 100% { transform: translate(-50%, -75px) scale(0.9); opacity: 0; } }
+      .floating-score { position: fixed; z-index: 99999; font-family: monospace; font-size: 24px; font-weight: 900; color: var(--accent-gold); text-shadow: 0 0 15px rgba(241,196,15,0.9), 0 0 30px rgba(241,196,15,0.5); pointer-events: none; animation: floatUpScore 1.6s cubic-bezier(0.2, 0.8, 0.2, 1) forwards; white-space: nowrap; }
 
-      @keyframes floatUpScore {
-        0% { transform: translate(-50%, 0) scale(0.6); opacity: 0; }
-        20% { transform: translate(-50%, -15px) scale(1.15); opacity: 1; }
-        75% { transform: translate(-50%, -45px) scale(1); opacity: 1; }
-        100% { transform: translate(-50%, -75px) scale(0.9); opacity: 0; }
-      }
-      .floating-score {
-        position: fixed; z-index: 99999;
-        font-family: monospace; font-size: 24px; font-weight: 900;
-        color: var(--accent-gold); text-shadow: 0 0 15px rgba(241,196,15,0.9), 0 0 30px rgba(241,196,15,0.5);
-        pointer-events: none; animation: floatUpScore 1.6s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
-        white-space: nowrap;
-      }
-
-      @keyframes feedbackSpring {
-        0% { transform: translate(-50%, 120%); opacity: 0; }
-        60% { transform: translate(-50%, -10px); opacity: 1; }
-        80% { transform: translate(-50%, 4px); }
-        100% { transform: translate(-50%, 0); opacity: 1; }
-      }
-      #feedback-panel { 
-        position: fixed; bottom: 25px; left: 50%; width: 95%; max-width: 460px; 
-        background: rgba(14, 20, 28, 0.98); backdrop-filter: blur(25px); 
-        padding: 22px 20px; border: 2px solid var(--noah-cyan); border-radius: 26px; 
-        transform: translate(-50%, 150%); z-index: 100; text-align: left; 
-        box-shadow: 0 25px 60px rgba(0,0,0,0.95); max-height: 80vh; overflow-y: auto; 
-      }
+      @keyframes feedbackSpring { 0% { transform: translate(-50%, 120%); opacity: 0; } 60% { transform: translate(-50%, -10px); opacity: 1; } 80% { transform: translate(-50%, 4px); } 100% { transform: translate(-50%, 0); opacity: 1; } }
+      #feedback-panel { position: fixed; bottom: 25px; left: 50%; width: 95%; max-width: 460px; background: rgba(14, 20, 28, 0.98); backdrop-filter: blur(25px); padding: 22px 20px; border: 2px solid var(--noah-cyan); border-radius: 26px; transform: translate(-50%, 150%); z-index: 100; text-align: left; box-shadow: 0 25px 60px rgba(0,0,0,0.95); max-height: 80vh; overflow-y: auto; }
       #feedback-panel.active { animation: feedbackSpring 0.45s cubic-bezier(0.175, 0.885, 0.32, 1.2) forwards; }
       #feedback-panel.correct { border-color: var(--accent-green); box-shadow: 0 0 35px rgba(46, 204, 113, 0.35); }
       #feedback-panel.wrong { border-color: var(--accent-red); box-shadow: 0 0 35px rgba(255, 51, 102, 0.35); }
       #feedback-panel.warning { border-color: var(--accent-gold); box-shadow: 0 0 35px rgba(241, 196, 15, 0.35); }
       
-      .hint-radar-text {
-        color: var(--accent-gold); font-weight: 900; letter-spacing: 3px; 
-        font-family: monospace; font-size: 20px; animation: pulse 1.8s infinite;
-      }
+      @keyframes radarGlow { 0%, 100% { text-shadow: 0 0 8px rgba(241,196,15,0.4); opacity: 0.9; } 50% { text-shadow: 0 0 20px rgba(241,196,15,1), 0 0 35px rgba(241,196,15,0.8); opacity: 1; } }
+      .hint-radar-text { color: var(--accent-gold); font-weight: 900; letter-spacing: 3px; font-family: monospace; font-size: 20px; animation: radarGlow 1.8s infinite; }
+
       .morph-tag { display: inline-flex; align-items: center; background: rgba(0, 229, 255, 0.1); border: 1px solid var(--noah-cyan); border-radius: 8px; padding: 4px 10px; font-size: 13px; font-weight: bold; margin-right: 6px; margin-bottom: 6px; color: var(--noah-cyan); }
       .morph-tag.derivative { border-color: var(--accent-gold); color: var(--accent-gold); background: rgba(241, 196, 15, 0.1); }
 
-      #comboBadge { 
-        background: rgba(241, 196, 15, 0.15); border: 1.5px solid var(--accent-gold); 
-        color: var(--accent-gold); font-family: monospace; font-weight: 900; font-size: 13px; 
-        padding: 3px 10px; border-radius: 20px; display: none; box-shadow: 0 0 12px rgba(241, 196, 15, 0.4); 
-      }
-      .rank-stamp { 
-        width: 76px; height: 76px; border-radius: 50%; border: 4px solid var(--accent-gold); 
-        display: flex; align-items: center; justify-content: center; font-size: 44px; font-weight: 900; 
-        font-family: monospace; color: var(--accent-gold); box-shadow: 0 0 35px rgba(241, 196, 15, 0.6); 
-      }
+      #comboBadge { background: rgba(241, 196, 15, 0.15); border: 1.5px solid var(--accent-gold); color: var(--accent-gold); font-family: monospace; font-weight: 900; font-size: 13px; padding: 3px 10px; border-radius: 20px; display: none; box-shadow: 0 0 12px rgba(241, 196, 15, 0.4); letter-spacing: 1px; }
+
+      .rank-stamp { width: 76px; height: 76px; border-radius: 50%; border: 4px solid var(--accent-gold); display: flex; align-items: center; justify-content: center; font-size: 44px; font-weight: 900; font-family: monospace; color: var(--accent-gold); box-shadow: 0 0 35px rgba(241, 196, 15, 0.6); }
       .rank-stamp.A { border-color: var(--noah-cyan); color: var(--noah-cyan); box-shadow: 0 0 35px rgba(0, 229, 255, 0.6); }
       .rank-stamp.B { border-color: #3498db; color: #3498db; box-shadow: 0 0 35px rgba(52, 152, 219, 0.6); }
 
@@ -329,39 +376,26 @@
       .lb-name { text-align: left; padding-left: 5px; color: #fff; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
       .lb-exp { text-align: right; color: var(--noah-cyan); font-weight: bold; font-size: 14px; }
 
-      .duo-card { 
-        background: linear-gradient(135deg, rgba(6, 25, 45, 0.96), rgba(2, 12, 22, 0.98)); 
-        border: 2px solid var(--noah-cyan); border-radius: 28px; padding: 30px 20px; 
-        max-width: 380px; width: 90%; text-align: center; 
-        box-shadow: 0 0 50px rgba(0, 229, 255, 0.35), 0 20px 40px rgba(0,0,0,0.85); 
-        position: relative; z-index: 30002; 
-      }
+      .duo-card { background: linear-gradient(135deg, rgba(6, 25, 45, 0.96), rgba(2, 12, 22, 0.98)); border: 2px solid var(--noah-cyan); border-radius: 28px; padding: 30px 20px; max-width: 380px; width: 90%; text-align: center; box-shadow: 0 0 50px rgba(0, 229, 255, 0.35), 0 20px 40px rgba(0,0,0,0.85); position: relative; z-index: 30002; }
       .sync-meter-box { position: relative; width: 110px; height: 110px; margin: 0 auto 15px auto; display: flex; align-items: center; justify-content: center; }
       .sync-meter-svg { transform: rotate(-90deg); width: 100%; height: 100%; }
       .sync-meter-bg { fill: none; stroke: rgba(255, 255, 255, 0.1); stroke-width: 8; }
       .sync-meter-fill { fill: none; stroke: var(--noah-cyan); stroke-width: 8; stroke-dasharray: 283; stroke-dashoffset: 283; stroke-linecap: round; filter: drop-shadow(0 0 8px var(--noah-cyan)); }
+      .sync-meter-badge { position: absolute; font-size: 42px; filter: drop-shadow(0 0 15px rgba(0, 229, 255, 0.8)); }
 
       .debrief-box { margin-top: 15px; margin-bottom: 20px; width: 100%; text-align: left; }
       .debrief-toggle { width: 100%; background: rgba(255,255,255,0.05); border: 1px solid #444; border-radius: 12px; color: #fff; padding: 12px 15px; font-size: 14px; font-weight: bold; cursor: pointer; display: flex; justify-content: space-between; align-items: center; }
       .debrief-content { display: none; background: rgba(0,0,0,0.5); border: 1px solid #333; border-radius: 0 0 12px 12px; padding: 12px; max-height: 200px; overflow-y: auto; margin-top: -5px; border-top: none; }
       .debrief-item { border-bottom: 1px solid #333; padding-bottom: 8px; margin-bottom: 8px; font-size: 13px; }
 
-      #loginTransitionOverlay {
-        position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
-        background: radial-gradient(circle at center, rgba(0, 30, 45, 0.98) 0%, rgba(2, 5, 10, 0.99) 100%);
-        z-index: 25000; display: none; flex-direction: column; justify-content: center; align-items: center;
-        backdrop-filter: blur(20px); text-align: center;
-      }
-      .sync-warp-line {
-        position: absolute; width: 100%; height: 2px; background: linear-gradient(90deg, transparent, var(--noah-cyan), transparent);
-        opacity: 0.6; animation: warpScan 1.2s infinite linear;
-      }
+      #loginTransitionOverlay { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: radial-gradient(circle at center, rgba(0, 30, 45, 0.98) 0%, rgba(2, 5, 10, 0.99) 100%); z-index: 25000; display: none; flex-direction: column; justify-content: center; align-items: center; backdrop-filter: blur(20px); text-align: center; }
+      .sync-warp-line { position: absolute; width: 100%; height: 2px; background: linear-gradient(90deg, transparent, var(--noah-cyan), transparent); opacity: 0.6; animation: warpScan 1.2s infinite linear; }
       @keyframes warpScan { 0% { top: 0%; opacity: 0; } 50% { opacity: 1; } 100% { top: 100%; opacity: 0; } }
       .sync-progress-bar-bg { width: 260px; height: 6px; background: rgba(255,255,255,0.1); border-radius: 6px; overflow: hidden; margin-top: 25px; border: 1px solid rgba(0,229,255,0.3); }
       .sync-progress-bar-fill { width: 0%; height: 100%; background: linear-gradient(90deg, var(--noah-cyan), var(--accent-gold)); border-radius: 6px; box-shadow: 0 0 10px var(--noah-cyan); transition: width 0.8s cubic-bezier(0.2, 0.8, 0.2, 1); }
 
       /* =========================================
-         🎲 全息招募終端 (5+5 緊湊佈局與適配)
+         🎲 全息招募終端
          ========================================= */
       #gachaOverlay { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(4, 8, 14, 0.96); backdrop-filter: blur(20px); z-index: 35000; display: none; flex-direction: column; justify-content: center; align-items: center; overflow: hidden; }
       .gacha-portal { position: absolute; width: 320px; height: 320px; border-radius: 50%; background: radial-gradient(circle, rgba(6, 18, 30, 0.78) 0%, rgba(2, 6, 12, 0.88) 72%, rgba(0, 229, 255, 0.2) 100%); backdrop-filter: blur(10px); border: 2px solid var(--noah-cyan); box-shadow: 0 0 50px rgba(0, 229, 255, 0.5), inset 0 0 30px rgba(0, 229, 255, 0.3); animation: spinRing 12s linear infinite; display: none; }
@@ -374,56 +408,51 @@
       @keyframes burstFlyOut { 0% { opacity: 0; transform: translate(-50%, -50%) scale(0.1) rotate(0deg); } 25% { opacity: 1; } 70% { opacity: 1; } 100% { opacity: 0; transform: translate(calc(-50% + var(--tx)), calc(-50% + var(--ty))) scale(1.3) rotate(var(--rot)); } }
       .btn-gacha-solid-gold { background: linear-gradient(135deg, #f39c12 0%, #e67e22 50%, #d35400 100%) !important; color: #ffffff !important; border: 2px solid #f1c40f !important; box-shadow: 0 0 30px rgba(241, 196, 15, 0.8), 0 8px 25px rgba(0,0,0,0.9) !important; text-shadow: 0 2px 4px rgba(0,0,0,0.8); font-weight: 900; letter-spacing: 2px; }
       
-      #gachaStageReveal { position: absolute; top: 0; left: 0; width: 100%; height: 100%; padding: 12px 10px 18px 10px; display: none; flex-direction: column; justify-content: space-between; align-items: center; overflow: hidden; }
+      #gachaStageReveal { 
+        position: absolute; top: 0; left: 0; width: 100%; height: 100%; 
+        padding: 16px 12px 24px 12px; display: none; flex-direction: column; 
+        justify-content: space-between; align-items: center; overflow: hidden; 
+      }
 
-      /* 🚀 2. 核心修正：5+5 緊湊排版與單抽獨立樣式 */
-      .gacha-cards-container {
-        width: 100%; max-width: 440px; z-index: 35002;
-        padding: 4px; margin: auto 0;
+      .gacha-cards-container { 
+        width: 100%; max-width: 440px; margin: auto; z-index: 35002; padding: 4px; 
       }
-      /* 十連抽：強制 5 欄 × 2 排，永不超出遮擋按鈕 */
-      .gacha-cards-container.ten-pull {
-        display: grid;
-        grid-template-columns: repeat(5, 1fr);
-        gap: 6px 4px;
-        align-content: center;
-        justify-items: center;
+      .gacha-cards-container.layout-10 {
+        display: grid; grid-template-columns: repeat(5, 1fr); grid-template-rows: repeat(2, 1fr);
+        gap: 6px; align-items: center; justify-content: center;
       }
-      .gacha-cards-container.ten-pull .gacha-card-wrapper {
-        width: 100%; max-width: 78px; aspect-ratio: 2 / 3; height: auto;
-      }
-      .gacha-cards-container.ten-pull .card-name-bar { font-size: 8px; padding: 2px 1px; }
-      .gacha-cards-container.ten-pull .card-badge-rarity { font-size: 8px; padding: 1px 3px; }
-      .gacha-cards-container.ten-pull .card-badge-new, 
-      .gacha-cards-container.ten-pull .card-badge-break { font-size: 7px; padding: 1px 3px; }
-
-      /* 單抽：居中優雅展示 */
-      .gacha-cards-container.single-pull {
+      .gacha-cards-container.layout-single {
         display: flex; justify-content: center; align-items: center;
-      }
-      .gacha-cards-container.single-pull .gacha-card-wrapper {
-        width: clamp(200px, 58vw, 240px); aspect-ratio: 2 / 3; height: auto;
       }
 
       .gacha-card-wrapper { perspective: 900px; cursor: pointer; user-select: none; }
+      .layout-10 .gacha-card-wrapper { width: 100%; aspect-ratio: 2 / 3; }
+      .layout-single .gacha-card-wrapper { width: clamp(210px, 62vw, 250px); height: clamp(315px, 92vw, 375px); }
+      
       .gacha-card-inner { position: relative; width: 100%; height: 100%; transform-style: preserve-3d; transition: transform 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
       .gacha-card-wrapper.is-flipped .gacha-card-inner { transform: rotateY(180deg); }
-      .gacha-card-face { position: absolute; top: 0; left: 0; width: 100%; height: 100%; backface-visibility: hidden; -webkit-backface-visibility: hidden; border-radius: 8px; overflow: hidden; }
-      .gacha-card-back { background: radial-gradient(circle at center, #0f2030 0%, #050b14 100%); border: 1.5px solid var(--noah-cyan); box-shadow: 0 0 10px rgba(0, 229, 255, 0.25); display: flex; flex-direction: column; align-items: center; justify-content: center; }
+      .gacha-card-face { position: absolute; top: 0; left: 0; width: 100%; height: 100%; backface-visibility: hidden; -webkit-backface-visibility: hidden; border-radius: 10px; overflow: hidden; }
+      .gacha-card-back { background: radial-gradient(circle at center, #0f2030 0%, #050b14 100%); border: 2px solid var(--noah-cyan); box-shadow: 0 0 10px rgba(0, 229, 255, 0.25); display: flex; flex-direction: column; align-items: center; justify-content: center; }
       .gacha-card-front { transform: rotateY(180deg); background: radial-gradient(circle at center, rgba(15, 25, 40, 0.95) 0%, rgba(4, 8, 14, 0.98) 100%); border: 1.5px solid #444; }
-      .gacha-card-wrapper.SSR .gacha-card-front { border-color: var(--accent-gold); box-shadow: 0 0 16px rgba(241, 196, 15, 0.55); }
-      .gacha-card-wrapper.SR .gacha-card-front { border-color: var(--accent-purple); box-shadow: 0 0 12px rgba(168, 85, 247, 0.45); }
-      .gacha-card-wrapper.R .gacha-card-front { border-color: var(--noah-cyan); box-shadow: 0 0 8px rgba(0, 229, 255, 0.3); }
-
+      .gacha-card-wrapper.SSR .gacha-card-front { border-color: var(--accent-gold); box-shadow: 0 0 22px rgba(241, 196, 15, 0.55); }
+      .gacha-card-wrapper.SR .gacha-card-front { border-color: var(--accent-purple); box-shadow: 0 0 16px rgba(168, 85, 247, 0.45); }
+      .gacha-card-wrapper.R .gacha-card-front { border-color: var(--noah-cyan); box-shadow: 0 0 10px rgba(0, 229, 255, 0.3); }
+      
       .op-detail-badge { display: inline-block; padding: 2px 8px; border-radius: 6px; font-size: 11px; font-weight: 900; font-family: monospace; letter-spacing: 1px; }
-      .card-badge-rarity { position: absolute; top: 3px; left: 3px; font-size: 9px; font-weight: 900; font-family: monospace; padding: 1px 5px; border-radius: 3px; z-index: 3; }
+      
+      .card-badge-rarity { position: absolute; top: 3px; left: 3px; font-size: 8px; font-weight: 900; font-family: monospace; padding: 1px 4px; border-radius: 4px; z-index: 3; }
+      .layout-single .card-badge-rarity { font-size: 11px; padding: 2px 6px; }
       .SSR .card-badge-rarity { background: var(--accent-gold); color: #000; }
       .SR .card-badge-rarity { background: var(--accent-purple); color: #fff; }
       .R .card-badge-rarity { background: var(--noah-cyan); color: #000; }
-      .card-badge-new { position: absolute; top: 3px; right: 3px; font-size: 8px; font-weight: 900; background: var(--accent-red); color: #fff; padding: 1px 4px; border-radius: 3px; z-index: 3; animation: pulse 1.5s infinite; }
-      .card-badge-break { position: absolute; top: 3px; right: 3px; font-size: 8px; font-weight: 900; background: rgba(0,0,0,0.7); border: 1px solid var(--accent-gold); color: var(--accent-gold); padding: 1px 3px; border-radius: 3px; z-index: 3; }
+      
+      .card-badge-new { position: absolute; top: 3px; right: 3px; font-size: 7px; font-weight: 900; background: var(--accent-red); color: #fff; padding: 1px 3px; border-radius: 4px; z-index: 3; animation: pulse 1.5s infinite; }
+      .card-badge-break { position: absolute; top: 3px; right: 3px; font-size: 7px; font-weight: 900; background: rgba(0,0,0,0.7); border: 1px solid var(--accent-gold); color: var(--accent-gold); padding: 1px 3px; border-radius: 4px; z-index: 3; }
+      .layout-single .card-badge-new, .layout-single .card-badge-break { font-size: 10px; padding: 2px 5px; }
+
       .card-img { width: 100%; height: 100%; object-fit: contain; object-position: center bottom; }
-      .card-name-bar { position: absolute; bottom: 0; left: 0; width: 100%; background: rgba(0,0,0,0.85); padding: 3px 1px; font-size: 9px; font-weight: bold; text-align: center; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; color: #fff; }
+      .card-name-bar { position: absolute; bottom: 0; left: 0; width: 100%; background: rgba(0,0,0,0.85); padding: 2px 1px; font-size: 8px; font-weight: bold; text-align: center; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; color: #fff; }
+      .layout-single .card-name-bar { font-size: 14px; padding: 6px 4px; }
     </style>
   </head>
   <body>
@@ -443,7 +472,7 @@
     <div id="footerWatermark">by Sailing Adventure Education Centre</div>
     <div id="sysMsgBox"></div>
 
-    <!-- 登入躍遷畫面 -->
+    <!-- 登入躍遷過場 -->
     <div id="loginTransitionOverlay">
       <div class="sync-warp-line"></div>
       <div style="font-size:55px; margin-bottom:15px; filter:drop-shadow(0 0 20px var(--noah-cyan));">🌐</div>
@@ -458,7 +487,7 @@
       </div>
     </div>
 
-    <!-- 戰術技能釋放 0.5s 全螢幕 Cut-in 橫幅 -->
+    <!-- 🚀 戰術技能釋放 Cut-in 橫幅 (支援 Skill_Image_URL 差分立繪) -->
     <div id="skillCutinOverlay">
       <div class="cutin-banner">
         <img id="cutinCharImg" class="cutin-img" src="" alt="Skill Operator">
@@ -466,14 +495,53 @@
       </div>
     </div>
 
-    <!-- 全息招募終端浮層 -->
+    <!-- 🛡️ 全息小隊編成介面 Modal (3 Presets + 5 Slots + Inventory) -->
+    <div id="squadFormationModal">
+      <div class="formation-card">
+        <div style="display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid #333; padding-bottom:8px; margin-bottom:10px;">
+          <div>
+            <div style="color:var(--noah-cyan); font-weight:900; font-size:16px;">🛡️ 戰術小隊編成</div>
+            <div style="font-size:10px; color:#888; font-family:monospace;">SQUAD PRESET & TACTICAL ASSIGNMENT</div>
+          </div>
+          <button onclick="closeSquadFormationModal()" style="background:none; border:none; color:#aaa; font-size:22px; cursor:pointer;">✕</button>
+        </div>
+
+        <!-- 3 套預設分頁標籤 -->
+        <div class="preset-tabs-row">
+          <button id="pTab1" class="preset-tab-btn active" onclick="switchPresetTab(1)">小隊 1 [出戰]</button>
+          <button id="pTab2" class="preset-tab-btn" onclick="switchPresetTab(2)">小隊 2</button>
+          <button id="pTab3" class="preset-tab-btn" onclick="switchPresetTab(3)">小隊 3</button>
+        </div>
+
+        <div style="font-size:11px; color:#aaa; margin-bottom:6px; text-align:left;">
+          👉 點選下方位置，再點擊幹員庫進行替換：
+        </div>
+
+        <!-- 當前預設的 5 個戰術位置 -->
+        <div class="formation-slots-grid" id="formationSlotsGrid"></div>
+
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px;">
+          <div style="font-size:12px; color:var(--accent-gold); font-weight:bold;">🎒 幹員庫 (INVENTORY)</div>
+          <button id="btnSetActivePreset" style="background:rgba(241,196,15,0.15); border:1px solid var(--accent-gold); color:var(--accent-gold); font-size:11px; padding:4px 8px; border-radius:6px; cursor:pointer; font-weight:bold;" onclick="setActiveBattlePreset()">
+            ⚡ 設為出戰小隊
+          </button>
+        </div>
+
+        <!-- 已持有的幹員名冊庫 -->
+        <div class="inventory-grid-scroll" id="formationInventoryGrid"></div>
+
+        <button class="primary-btn btn-cyan" style="margin-top:10px; height:42px; font-size:14px;" onclick="saveAndCloseSquadFormation()">
+          ✔ 確認並保存小隊 (SAVE)
+        </button>
+      </div>
+    </div>
+
+    <!-- 兩段式招募終端 -->
     <div id="gachaOverlay">
-      <!-- 🚀 1. 修正：SKIP 按鈕統一走智能處理函數 -->
       <button id="gachaSkipBtn" style="position:absolute; top:18px; right:18px; background:rgba(0,0,0,0.75); border:1px solid #666; color:#aaa; padding:8px 16px; border-radius:8px; font-size:13px; cursor:pointer; font-family:monospace; z-index:35010;" onclick="handleGachaSkip()">
         [ SKIP ⏩ ]
       </button>
 
-      <!-- 階段一：過場演出 -->
       <div id="gachaStageWarp" style="position:absolute; top:0; left:0; width:100%; height:100%; display:flex; flex-direction:column; justify-content:center; align-items:center; overflow:hidden;">
         <video id="gachaWarpVid" playsinline preload="auto" style="position:absolute; top:0; left:0; width:100%; height:100%; object-fit:cover; z-index:1; pointer-events:none;">
           <source src="https://pub-2a6f35ae1aea46f3a4762ecf8c1a6eae.r2.dev/Background/gacha.mp4" type="video/mp4">
@@ -491,19 +559,17 @@
           </div>
         </div>
 
-        <button id="gachaRevealNextBtn" class="primary-btn btn-gacha-solid-gold" style="position:relative; width:80%; max-width:320px; margin-top:35px; opacity:0; transition:opacity 0.6s ease; z-index:35008; pointer-events:none;" onclick="proceedToReveal(false)">
+        <button id="gachaRevealNextBtn" class="primary-btn btn-gacha-solid-gold" style="position:relative; width:80%; max-width:320px; margin-top:35px; opacity:0; transition:opacity 0.6s ease; z-index:35008; pointer-events:none;" onclick="proceedToReveal()">
           檢視檔案 / REVEAL ➡️
         </button>
       </div>
 
-      <!-- 階段二：揭卡展示畫面 -->
       <div id="gachaStageReveal">
         <video id="gachaRevealVid" playsinline loop muted style="position:absolute; top:0; left:0; width:100%; height:100%; object-fit:cover; z-index:1; pointer-events:none; opacity:0.85;">
           <source src="https://pub-2a6f35ae1aea46f3a4762ecf8c1a6eae.r2.dev/Background/gacha_card_reveal.mp4" type="video/mp4">
         </video>
 
-        <!-- 頂部資訊列與一鍵翻開 -->
-        <div style="position:relative; z-index:2; width:95%; max-width:440px; display:flex; justify-content:space-between; align-items:center; padding-top:4px;">
+        <div style="position:relative; z-index:2; width:95%; max-width:440px; display:flex; justify-content:space-between; align-items:center;">
           <div style="text-align:left;">
             <div style="color:var(--accent-gold); font-family:monospace; font-weight:900; font-size:15px; letter-spacing:2px; text-shadow:0 0 10px rgba(241,196,15,0.6);">
               TACTICAL DOSSIER
@@ -515,22 +581,20 @@
           </button>
         </div>
 
-        <!-- 卡牌展示容器 (動態注入 single-pull 或 ten-pull) -->
         <div id="gachaCardsContainer" class="gacha-cards-container"></div>
 
-        <!-- 🚀 2. 核心修正：全部翻開後展示雙返回按鈕 -->
-        <div id="gachaActionButtons" style="display:none; width:95%; max-width:440px; gap:10px; margin: 4px auto 10px auto; z-index:35010;">
-          <button class="primary-btn btn-cyan" style="flex:1; margin-top:0; padding:12px 4px; font-size:14px; box-shadow:0 0 15px rgba(0,229,255,0.3);" onclick="closeGachaAndGoBriefing()">
-            🛡️ 返回作戰室
+        <div id="gachaActionButtons" style="display:none; width:95%; max-width:440px; gap:10px; margin-bottom:10px; z-index:35010;">
+          <button class="primary-btn btn-gold" style="flex:1; margin-top:0; padding:12px 5px; font-size:14px; box-shadow:0 0 15px rgba(241,196,15,0.4);" onclick="closeGachaAndStayTerminal()">
+            🎲 再次招募 / RECRUIT
           </button>
-          <button class="primary-btn btn-gold" style="flex:1; margin-top:0; padding:12px 4px; font-size:14px; box-shadow:0 0 15px rgba(241,196,15,0.3);" onclick="closeGachaToTerminal()">
-            🎲 返回招募終端
+          <button class="primary-btn btn-cyan" style="flex:1; margin-top:0; padding:12px 5px; font-size:14px; box-shadow:0 0 15px rgba(0,229,255,0.4);" onclick="closeGachaAndGoBriefing()">
+            🛡️ 歸隊作戰室 / RETURN
           </button>
         </div>
       </div>
     </div>
 
-    <!-- 幹員名冊 Modal -->
+    <!-- 幹員名冊與機率 Modal -->
     <div id="operatorArchiveModal" style="position:fixed; top:0; left:0; width:100vw; height:100vh; background:rgba(2,6,12,0.96); backdrop-filter:blur(18px); z-index:36000; display:none; flex-direction:column; justify-content:center; align-items:center; padding:15px;">
       <div style="background:rgba(8,16,26,0.95); border:1.5px solid var(--noah-cyan); border-radius:20px; width:100%; max-width:440px; max-height:85vh; display:flex; flex-direction:column; padding:18px; box-shadow:0 15px 40px rgba(0,0,0,0.9);">
         <div style="display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid #333; padding-bottom:10px; margin-bottom:12px;">
@@ -561,7 +625,7 @@
       </div>
     </div>
 
-    <!-- 幹員詳細情報 Modal -->
+    <!-- 幹員詳細情報檔案 Modal -->
     <div id="operatorDetailModal" style="position:fixed; top:0; left:0; width:100vw; height:100vh; background:rgba(0,0,0,0.92); backdrop-filter:blur(22px); z-index:37000; display:none; flex-direction:column; justify-content:center; align-items:center; padding:15px;">
       <div style="background:linear-gradient(135deg, rgba(8,18,30,0.98), rgba(4,10,16,0.98)); border:2px solid var(--noah-cyan); border-radius:24px; width:100%; max-width:440px; max-height:88vh; display:flex; flex-direction:column; overflow:hidden; box-shadow:0 0 45px rgba(0,229,255,0.35);">
         <div style="display:flex; justify-content:space-between; align-items:center; padding:12px 18px; border-bottom:1px solid rgba(255,255,255,0.1);">
@@ -604,7 +668,7 @@
           </div>
 
           <div id="detailOpLeaderBox" style="display:none; background:rgba(241,196,15,0.08); border-radius:12px; border:1px solid rgba(241,196,15,0.3); padding:10px 12px; margin-bottom:10px; text-align:left;">
-            <div style="color:var(--accent-gold); font-size:12px; font-weight:900; letter-spacing:1px; margin-bottom:4px; font-family:monospace;">👑 領航光狂 (LEADER AURA)</div>
+            <div style="color:var(--accent-gold); font-size:12px; font-weight:900; letter-spacing:1px; margin-bottom:4px; font-family:monospace;">👑 領航光環 (LEADER AURA)</div>
             <div id="detailOpLeader" style="font-size:13px; color:#f1c40f;">--</div>
           </div>
 
@@ -618,7 +682,7 @@
       </div>
     </div>
 
-    <!-- 高清立繪檢視器 -->
+    <!-- 幹員立繪高清大圖檢視器 -->
     <div id="opArtworkLightbox" style="position:fixed; top:0; left:0; width:100vw; height:100vh; background:rgba(3,6,12,0.96); backdrop-filter:blur(25px); z-index:40000; display:none; flex-direction:column; justify-content:center; align-items:center; cursor:pointer;" onclick="closeArtworkLightbox()">
       <div style="position:absolute; top:20px; right:25px; color:#aaa; font-family:monospace; font-size:13px; background:rgba(0,0,0,0.6); padding:6px 12px; border-radius:20px; border:1px solid #444;">[ ✕ 點擊任意處關閉 ]</div>
       <div style="width:90%; max-width:440px; height:75vh; display:flex; justify-content:center; align-items:center; position:relative;">
@@ -630,7 +694,7 @@
       </div>
     </div>
 
-    <!-- 解鎖畫面 -->
+    <!-- 系統媒體解鎖畫面 -->
     <div id="system-unlock-screen">
       <div style="text-align: center; margin-bottom: 40px;">
         <h1 style="font-size: 50px; text-shadow: 0 0 20px rgba(0,229,255,0.5); margin-bottom: 5px;">N.O.A.H.</h1>
@@ -661,10 +725,10 @@
        <div id="loadingText" style="font-family: monospace; letter-spacing: 2px; font-size: 18px;">NEURAL LINKING...</div>
     </div>
 
-    <!-- 主介面容器 -->
+    <!-- 主容器 -->
     <div id="app-container">
       
-      <!-- 1. 登入 -->
+      <!-- 1. 登入畫面 -->
       <div id="loginScreen" class="screen active">
         <h1 style="margin-bottom: 5px;">N.O.A.H.</h1>
         <div style="color: var(--accent-gold); font-size: 20px; font-weight: bold; letter-spacing: 2px; margin-bottom: 2px;">Sailors' Quest</div>
@@ -685,7 +749,8 @@
         <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
           <div style="text-align:left;">
             <div id="dashGreeting" style="font-size:24px; font-weight:bold; color:var(--noah-cyan);">隊長，歡迎歸隊</div>
-            <div id="dashRank" style="font-size:14px; color:var(--accent-gold); font-weight:bold; margin-top:4px;">RANK: 候補學員</div>
+            <!-- 🚀 稱號：100% 鏡像 Auth_Manager.gs V16.0 演算法 -->
+            <div id="dashRank" style="font-size:14px; color:var(--text-dim); margin-top:4px;">RANK: --</div>
           </div>
           <button style="background:rgba(0,0,0,0.5); border:1px solid #444; color:#888; padding:8px 12px; border-radius:8px;" onclick="logout()">🚪 登出</button>
         </div>
@@ -725,18 +790,18 @@
       <!-- 3. 作戰會議室 -->
       <div id="briefingRoom" class="screen">
         <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px; border-bottom:1px solid #333; padding-bottom:10px;">
-          <div>
-            <span id="roomGreeting" style="font-weight:bold; color:var(--noah-cyan);">隊長</span>
-            <span id="roomRank" style="margin-left:8px; font-size:12px; color:var(--accent-gold); font-family:monospace;">[ 候補學員 ]</span>
-          </div>
+          <div id="roomGreeting" style="font-weight:bold; color:var(--noah-cyan);">隊長</div>
           <div style="color:var(--accent-gold); font-weight:bold;">💰 <span id="roomCoins">0</span></div>
         </div>
-        <div class="squad-view">
-          <div class="op-frame member"><div class="op-placeholder"></div></div>
-          <div class="op-frame leader"><div class="op-placeholder"></div></div>
-          <div class="op-frame member"><div class="op-placeholder"></div></div>
+        
+        <!-- 作戰室三位先鋒預覽 (連動出戰小隊之前三名) -->
+        <div class="squad-view" id="briefingSquadPreview">
+          <div class="op-frame member" id="roomOpSlot1"><div class="op-placeholder"></div></div>
+          <div class="op-frame leader" id="roomOpSlot0"><div class="op-placeholder"></div></div>
+          <div class="op-frame member" id="roomOpSlot2"><div class="op-placeholder"></div></div>
         </div>
-        <button class="primary-btn" style="background:rgba(0,0,0,0.5); border:1px solid #555;" onclick="alert('小隊編成系統即將於下一階段啟動...')">[ 小隊編成 ]</button>
+
+        <button class="primary-btn btn-cyan" onclick="openSquadFormationModal()">🛡️ 小隊編成 (SQUAD FORMATION)</button>
         <button class="primary-btn btn-gold" onclick="openGachaScreen()">🎲 幹員招募 (RECRUIT)</button>
         <button class="primary-btn" style="background:transparent; color:#888;" onclick="navTo('dashboardScreen')">⬅ 返回大廳</button>
       </div>
@@ -791,12 +856,18 @@
         <button class="primary-btn" style="background:transparent; border:2px solid #fff; color:#fff; margin-top:10px;" onclick="navTo('dashboardScreen')">ABORT</button>
       </div>
 
-      <!-- 6. 任務戰鬥核心介面 -->
+      <!-- 6. ⚔️ 任務戰鬥核心介面 -->
       <div id="missionScreen" class="screen">
-        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px; font-family:monospace; min-height:26px;">
-          <div id="missionProgress" style="color:var(--noah-cyan); font-weight:bold;">SYNC: 1/10</div>
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px; font-family:monospace; min-height:26px;">
+          <div id="missionProgress" style="color:var(--noah-cyan); font-weight:bold; font-size:13px;">SYNC: 1/10</div>
+          
+          <div class="player-sync-hp">
+            <span style="color:var(--noah-cyan); font-size:10px;">CAPTAIN:</span>
+            <span id="playerHpHearts" class="player-hearts">♥♥♥</span>
+          </div>
+
           <div id="comboBadge">COMBO x0</div>
-          <div id="missionTimer" style="color:var(--accent-gold); font-weight:bold;">00:00</div>
+          <div id="missionTimer" style="color:var(--accent-gold); font-weight:bold; font-size:13px;">00:00</div>
         </div>
         
         <div class="q-image-box">
@@ -807,7 +878,9 @@
             <span class="enemy-hearts" id="enemyHpHearts">♥</span>
           </div>
 
-          <div id="bossAlarmOverlay"></div>
+          <div id="attackSlashVfx" class="attack-slash-line"></div>
+          <div id="bossHazardBanner">⚠️ WARNING: THREAT APPROACHING ⚠️</div>
+
           <img id="qImage" class="q-stage-bg" src="">
           <img id="enemySprite" class="enemy-sprite" src="">
         </div>
@@ -818,6 +891,8 @@
         
         <div id="answerArea"></div>
         <button id="submitBtn" class="primary-btn btn-cyan" style="display:none;" onclick="checkAnswer()">SUBMIT DATA</button>
+
+        <!-- 🛡️ 底部 5 人小隊半身戰術框 (由出戰 Preset 動態決定) -->
         <div id="tacticalSquadDock"></div>
       </div>
 
@@ -926,33 +1001,64 @@
 
     <script>
       // ==========================================
-      // 🚀 1. 全域設定、階級階梯與音訊資源
+      // 🚀 1. 全域設定與中轉 API 網址
       // ==========================================
       const API_URL = "https://noah-api-proxy.hksatutors.workers.dev/";
       const R2_BASE = "https://pub-2a6f35ae1aea46f3a4762ecf8c1a6eae.r2.dev";
 
-      // 🎖️ 3. 核心修正：階級經驗值自動晉級表
-      const RANK_LADDER = [
-        { minExp: 0,     title: "候補學員", icon: "🌱" },
-        { minExp: 500,   title: "初階幹員", icon: "🥉" },
-        { minExp: 1500,  title: "前線先鋒", icon: "🥈" },
-        { minExp: 3500,  title: "精銳特擊", icon: "🥇" },
-        { minExp: 6500,  title: "戰術破譯官", icon: "🔮" },
-        { minExp: 10000, title: "神經指揮官", icon: "⚡" },
-        { minExp: 15000, title: "聖域領航者", icon: "👑" },
-        { minExp: 22000, title: "傳奇執政官", icon: "🌌" }
-      ];
+      // 詞性標準化全寫字典
+      const POS_STANDARDIZED = {
+        "n": "Noun", "noun": "Noun",
+        "v": "Verb", "verb": "Verb",
+        "adj": "Adjective", "adjective": "Adjective",
+        "adv": "Adverb", "adverb": "Adverb",
+        "prep": "Preposition", "preposition": "Preposition",
+        "conj": "Conjunction", "conjunction": "Conjunction",
+        "pron": "Pronoun", "pronoun": "Pronoun"
+      };
 
-      function calculateRankFromExp(exp) {
-        var n = Number(exp || 0);
-        var res = RANK_LADDER[0].title;
-        for (var i = RANK_LADDER.length - 1; i >= 0; i--) {
-          if (n >= RANK_LADDER[i].minExp) {
-            res = RANK_LADDER[i].title;
-            break;
-          }
-        }
-        return res;
+      // 🚀 100% 鏡像 Auth_Manager.gs V16.0 的 Rank 計算引擎
+      function calculateRank(exp) {
+        const currentExp = Number(exp) || 0;
+        if (currentExp < 2500)   return { level: 1,  title: "候補學員",     icon: "📝" };
+        if (currentExp < 7500)   return { level: 2,  title: "初階幹員",     icon: "🔰" };
+        if (currentExp < 15000)  return { level: 3,  title: "正式幹員",     icon: "⚓" };
+        if (currentExp < 25000)  return { level: 4,  title: "資深幹員",     icon: "🧭" };
+        if (currentExp < 40000)  return { level: 5,  title: "菁英幹員",     icon: "💠" };
+        if (currentExp < 60000)  return { level: 6,  title: "特遣專員",     icon: "🎖️" };
+        if (currentExp < 85000)  return { level: 7,  title: "高級特遣專員", icon: "🔱" };
+        if (currentExp < 115000) return { level: 8,  title: "戰術大師",     icon: "🎯" };
+        if (currentExp < 150000) return { level: 9,  title: "首席戰術大師", icon: "⚡" };
+        if (currentExp < 190000) return { level: 10, title: "前線指揮官",   icon: "⚔️" };
+        if (currentExp < 235000) return { level: 11, title: "總指揮官",     icon: "🦅" };
+        if (currentExp < 290000) return { level: 12, title: "領航艦長",     icon: "👑" };
+        return { level: 13, title: "傳奇探索者", icon: "🌌" }; 
+      }
+
+      // 🚀 核心：幹員物件雙向相容解析器 (完美兼融大寫下劃線與小寫駝峰)
+      function normalizeOp(raw) {
+        if (!raw) return null;
+        var cardId = raw.Card_ID || raw.cardId || raw.id || "OP_R_01";
+        var baseImg = raw.Image_URL || raw.imageUrl || (R2_BASE + "/Cards/" + cardId + ".png");
+        var skillImg = raw.Skill_Image_URL || raw.skillImageUrl || raw.skillImg || baseImg;
+
+        return {
+          cardId: cardId,
+          nameZh: raw.Name_ZH || raw.nameZh || raw.name || "幹員",
+          nameEn: raw.Name_EN || raw.nameEn || "Operative",
+          rarity: raw.Rarity || raw.rarity || "R",
+          faction: raw.Faction || raw.faction || "中立",
+          role: raw.Role || raw.role || "戰術",
+          activeSkill: raw.Active_Skill || raw.activeSkill || "超頻解析",
+          activeCode: raw.Active_Code || raw.activeCode || "",
+          chargeCost: Number(raw.Charge_Cost || raw.chargeCost || 2),
+          passiveSkill: raw.Passive_Skill || raw.passiveSkill || "",
+          passiveCode: raw.Passive_Code || raw.passiveCode || "",
+          leaderAura: raw.Leader_Aura || raw.leaderAura || "",
+          imageUrl: baseImg,
+          skillImageUrl: skillImg, // 🚀 差分立繪
+          profile: raw.Profile || raw.profile || ""
+        };
       }
 
       var VOICE_POOL = {
@@ -962,15 +1068,9 @@
 
       var MEDIA = {
         videos: { 
-          loginScreen: "vid-login", 
-          dashboardScreen: "vid-dashboard", 
-          vocab_basic: "vid-vocab_basic", 
-          vocab_adv: "vid-vocab_adv", 
-          grammar: "vid-grammar", 
-          listening: "vid-listening", 
-          briefingRoom: "vid-briefingRoom", 
-          finishScreen: "vid-finishScreen",
-          gachaScreen: "vid-briefingRoom"
+          loginScreen: "vid-login", dashboardScreen: "vid-dashboard", vocab_basic: "vid-vocab_basic", 
+          vocab_adv: "vid-vocab_adv", grammar: "vid-grammar", listening: "vid-listening", 
+          briefingRoom: "vid-briefingRoom", finishScreen: "vid-finishScreen", gachaScreen: "vid-briefingRoom"
         },
         gachaBgm: R2_BASE + "/Bgm/テセウスの船.mp3",
         bgm: [
@@ -990,30 +1090,18 @@
           {name:"Open Your Network", url: R2_BASE + "/Bgm/Open_Your_Network.mp3", type:"day"}
         ],
         sfx: { 
-          login_success: R2_BASE + "/SFX/login_success.mp3", 
-          login_fail: R2_BASE + "/SFX/login_fail.mp3", 
-          click: R2_BASE + "/SFX/click.mp3", 
-          vocab: R2_BASE + "/SFX/vocab.mp3", 
-          grammar: R2_BASE + "/SFX/grammar.mp3", 
-          listening: R2_BASE + "/SFX/listening.mp3", 
-          submit: R2_BASE + "/SFX/submit_answer.mp3", 
-          correct: R2_BASE + "/SFX/correct.mp3", 
-          wrong: R2_BASE + "/SFX/wrong.mp3", 
-          next: R2_BASE + "/SFX/nextquestion.mp3", 
-          clear: R2_BASE + "/SFX/clear.mp3", 
-          rank_up: R2_BASE + "/SFX/rank_up.mp3", 
-          promotion: R2_BASE + "/SFX/promotion.mp3",
-          gacha_ssr_stinger: R2_BASE + "/SFX/gacha_ssr_stinger.mp3",
-          gacha_flip_r: R2_BASE + "/SFX/gacha_flip_r.mp3",
-          gacha_flip_sr: R2_BASE + "/SFX/gacha_flip_sr.mp3",
-          gacha_flip_ssr: R2_BASE + "/SFX/gacha_flip_ssr.mp3",
-          dossier_open: R2_BASE + "/SFX/dossier_open.mp3",
-          hit_normal: R2_BASE + "/SFX/sfx_hit_normal.mp3",
-          hit_critical: R2_BASE + "/SFX/sfx_hit_critical.mp3",
-          shield_block: R2_BASE + "/SFX/sfx_shield_block.mp3",
-          enemy_attack: R2_BASE + "/SFX/sfx_enemy_attack.mp3",
-          skill_cast: R2_BASE + "/SFX/sfx_skill_cast.mp3",
-          boss_alarm: R2_BASE + "/SFX/sfx_boss_alarm.mp3"
+          login_success: R2_BASE + "/SFX/login_success.mp3", login_fail: R2_BASE + "/SFX/login_fail.mp3", 
+          click: R2_BASE + "/SFX/click.mp3", vocab: R2_BASE + "/SFX/vocab.mp3", 
+          grammar: R2_BASE + "/SFX/grammar.mp3", listening: R2_BASE + "/SFX/listening.mp3", 
+          submit: R2_BASE + "/SFX/submit_answer.mp3", correct: R2_BASE + "/SFX/correct.mp3", 
+          wrong: R2_BASE + "/SFX/wrong.mp3", next: R2_BASE + "/SFX/nextquestion.mp3", 
+          clear: R2_BASE + "/SFX/clear.mp3", rank_up: R2_BASE + "/SFX/rank_up.mp3", 
+          promotion: R2_BASE + "/SFX/promotion.mp3", gacha_ssr_stinger: R2_BASE + "/SFX/gacha_ssr_stinger.mp3",
+          gacha_flip_r: R2_BASE + "/SFX/gacha_flip_r.mp3", gacha_flip_sr: R2_BASE + "/SFX/gacha_flip_sr.mp3", 
+          gacha_flip_ssr: R2_BASE + "/SFX/gacha_flip_ssr.mp3", dossier_open: R2_BASE + "/SFX/dossier_open.mp3",
+          hit_normal: R2_BASE + "/SFX/sfx_hit_normal.mp3", hit_critical: R2_BASE + "/SFX/sfx_hit_critical.mp3",
+          shield_block: R2_BASE + "/SFX/sfx_shield_block.mp3", enemy_attack: R2_BASE + "/SFX/sfx_enemy_attack.mp3",
+          skill_cast: R2_BASE + "/SFX/sfx_skill_cast.mp3", boss_alarm: R2_BASE + "/SFX/sfx_boss_alarm.mp3"
         }
       };
 
@@ -1035,13 +1123,20 @@
         }
       };
 
-      var currentSquad = [
-        { id: "OP_SSR_01", name: "領航者", skill: "超頻解析", chargeCost: 3, currentSp: 0, img: R2_BASE + "/Cards/OP_SSR_01.png" },
-        { id: "OP_SR_01",  name: "破譯手", skill: "護盾過載", chargeCost: 3, currentSp: 0, img: R2_BASE + "/Cards/OP_SR_01.png" },
-        { id: "OP_SR_02",  name: "重裝衛士", skill: "連擊狂潮", chargeCost: 3, currentSp: 0, img: R2_BASE + "/Cards/OP_SR_02.png" },
-        { id: "OP_R_01",   name: "通訊專員", skill: "深度掃描", chargeCost: 2, currentSp: 0, img: R2_BASE + "/Cards/OP_R_01.png" },
-        { id: "OP_R_02",   name: "偵察兵", skill: "逆向線索", chargeCost: 2, currentSp: 0, img: R2_BASE + "/Cards/OP_R_02.png" }
-      ];
+      // 🛡️ 常備幹員總表快取 (Operator_Pool)
+      var globalOperatorPool = [];
+      // 🎒 學生持有的幹員庫清單 (Player_Inventory)
+      var playerInventory = [];
+      // 📋 3 套小隊預設 (Player_Squads)
+      var playerPresets = {
+        active: 1,
+        preset1: ["OP_SSR_01", "OP_SR_01", "OP_SR_02", "OP_R_01", "OP_R_02"],
+        preset2: ["OP_SSR_01", "OP_SR_01", "OP_SR_02", "OP_R_01", "OP_R_02"],
+        preset3: ["OP_SSR_01", "OP_SR_01", "OP_SR_02", "OP_R_01", "OP_R_02"]
+      };
+
+      // 出戰小隊實體陣列 (長度 5，包含 SP 蓄能)
+      var battleSquad = [];
 
       var currentUserData = null, isBgmPlaying = false, missionQueue = [], currentIdx = 0;
       var currentMissionType = "", missionResults = [], wrongAttempts = 0, timerVal = 0, timerInterval;
@@ -1051,7 +1146,9 @@
 
       var bossStartIndex = -1, maxBossHp = 3, currentBossHp = 3;
       var isBossPhase = false, currentEnemyMode = "vocab", lastMinionIndex = -1;
+      var activeLockedBossIndex = null;
       var activeShieldCount = 0;
+      var playerMaxHp = 3, playerCurrentHp = 3;
 
       var bgmPlayer = document.getElementById('bgm-player'), sePlayer = document.getElementById('se-player'), elevenPlayer = document.getElementById('eleven-player');
       var bgmSelect = document.getElementById('bgmSelect'), sysMsgBox = document.getElementById('sysMsgBox');
@@ -1121,7 +1218,8 @@
           }
         }
         
-        el.style.left = x + 'px'; el.style.top = y + 'px';
+        el.style.left = x + 'px';
+        el.style.top = y + 'px';
         document.body.appendChild(el);
         setTimeout(function() { el.remove(); }, 1600);
       }
@@ -1249,10 +1347,14 @@
         if (targetScreen) targetScreen.classList.add('active');
         
         var targetVidId = MEDIA.videos[screenId] || (screenId === 'missionScreen' ? MEDIA.videos[currentMissionType] : MEDIA.videos.dashboardScreen);
+        
         document.querySelectorAll('.bg-vid').forEach(function(vid) { if (vid.id === targetVidId) vid.classList.add('active-bg'); else vid.classList.remove('active-bg'); });
         document.getElementById('bgmController').style.display = (screenId === 'loginScreen') ? 'none' : 'flex';
       }
 
+      // ==========================================
+      // 🚀 2. 登入邏輯與後台陣容載入
+      // ==========================================
       function attemptLogin() {
         var id = String(document.getElementById('inputId').value).trim(), pin = String(document.getElementById('inputPin').value).trim();
         if(!id || !pin) return showSysMsg("⚠️ Please enter ID and PIN", true);
@@ -1286,6 +1388,9 @@
                 greetEl.innerText = "WELCOME BACK, CAPTAIN " + (currentUserData.name || "OPERATIVE");
                 progFill.style.width = '100%';
 
+                // 🚀 登入成功後，並行拉取幹員總表、背包與小隊 Presets
+                fetchUserDataAndSquads();
+
                 setTimeout(function() {
                   transOverlay.style.display = 'none';
                   updateUI(); 
@@ -1303,36 +1408,355 @@
             }
         }).catch(err => {
             transOverlay.style.display = 'none';
-            showSysMsg("⚠️ Server Error", true);
+            showSysMsg("🚨 Server Error", true);
         });
       }
 
-      // 🚀 3. 核心修正：動態計算並展示最新階級稱號
       function updateUI() {
         if(!currentUserData) return;
-        var calculatedRank = calculateRankFromExp(currentUserData.totalExp);
-        var activeRank = currentUserData.rankName || currentUserData.rank || calculatedRank;
-        
         document.getElementById('dashGreeting').innerText = "隊長 " + (currentUserData.name || "Unknown") + "，歡迎歸隊";
-        document.getElementById('dashRank').innerText = "RANK: " + activeRank;
+        
+        // 🚀 稱號更新：100% 依據 Auth_Manager.gs V16.0 的 calculateRank
+        var rankInfo = calculateRank(currentUserData.totalExp);
+        document.getElementById('dashRank').innerText = "RANK: " + rankInfo.icon + " " + rankInfo.title;
+
         document.getElementById('dashCoins').innerText = currentUserData.coins;
         document.getElementById('dashExp').innerText = currentUserData.totalExp;
         document.getElementById('roomCoins').innerText = currentUserData.coins;
         document.getElementById('gachaCoinsDisplay').innerText = currentUserData.coins;
         document.getElementById('roomGreeting').innerText = (currentUserData.name || "隊長");
-        document.getElementById('roomRank').innerText = "[ " + activeRank + " ]";
         document.getElementById('dashTotalMissions').innerText = currentUserData.totalMissions || 0;
         document.getElementById('dashTotalQuestions').innerText = currentUserData.totalQuestions || 0;
+
+        renderBriefingRoomSquad();
       }
 
       function logout() { 
           playSFX('click');
           localStorage.removeItem('noah_id'); localStorage.removeItem('noah_pin'); 
-          if (window.parent !== window) { window.parent.postMessage({ type: 'CLEAR_CREDENTIALS' }, '*'); }
-          if (window.AppInventor) { window.AppInventor.setWebViewString("LOGOUT"); }
           currentUserData = null; isMissionActive = false;
           document.getElementById('inputId').value = ""; document.getElementById('inputPin').value = "";
           navTo('loginScreen');
+      }
+
+      // ==========================================
+      // 🛡️ 3. 幹員庫、背包與小隊 Preset 系統
+      // ==========================================
+      function fetchUserDataAndSquads() {
+        // 同步請求幹員總庫、玩家背包與陣容
+        fetch(API_URL, {
+          method: 'POST', headers: { 'Content-Type': 'text/plain' },
+          body: JSON.stringify({ action: 'getOperatorPool' })
+        })
+        .then(res => res.json())
+        .then(res => {
+          if (res && res.success && res.operators) {
+            globalOperatorPool = res.operators.map(normalizeOp);
+          }
+          // 嘗試載入玩家已儲存的陣容
+          loadSquadPresets();
+        }).catch(() => {
+          loadSquadPresets();
+        });
+      }
+
+      function loadSquadPresets() {
+        // 優先讀取 local 快取或後端資料
+        var cachedPresets = localStorage.getItem('noah_squad_presets_' + currentUserData.studentId);
+        if (cachedPresets) {
+          try { playerPresets = JSON.parse(cachedPresets); } catch(e){}
+        }
+        buildActiveBattleSquad();
+        renderBriefingRoomSquad();
+      }
+
+      // 依據當前 Active_Preset_Index 組合出戰的 5 人名單
+      function buildActiveBattleSquad() {
+        var activeKey = "preset" + (playerPresets.active || 1);
+        var cardIds = playerPresets[activeKey] || ["OP_SSR_01", "OP_SR_01", "OP_SR_02", "OP_R_01", "OP_R_02"];
+        
+        battleSquad = cardIds.map((cid, idx) => {
+          var found = globalOperatorPool.find(o => o.cardId === cid);
+          if (!found) {
+            found = {
+              cardId: cid, nameZh: "幹員 " + (idx+1), role: "戰術", activeSkill: "超頻解析",
+              chargeCost: 2, imageUrl: `${R2_BASE}/Cards/${cid}.png`, skillImageUrl: `${R2_BASE}/Cards/${cid}.png`
+            };
+          }
+          return {
+            ...found,
+            currentSp: 2 // 開局預蓄 2 SP，保證技能可立即測試
+          };
+        });
+      }
+
+      // 渲染作戰室中央 3 位先鋒立繪 (0: 隊長, 1: 隊員1, 2: 隊員2)
+      function renderBriefingRoomSquad() {
+        if (!battleSquad || battleSquad.length < 3) return;
+        var s0 = document.getElementById('roomOpSlot0');
+        var s1 = document.getElementById('roomOpSlot1');
+        var s2 = document.getElementById('roomOpSlot2');
+        
+        if (s0) s0.innerHTML = `<img src="${battleSquad[0].imageUrl}" onerror="this.src='${R2_BASE}/Cards/OP_SSR_01.png'" style="width:100%; height:100%; object-fit:contain; object-position:center bottom;">`;
+        if (s1) s1.innerHTML = `<img src="${battleSquad[1].imageUrl}" onerror="this.src='${R2_BASE}/Cards/OP_SR_01.png'" style="width:100%; height:100%; object-fit:contain; object-position:center bottom;">`;
+        if (s2) s2.innerHTML = `<img src="${battleSquad[2].imageUrl}" onerror="this.src='${R2_BASE}/Cards/OP_SR_02.png'" style="width:100%; height:100%; object-fit:contain; object-position:center bottom;">`;
+      }
+
+      // ==========================================
+      // 🛡️ 4. 全息小隊編成 Modal 操作邏輯
+      // ==========================================
+      var currentEditingPresetTab = 1;
+      var selectedSlotIndex = 0; // 當前選中的槽位 (0~4)
+
+      function openSquadFormationModal() {
+        playSFX('click');
+        currentEditingPresetTab = playerPresets.active || 1;
+        selectedSlotIndex = 0;
+        document.getElementById('squadFormationModal').style.display = "flex";
+        renderFormationUI();
+      }
+
+      function closeSquadFormationModal() {
+        playSFX('click');
+        document.getElementById('squadFormationModal').style.display = "none";
+      }
+
+      function switchPresetTab(tabIndex) {
+        playSFX('click');
+        currentEditingPresetTab = tabIndex;
+        selectedSlotIndex = 0;
+        renderFormationUI();
+      }
+
+      function setActiveBattlePreset() {
+        playSFX('click');
+        playerPresets.active = currentEditingPresetTab;
+        buildActiveBattleSquad();
+        renderBriefingRoomSquad();
+        renderFormationUI();
+        showSysMsg("⚡ 已將 [小隊 " + currentEditingPresetTab + "] 設為出戰陣容！", false);
+      }
+
+      function renderFormationUI() {
+        // 1. 標籤按鈕高亮
+        for (let i = 1; i <= 3; i++) {
+          var btn = document.getElementById('pTab' + i);
+          var isCurrentTab = (i === currentEditingPresetTab);
+          var isBattleActive = (i === (playerPresets.active || 1));
+          btn.className = "preset-tab-btn" + (isCurrentTab ? " active" : "") + (isBattleActive ? " is-battle-active" : "");
+          btn.innerText = "小隊 " + i + (isBattleActive ? " [出戰]" : "");
+        }
+
+        // 2. 當前分頁的 5 個插槽
+        var currentPresetKey = "preset" + currentEditingPresetTab;
+        var currentPresetCardIds = playerPresets[currentPresetKey] || ["OP_SSR_01", "OP_SR_01", "OP_SR_02", "OP_R_01", "OP_R_02"];
+        var slotsGrid = document.getElementById('formationSlotsGrid');
+        slotsGrid.innerHTML = "";
+
+        currentPresetCardIds.forEach((cid, idx) => {
+          var op = globalOperatorPool.find(o => o.cardId === cid) || { cardId: cid, nameZh: "幹員", imageUrl: `${R2_BASE}/Cards/${cid}.png` };
+          var slotDiv = document.createElement('div');
+          slotDiv.className = "formation-slot-item" + (idx === 0 ? " is-leader" : "") + (idx === selectedSlotIndex ? " selected" : "");
+          
+          slotDiv.innerHTML = `
+            <div class="formation-slot-label">${idx === 0 ? "👑LEADER" : "SLOT " + (idx+1)}</div>
+            <img src="${op.imageUrl}" onerror="this.src='${R2_BASE}/Cards/OP_R_01.png'" style="width:100%; height:100%; object-fit:contain; object-position:center bottom;">
+          `;
+
+          slotDiv.onclick = function() {
+            playSFX('click');
+            selectedSlotIndex = idx;
+            renderFormationUI();
+          };
+          slotsGrid.appendChild(slotDiv);
+        });
+
+        // 3. 幹員庫清單 (點選替換到 selectedSlotIndex)
+        var invGrid = document.getElementById('formationInventoryGrid');
+        invGrid.innerHTML = "";
+
+        // 若尚未有背包數據，使用 globalOperatorPool 供自由編隊
+        var displayInventory = (globalOperatorPool.length > 0) ? globalOperatorPool : [
+          { cardId: "OP_SSR_01", nameZh: "領航者", rarity: "SSR", imageUrl: `${R2_BASE}/Cards/OP_SSR_01.png` },
+          { cardId: "OP_SR_01",  nameZh: "破譯手", rarity: "SR",  imageUrl: `${R2_BASE}/Cards/OP_SR_01.png` },
+          { cardId: "OP_SR_02",  nameZh: "鐵衛",   rarity: "SR",  imageUrl: `${R2_BASE}/Cards/OP_SR_02.png` },
+          { cardId: "OP_R_01",   nameZh: "信標",   rarity: "R",   imageUrl: `${R2_BASE}/Cards/OP_R_01.png` },
+          { cardId: "OP_R_02",   nameZh: "幽影",   rarity: "R",   imageUrl: `${R2_BASE}/Cards/OP_R_02.png` }
+        ];
+
+        displayInventory.forEach(op => {
+          var isAlreadyEquipped = currentPresetCardIds.includes(op.cardId);
+          var cardDiv = document.createElement('div');
+          cardDiv.className = "inv-item-card" + (isAlreadyEquipped ? " equipped" : "");
+          
+          cardDiv.innerHTML = `
+            <div style="font-size:8px; font-weight:bold; color:var(--accent-gold);">${op.rarity}</div>
+            <div style="width:100%; aspect-ratio:2/3; margin:2px 0; overflow:hidden;">
+              <img src="${op.imageUrl}" onerror="this.src='${R2_BASE}/Cards/OP_R_01.png'" style="width:100%; height:100%; object-fit:contain;">
+            </div>
+            <div style="font-size:9px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">${op.nameZh.replace(/【.*?】/, '')}</div>
+          `;
+
+          cardDiv.onclick = function() {
+            if (isAlreadyEquipped) return;
+            playSFX('click');
+            // 替換選中的槽位
+            currentPresetCardIds[selectedSlotIndex] = op.cardId;
+            playerPresets[currentPresetKey] = currentPresetCardIds;
+            buildActiveBattleSquad();
+            renderBriefingRoomSquad();
+            renderFormationUI();
+          };
+          invGrid.appendChild(cardDiv);
+        });
+      }
+
+      function saveAndCloseSquadFormation() {
+        playSFX('click');
+        buildActiveBattleSquad();
+        renderBriefingRoomSquad();
+        
+        // 本機持久化保存
+        if (currentUserData && currentUserData.studentId) {
+          localStorage.setItem('noah_squad_presets_' + currentUserData.studentId, JSON.stringify(playerPresets));
+        }
+
+        // 向後端試算表 Player_Squads 同步存檔
+        fetch(API_URL, {
+          method: 'POST', headers: { 'Content-Type': 'text/plain' },
+          body: JSON.stringify({
+            action: 'saveSquadPresets',
+            studentId: currentUserData.studentId,
+            activePresetIndex: playerPresets.active || 1,
+            preset1: playerPresets.preset1.join(","),
+            preset2: playerPresets.preset2.join(","),
+            preset3: playerPresets.preset3.join(",")
+          })
+        }).catch(()=>{});
+
+        closeSquadFormationModal();
+        showSysMsg("✅ 小隊陣容已儲存完畢！", false);
+      }
+
+      // ==========================================
+      // 🛡️ 5. 戰鬥小隊戰術槽與技能 (支援 Skill_Image_URL 差分)
+      // ==========================================
+      function renderTacticalDock() {
+        var dock = document.getElementById('tacticalSquadDock');
+        if (!dock) return;
+        dock.innerHTML = "";
+
+        battleSquad.forEach((op, idx) => {
+          var isReady = op.currentSp >= op.chargeCost;
+          var slot = document.createElement('div');
+          slot.className = "squad-slot" + (idx === 0 ? " is-leader" : "") + (isReady ? " is-ready" : "");
+          slot.title = op.nameZh + " (" + op.activeSkill + ")";
+          var fillPercent = Math.min(100, Math.floor((op.currentSp / op.chargeCost) * 100));
+
+          slot.innerHTML = `
+            <img class="squad-slot-img" src="${op.imageUrl}" onerror="this.src='${R2_BASE}/Cards/OP_R_01.png'">
+            <div class="squad-sp-gauge"><div class="squad-sp-fill" style="width:${fillPercent}%;"></div></div>
+          `;
+
+          slot.onclick = function() {
+            if (isReady && !isQuestionLocked) {
+              castOperatorSkill(idx);
+            } else if (!isReady) {
+              showSysMsg("⚠️ SP 充能中 (" + op.currentSp + "/" + op.chargeCost + ")，答對題目可充能！", false);
+            }
+          };
+          dock.appendChild(slot);
+        });
+      }
+
+      function chargeSquadSP(points) {
+        battleSquad.forEach(op => {
+          op.currentSp = Math.min(op.chargeCost, op.currentSp + points);
+        });
+        renderTacticalDock();
+      }
+
+      function castOperatorSkill(opIdx) {
+        var op = battleSquad[opIdx];
+        if (op.currentSp < op.chargeCost) return;
+        op.currentSp = 0;
+        renderTacticalDock();
+        playSFX('skill_cast');
+
+        // 🚀 核心升級：釋放技能時讀取 Skill_Image_URL 差分立繪
+        var cutinOverlay = document.getElementById('skillCutinOverlay');
+        var charImg = document.getElementById('cutinCharImg');
+        var skillText = document.getElementById('cutinSkillText');
+
+        charImg.src = op.skillImageUrl || op.imageUrl;
+        skillText.innerText = "【" + op.nameZh + "】" + op.activeSkill + "！";
+        cutinOverlay.style.display = "flex";
+
+        setTimeout(function() {
+          cutinOverlay.style.display = "none";
+        }, 550);
+
+        if (op.activeSkill === "超頻解析" || op.activeSkill === "深度掃描") {
+          var wrongBtns = Array.from(document.querySelectorAll('.option-btn')).filter(b => b.innerText.trim().toLowerCase() !== targetCurrentAnswer.toLowerCase());
+          wrongBtns.slice(0, 2).forEach(b => {
+            b.style.opacity = "0.2";
+            b.style.pointerEvents = "none";
+            b.style.textDecoration = "line-through";
+          });
+          spawnFloatingText("✂️ 排除 2 個干擾項！", true);
+        } else if (op.activeSkill === "護盾過載") {
+          activeShieldCount++;
+          spawnFloatingText("🛡️ 戰術護盾就緒！", true);
+        } else if (op.activeSkill === "連擊狂潮") {
+          currentCombo += 2;
+          updateComboUI();
+          spawnFloatingText("🔥 COMBO +2！", true);
+        } else {
+          spawnFloatingText("⚡ 戰術同調啟動！", true);
+        }
+      }
+
+      // ==========================================
+      // 👾 6. 敵方動態刷新 (鎖定 Boss 與血條)
+      // ==========================================
+      function updateBattleEnemy() {
+        var modeConfig = ENEMY_CONFIG[currentEnemyMode] || ENEMY_CONFIG.vocab;
+        var enemySpriteEl = document.getElementById('enemySprite');
+        var nameLabel = document.getElementById('enemyNameLabel');
+        var heartsEl = document.getElementById('enemyHpHearts');
+        var hazardBanner = document.getElementById('bossHazardBanner');
+
+        enemySpriteEl.classList.remove('enemy-dissolve', 'enemy-hit', 'boss-slam-active');
+
+        if (currentIdx < bossStartIndex) {
+          isBossPhase = false;
+          let randomIndex;
+          do {
+            randomIndex = Math.floor(Math.random() * modeConfig.minions) + 1;
+          } while (modeConfig.minions > 1 && randomIndex === lastMinionIndex);
+          lastMinionIndex = randomIndex;
+
+          var padIndex = String(randomIndex).padStart(2, '0');
+          enemySpriteEl.src = `${R2_BASE}/Enemies/minion_${currentEnemyMode}_${padIndex}.png`;
+          nameLabel.innerText = modeConfig.minionNames[randomIndex - 1] || "數據感染體";
+          heartsEl.innerText = "♥";
+        } else {
+          if (activeLockedBossIndex === null) {
+            activeLockedBossIndex = Math.floor(Math.random() * modeConfig.bosses) + 1;
+            isBossPhase = true;
+            playSFX('boss_alarm');
+            hazardBanner.style.display = "flex";
+            enemySpriteEl.classList.add('boss-slam-active');
+            setTimeout(() => { hazardBanner.style.display = "none"; }, 1300);
+          }
+
+          var bossPad = String(activeLockedBossIndex).padStart(2, '0');
+          enemySpriteEl.src = `${R2_BASE}/Enemies/boss_${currentEnemyMode}_${bossPad}.png`;
+          nameLabel.innerText = modeConfig.bossNames[activeLockedBossIndex - 1] || "【守門領主】";
+          
+          var heartsStr = "♥".repeat(Math.max(0, currentBossHp)) + "🖤".repeat(Math.max(0, maxBossHp - currentBossHp));
+          heartsEl.innerText = heartsStr || "K.O.";
+        }
       }
 
       function showBriefing(type) {
@@ -1345,117 +1769,6 @@
         if (document.getElementById('briefingTitle')) document.getElementById('briefingTitle').innerText = bTitle;
         if (document.getElementById('briefingDesc')) document.getElementById('briefingDesc').innerText = bDesc;
         navTo('preMissionScreen'); 
-      }
-
-      // ==========================================
-      // 🛡️ 戰術小隊與技能釋放機制
-      // ==========================================
-      function renderTacticalDock() {
-        var dock = document.getElementById('tacticalSquadDock');
-        dock.innerHTML = "";
-        currentSquad.forEach((op, idx) => {
-          var isReady = op.currentSp >= op.chargeCost;
-          var slot = document.createElement('div');
-          slot.className = "squad-slot" + (isReady ? " is-ready" : "");
-          slot.title = op.name + " (" + op.skill + ")";
-          
-          var fillPercent = Math.min(100, Math.floor((op.currentSp / op.chargeCost) * 100));
-          slot.innerHTML = `
-            <img class="squad-slot-img" src="${op.img}" onerror="this.src='${R2_BASE}/Cards/OP_R_01.png'">
-            <div class="squad-sp-gauge"><div class="squad-sp-fill" style="width:${fillPercent}%;"></div></div>
-          `;
-          slot.onclick = function() {
-            if (isReady && !isQuestionLocked) {
-              castOperatorSkill(idx);
-            }
-          };
-          dock.appendChild(slot);
-        });
-      }
-
-      function chargeSquadSP(points) {
-        currentSquad.forEach(op => {
-          op.currentSp = Math.min(op.chargeCost, op.currentSp + points);
-        });
-        renderTacticalDock();
-      }
-
-      function castOperatorSkill(opIdx) {
-        var op = currentSquad[opIdx];
-        if (op.currentSp < op.chargeCost) return;
-        op.currentSp = 0;
-        renderTacticalDock();
-
-        playSFX('skill_cast');
-
-        var cutinOverlay = document.getElementById('skillCutinOverlay');
-        var charImg = document.getElementById('cutinCharImg');
-        var skillText = document.getElementById('cutinSkillText');
-
-        charImg.src = op.img;
-        skillText.innerText = "【" + op.name + "】" + op.skill + "！";
-        cutinOverlay.style.display = "flex";
-
-        setTimeout(function() {
-          cutinOverlay.style.display = "none";
-        }, 550);
-
-        if (op.skill === "超頻解析") {
-          var wrongBtns = Array.from(document.querySelectorAll('.option-btn')).filter(b => b.innerText.trim().toLowerCase() !== targetCurrentAnswer.toLowerCase());
-          wrongBtns.slice(0, 2).forEach(b => {
-            b.style.opacity = "0.2";
-            b.style.pointerEvents = "none";
-            b.style.textDecoration = "line-through";
-          });
-          spawnFloatingText("✂️ 排除 2 個干擾項！", true);
-        } else if (op.skill === "護盾過載") {
-          activeShieldCount++;
-          spawnFloatingText("🛡️ 戰術護盾就緒！", true);
-        } else if (op.skill === "連擊狂潮") {
-          currentCombo += 2;
-          updateComboUI();
-          spawnFloatingText("🔥 COMBO +2！", true);
-        } else {
-          spawnFloatingText("⚡ 戰術同調啟動！", true);
-        }
-      }
-
-      function updateBattleEnemy() {
-        var modeConfig = ENEMY_CONFIG[currentEnemyMode] || ENEMY_CONFIG.vocab;
-        var enemySpriteEl = document.getElementById('enemySprite');
-        var nameLabel = document.getElementById('enemyNameLabel');
-        var heartsEl = document.getElementById('enemyHpHearts');
-        var alarmOverlay = document.getElementById('bossAlarmOverlay');
-
-        enemySpriteEl.classList.remove('enemy-dissolve', 'enemy-hit');
-
-        if (currentIdx < bossStartIndex) {
-          isBossPhase = false;
-          alarmOverlay.style.display = "none";
-
-          let randomIndex;
-          do {
-            randomIndex = Math.floor(Math.random() * modeConfig.minions) + 1;
-          } while (modeConfig.minions > 1 && randomIndex === lastMinionIndex);
-          lastMinionIndex = randomIndex;
-
-          var padIndex = String(randomIndex).padStart(2, '0');
-          enemySpriteEl.src = `${R2_BASE}/Enemies/minion_${currentEnemyMode}_${padIndex}.png`;
-          nameLabel.innerText = modeConfig.minionNames[randomIndex - 1] || "數據感染體";
-          heartsEl.innerText = "♥";
-        } else {
-          if (!isBossPhase) {
-            isBossPhase = true;
-            playSFX('boss_alarm');
-            alarmOverlay.style.display = "block";
-            setTimeout(() => { alarmOverlay.style.display = "none"; }, 1500);
-          }
-
-          var bossIdx = String(Math.floor(Math.random() * modeConfig.bosses) + 1).padStart(2, '0');
-          enemySpriteEl.src = `${R2_BASE}/Enemies/boss_${currentEnemyMode}_${bossIdx}.png`;
-          nameLabel.innerText = modeConfig.bossNames[parseInt(bossIdx)-1] || "【守門領主】";
-          heartsEl.innerText = "♥".repeat(Math.max(1, currentBossHp));
-        }
       }
 
       function executeMission() {
@@ -1491,15 +1804,21 @@
                 currentCombo = 0; wrongQuestionsList = []; activeShieldCount = 0;
                 updateComboUI();
 
+                playerCurrentHp = playerMaxHp;
+                updatePlayerHpUI();
+
                 var totalQ = missionQueue.length;
                 if (totalQ <= 5) { bossStartIndex = 3; maxBossHp = 1; }
                 else if (totalQ <= 8) { bossStartIndex = 4; maxBossHp = 2; }
                 else if (totalQ <= 10) { bossStartIndex = 5; maxBossHp = 3; }
                 else { bossStartIndex = 9; maxBossHp = 4; }
+                
                 currentBossHp = maxBossHp;
+                activeLockedBossIndex = null;
                 isBossPhase = false;
 
-                currentSquad.forEach(op => op.currentSp = 0);
+                // 重新依據出戰 preset 構建陣容並賦予 2 SP
+                buildActiveBattleSquad();
                 renderTacticalDock();
 
                 clearInterval(timerInterval); 
@@ -1519,6 +1838,11 @@
         });
       }
 
+      function updatePlayerHpUI() {
+        var heartsStr = "♥".repeat(Math.max(0, playerCurrentHp)) + "🖤".repeat(Math.max(0, playerMaxHp - playerCurrentHp));
+        document.getElementById('playerHpHearts').innerText = heartsStr;
+      }
+
       function updateComboUI() {
         var cb = document.getElementById('comboBadge');
         if (currentCombo >= 2) {
@@ -1532,6 +1856,9 @@
         }
       }
 
+      // ==========================================
+      // 🎯 7. 題目渲染 (詞性全寫統一標準化)
+      // ==========================================
       function renderQuestion() {
         if (currentIdx >= missionQueue.length) return finishMission();
         var q = missionQueue[currentIdx];
@@ -1540,6 +1867,7 @@
         document.getElementById('missionProgress').innerText = "SYNC: " + (currentIdx+1) + "/" + missionQueue.length;
         
         updateBattleEnemy();
+        renderTacticalDock();
 
         var imgEl = document.getElementById('qImage');
         imgEl.classList.remove('loaded'); 
@@ -1609,11 +1937,15 @@
                 playAudioLogic(targetCurrentAnswer, false); 
             } 
             else if (r===7) { 
-                currentBadge="SUFFIX ANALYSIS"; instructionText="Identify the part of speech."; 
+                // 詞性標準化全寫對齊 (解決問題 1)
+                currentBadge="SUFFIX ANALYSIS"; instructionText="Analyze the suffix to identify the part of speech."; 
                 var chosenD = derivList[Math.floor(Math.random() * derivList.length)];
-                displayQ="Analyze the suffix to find the part of speech for:\n「 " + chosenD.word + " 」"; 
-                targetCurrentAnswer=String(chosenD.pos).trim(); 
-                renderMode="MCQ"; 
+                var rawPos = String(chosenD.pos || "").trim().toLowerCase();
+                var stdPos = POS_STANDARDIZED[rawPos] || (rawPos.charAt(0).toUpperCase() + rawPos.slice(1));
+                
+                targetCurrentAnswer = stdPos; 
+                displayQ = "Analyze the suffix to find the part of speech for:\n「 " + chosenD.word + " 」"; 
+                renderMode = "MCQ"; 
             }
         }
         else if (currentMissionType === 'grammar') {
@@ -1652,7 +1984,6 @@
         if (renderMode === "BUG_HUNTER") {
           var cleanQ = displayQ.replace(/[\[\]]/g, "");
           document.getElementById('qText').innerText = cleanQ;
-          
           var tokens = cleanQ.split(" ");
           var tokensBox = document.createElement('div');
           tokensBox.className = "bug-tokens-container";
@@ -1697,7 +2028,10 @@
             if (currentBadge.toUpperCase() === 'TFNG' || currentBadge.toUpperCase() === 'T/F/NG') { dArr = ["True", "False", "Not Given"]; }
             else if(currentMissionType.startsWith('vocab') && currentBadge==='SEMANTIC') { dArr = missionQueue.filter(function(m){return m && String(m.Meaning).trim()!==targetCurrentAnswer && String(m.Meaning).trim()!=="";}).map(function(m){return String(m.Meaning).trim();}).slice(0,3); if(dArr.length < 3) dArr = dArr.concat(["選項 A", "選項 B", "選項 C"]).slice(0,3); }
             else if(currentMissionType.startsWith('vocab') && currentBadge==='ROOT') { dArr = missionQueue.filter(function(m){return m && m.Root && String(m.Root).indexOf(targetCurrentAnswer)===-1;}).map(function(m){return m.Root.match(/\(([^)]+)\)/)?m.Root.match(/\(([^)]+)\)/)[1]:String(m.Root);}).slice(0,3); if(dArr.length < 3) dArr = dArr.concat(["To appear (顯現)", "To build (建造)", "To sound (聲音)"]).slice(0,3); }
-            else if(currentBadge === 'SUFFIX ANALYSIS') { var allPOS = ["Noun", "Verb", "Adjective", "Adverb", "Preposition", "Conjunction"]; dArr = allPOS.filter(function(p) { return p.toLowerCase() !== targetCurrentAnswer.toLowerCase(); }).sort(function(){return 0.5-Math.random();}).slice(0, 3); }
+            else if(currentBadge === 'SUFFIX ANALYSIS') { 
+              var allPOS = ["Noun", "Verb", "Adjective", "Adverb"]; 
+              dArr = allPOS.filter(function(p) { return p.toLowerCase() !== targetCurrentAnswer.toLowerCase(); }); 
+            }
             else { var rawDist = String(q.Distractors || ""); if (rawDist.indexOf('|') !== -1) dArr = rawDist.split("|").map(s => s.trim()); else if (rawDist.indexOf('/') !== -1) dArr = rawDist.split("/").map(s => s.trim()); else dArr = rawDist.split(",").map(s => s.trim()); dArr = dArr.filter(d => d !== ""); }
             var opts = dArr.concat([targetCurrentAnswer]).filter(function(v, i, a) { if (!v) return false; var firstIdx = a.findIndex(function(e) { return String(e).toUpperCase() === String(v).toUpperCase(); }); return firstIdx === i; }).sort(function(){return 0.5-Math.random();});
             opts.forEach(function(o){ var b = document.createElement('button'); b.className='option-btn'; b.innerText=o; b.onclick=function(e){checkAnswer(o, e.target);}; grid.appendChild(b); });
@@ -1731,6 +2065,9 @@
             if(btn) btn.classList.add('wrong');
             currentCombo = 0; updateComboUI();
             
+            playerCurrentHp = Math.max(0, playerCurrentHp - 1);
+            updatePlayerHpUI();
+
             appCont.classList.remove('jolt-active');
             void appCont.offsetWidth;
             appCont.classList.add('jolt-active');
@@ -1760,6 +2097,11 @@
 
         isQuestionLocked = true; 
         if (correct) { 
+          var slashVfx = document.getElementById('attackSlashVfx');
+          slashVfx.classList.remove('slash-active');
+          void slashVfx.offsetWidth;
+          slashVfx.classList.add('slash-active');
+
           if (currentCombo >= 3 || (isBossPhase && currentBossHp <= 1)) {
             playSFX('hit_critical');
           } else {
@@ -1769,20 +2111,26 @@
           currentCombo++; 
           
           enemySpriteEl.classList.add('enemy-hit');
-          setTimeout(() => { enemySpriteEl.classList.remove('enemy-hit'); }, 300);
+          setTimeout(() => { enemySpriteEl.classList.remove('enemy-hit'); }, 350);
 
           if (isBossPhase) {
             currentBossHp = Math.max(0, currentBossHp - 1);
-            document.getElementById('enemyHpHearts').innerText = "♥".repeat(Math.max(1, currentBossHp));
+            var heartsStr = "♥".repeat(Math.max(0, currentBossHp)) + "🖤".repeat(Math.max(0, maxBossHp - currentBossHp));
+            document.getElementById('enemyHpHearts').innerText = heartsStr || "K.O.";
+
             if (currentBossHp === 0) {
               enemySpriteEl.classList.add('enemy-dissolve');
+              spawnFloatingText("💥 BOSS ELIMINATED!", true, enemySpriteEl);
+            } else {
+              spawnFloatingText("-100 DMG ⚔️", true, enemySpriteEl);
             }
           } else {
             enemySpriteEl.classList.add('enemy-dissolve');
+            spawnFloatingText(currentCombo >= 3 ? "🔥 COMBO x" + currentCombo + "!" : "+50 EXP ⚡", currentCombo >= 3, btn || document.getElementById('answerArea'));
           }
 
           chargeSquadSP(1);
-          spawnFloatingText(currentCombo >= 3 ? "🔥 COMBO x" + currentCombo + "!" : "+50 EXP ⚡", currentCombo >= 3, btn || document.getElementById('answerArea'));
+
         } else { 
           playSFX('wrong'); 
           currentCombo = 0; 
@@ -1889,9 +2237,13 @@
             document.getElementById('loadingOverlay').style.display = 'none';
             if(res && res.success) {
                 if(res.rankUp) {
-                    playSFX('promotion'); document.getElementById('newRankIcon').innerText = res.newRankIcon;
-                    document.getElementById('newRankName').innerText = res.newRankName; document.getElementById('rankUpOverlay').style.display = 'flex';
-                } else { playSFX('clear'); setTimeout(function(){ playSFX('rank_up'); }, 800); }
+                    playSFX('promotion'); 
+                    document.getElementById('newRankIcon').innerText = res.newRankIcon;
+                    document.getElementById('newRankName').innerText = res.newRankName; 
+                    document.getElementById('rankUpOverlay').style.display = 'flex';
+                } else { 
+                    playSFX('clear'); setTimeout(function(){ playSFX('rank_up'); }, 800); 
+                }
                 isMissionActive = false; if(isBgmPlaying) bgmPlayer.volume = 0.3; 
                 
                 var stamp = document.getElementById('finishRankStamp');
@@ -1941,20 +2293,13 @@
                 currentUserData.coins += res.earnedCoins; 
                 currentUserData.totalExp += res.earnedExp; 
                 currentUserData.totalMissions += 1;
-                
-                // 🚀 3. 核心修正：結算後即刻同步更新等級與稱號
-                if (res.newRankName) {
-                  currentUserData.rankName = res.newRankName;
-                } else {
-                  currentUserData.rankName = calculateRankFromExp(currentUserData.totalExp);
-                }
-
                 var questionsDoneThisTime = res.currentWeeklyQ - (currentUserData.weeklyQuestions || 0);
                 if (!isNaN(questionsDoneThisTime)) {
                     currentUserData.totalQuestions += questionsDoneThisTime; 
                 }
                 currentUserData.weeklyQuestions = res.currentWeeklyQ;
                 currentUserData.weeklyMissions = res.currentWeeklyM;
+                
                 updateUI();
             } else { 
                 showSysMsg("📡 同步失敗：" + (res.error || "未知原因"), true); 
@@ -1994,8 +2339,7 @@
         const container = document.getElementById('leaderboardContainer');
         const data = (mode === 'weekly') ? currentLBData.weekly : currentLBData.sameRank;
         const scoreKey = (mode === 'weekly') ? 'weeklyExp' : 'totalExp';
-        var activeRank = currentLBData.userRankName || calculateRankFromExp(currentUserData.totalExp);
-        document.getElementById('tab-rank').innerText = "🎖️ " + activeRank + "排行";
+        document.getElementById('tab-rank').innerText = "🎖️ " + (currentLBData.userRankName || "同階") + "排行";
         let html = "";
         if (data && data.length > 0) {
             data.forEach((p, i) => {
@@ -2007,11 +2351,10 @@
       }
 
       // ==========================================
-      // 🎲 全息招募終端與翻牌控制器
+      // 🎲 8. 招募控制邏輯
       // ==========================================
       var currentPulledCards = [];
       var gachaWarpTimeout = null, ssrStingerTimeout = null, previousBgmTrackIdx = 0, unflippedCardCount = 0;
-      var cachedOperatorRoster = null;
 
       function openGachaScreen() {
         playSFX('click'); updateUI();
@@ -2071,7 +2414,7 @@
         stageWarp.style.display = "flex"; stageReveal.style.display = "none";
         nextBtn.style.opacity = "0"; nextBtn.style.pointerEvents = "none"; skipBtn.style.display = "block"; overlay.style.display = "flex";
 
-        var hasSSR = cards.some(c => (c.rarity || c.Rarity) === "SSR"), hasSR = cards.some(c => (c.rarity || c.Rarity) === "SR");
+        var hasSSR = cards.some(c => (c.Rarity || c.rarity) === "SSR"), hasSR = cards.some(c => (c.Rarity || c.rarity) === "SR");
         portal.style.display = "block"; portal.className = "gacha-portal " + (hasSSR ? "gold" : (hasSR ? "purple" : ""));
 
         setTimeout(function() { triggerFlyingCardsBurst(cards, pullCount); }, 2200);
@@ -2081,7 +2424,7 @@
 
         setTimeout(function() { nextBtn.style.opacity = "1"; nextBtn.style.pointerEvents = "auto"; }, 4200);
         if (gachaWarpTimeout) clearTimeout(gachaWarpTimeout);
-        gachaWarpTimeout = setTimeout(function() { proceedToReveal(false); }, 7000);
+        gachaWarpTimeout = setTimeout(function() { proceedToReveal(); }, 7000);
       }
 
       function triggerFlyingCardsBurst(cards, pullCount) {
@@ -2089,7 +2432,7 @@
         var count = cards.length;
         cards.forEach(function(c, i) {
           var chip = document.createElement('div');
-          var rarity = (c.rarity || c.Rarity || "R").toUpperCase();
+          var rarity = (c.Rarity || c.rarity || "R").toUpperCase();
           chip.className = "flying-card-chip " + rarity;
           var angle = (count === 1) ? 0 : ( (360 / count) * i + (Math.random() * 20 - 10) );
           var rad = (angle * Math.PI) / 180;
@@ -2103,21 +2446,16 @@
         });
       }
 
-      // 🚀 1. 核心修正：智能 SKIP 按鈕邏輯
       function handleGachaSkip() {
-        playSFX('click');
         var stageWarp = document.getElementById('gachaStageWarp');
         if (stageWarp.style.display !== 'none') {
-          // 在過場動畫中按 Skip：直接跳至揭卡畫面，並全數立即翻開
-          proceedToReveal(true);
+          proceedToReveal();
         } else {
-          // 已經在揭卡畫面中按 Skip：立即全數翻開未翻的卡牌
-          flipAllCardsInstantly();
+          flipAllCardsInstant();
         }
       }
 
-      // 🚀 2. 核心修正：proceedToReveal 支援 5+5 佈局與立即全開
-      function proceedToReveal(autoFlipImmediately) {
+      function proceedToReveal() {
         if (gachaWarpTimeout) clearTimeout(gachaWarpTimeout);
         if (ssrStingerTimeout) clearTimeout(ssrStingerTimeout);
         var warpVid = document.getElementById('gachaWarpVid'); if (warpVid) warpVid.pause();
@@ -2131,46 +2469,41 @@
         actionBtns.style.display = "none"; flipAllBtn.style.display = "block"; hintText.innerText = "[ 點擊未翻開卡牌進行解密 ]";
 
         var isSingle = (currentPulledCards.length === 1);
-        container.className = "gacha-cards-container " + (isSingle ? "single-pull" : "ten-pull");
         unflippedCardCount = currentPulledCards.length;
 
-        currentPulledCards.forEach(function(cardData, idx) {
+        if (isSingle) {
+          container.className = "gacha-cards-container layout-single";
+        } else {
+          container.className = "gacha-cards-container layout-10";
+        }
+
+        currentPulledCards.forEach(function(rawCard, idx) {
+          var cardData = normalizeOp(rawCard);
+          cardData.isNew = rawCard.isNew;
           var wrapper = createInteractiveCardElement(cardData, isSingle, idx);
-          if (autoFlipImmediately) {
-            wrapper.classList.add('is-flipped');
-          }
           container.appendChild(wrapper);
         });
-
-        if (autoFlipImmediately) {
-          unflippedCardCount = 0;
-          checkIfAllCardsRevealed();
-        }
       }
 
       function createInteractiveCardElement(c, isSingle, index) {
-        var rarity = c.rarity || c.Rarity || "R";
+        var rarity = c.rarity || "R";
         var wrapper = document.createElement('div');
         wrapper.className = "gacha-card-wrapper " + rarity;
         wrapper.id = "cardWrap_" + index;
 
-        var cardId = c.cardId || c.Card_ID || c.id || "OP_R_01";
-        var imgUrl = c.imageUrl || c.Image_URL || (R2_BASE + "/Cards/" + cardId + ".png");
-        var nameText = c.nameZh || c.Name_ZH || c.nameEn || c.Name_EN || "Operative";
         var statusBadge = c.isNew ? `<div class="card-badge-new">NEW!</div>` : `<div class="card-badge-break">★+1</div>`;
 
         wrapper.innerHTML = `
           <div class="gacha-card-inner">
             <div class="gacha-card-face gacha-card-back">
-              <div style="font-size:20px; opacity:0.8; filter:drop-shadow(0 0 5px var(--noah-cyan));">🛰️</div>
+              <div style="font-size:22px; opacity:0.8; filter:drop-shadow(0 0 5px var(--noah-cyan));">🛰️</div>
               <div style="font-family:monospace; font-size:9px; color:var(--noah-cyan); margin-top:4px; letter-spacing:1px; font-weight:bold;">N.O.A.H.</div>
-              <div style="font-size:7px; color:#666; margin-top:2px;">[ ENCRYPTED ]</div>
             </div>
             <div class="gacha-card-face gacha-card-front">
               <div class="card-badge-rarity">${rarity}</div>
               ${statusBadge}
-              <img class="card-img" src="${imgUrl}" onerror="this.src='${R2_BASE}/Cards/OP_R_01.png'">
-              <div class="card-name-bar">${nameText}</div>
+              <img class="card-img" src="${c.imageUrl}" onerror="this.src='${R2_BASE}/Cards/OP_R_01.png'">
+              <div class="card-name-bar">${c.nameZh}</div>
             </div>
           </div>
         `;
@@ -2183,7 +2516,7 @@
       }
 
       function flipSingleCard(wrapper, c) {
-        var rarity = (c.rarity || c.Rarity || "R").toUpperCase();
+        var rarity = (c.rarity || "R").toUpperCase();
         wrapper.classList.add('is-flipped');
         if (rarity === 'SSR') playSFX('gacha_flip_ssr');
         else if (rarity === 'SR') playSFX('gacha_flip_sr');
@@ -2202,37 +2535,48 @@
           if (flipIdx < wrappers.length) {
             var wrap = wrappers[flipIdx];
             var dataIdx = parseInt(wrap.id.replace('cardWrap_', ''), 10);
-            flipSingleCard(wrap, currentPulledCards[dataIdx]);
+            var cardData = normalizeOp(currentPulledCards[dataIdx]);
+            flipSingleCard(wrap, cardData);
             flipIdx++;
           } else { clearInterval(interval); }
         }, 160);
       }
 
-      // 🚀 1. 核心修正：立即全翻函數
-      function flipAllCardsInstantly() {
+      function flipAllCardsInstant() {
         var wrappers = document.querySelectorAll('.gacha-card-wrapper:not(.is-flipped)');
         if (wrappers.length === 0) return;
-        var hasSSR = false;
-        wrappers.forEach(w => {
-          w.classList.add('is-flipped');
-          if (w.classList.contains('SSR')) hasSSR = true;
+        document.getElementById('gachaFlipAllBtn').style.display = "none";
+        wrappers.forEach(function(wrap) {
+          wrap.classList.add('is-flipped');
         });
-        if (hasSSR) playSFX('gacha_flip_ssr');
-        else playSFX('gacha_flip_r');
         unflippedCardCount = 0;
+        playSFX('gacha_flip_sr');
         checkIfAllCardsRevealed();
       }
 
       function checkIfAllCardsRevealed() {
         if (unflippedCardCount <= 0) {
           document.getElementById('gachaFlipAllBtn').style.display = "none";
-          document.getElementById('gachaHintText').innerText = "[ 點擊卡牌可檢視幹員機密檔案 ]";
+          document.getElementById('gachaHintText').innerText = "[ 點擊已翻開卡牌可檢視幹員檔案 ]";
+          
           var actionBtns = document.getElementById('gachaActionButtons');
           actionBtns.style.display = "flex";
+          actionBtns.style.opacity = "0";
+          setTimeout(() => { 
+            actionBtns.style.transition = "opacity 0.4s ease"; 
+            actionBtns.style.opacity = "1"; 
+          }, 80);
         }
       }
 
-      // 🚀 2. 核心修正：返回作戰會議室
+      function closeGachaAndStayTerminal() {
+        playSFX('click');
+        var revealVid = document.getElementById('gachaRevealVid'); if (revealVid) revealVid.pause();
+        document.getElementById('gachaOverlay').style.display = 'none';
+        document.getElementById('gachaCardsContainer').innerHTML = "";
+        navTo('gachaScreen');
+      }
+
       function closeGachaAndGoBriefing() {
         playSFX('click');
         var revealVid = document.getElementById('gachaRevealVid'); if (revealVid) revealVid.pause();
@@ -2240,16 +2584,6 @@
         document.getElementById('gachaCardsContainer').innerHTML = "";
         if (MEDIA.gachaBgm) { bgmSelect.value = previousBgmTrackIdx; changeBGMTrack(); }
         navTo('briefingRoom');
-      }
-
-      // 🚀 2. 核心修正：返回招募終端 (Banner 介面)
-      function closeGachaToTerminal() {
-        playSFX('click');
-        var revealVid = document.getElementById('gachaRevealVid'); if (revealVid) revealVid.pause();
-        document.getElementById('gachaOverlay').style.display = 'none';
-        document.getElementById('gachaCardsContainer').innerHTML = "";
-        updateUI();
-        navTo('gachaScreen');
       }
 
       const BREAKTHROUGH_EFFECTS = [
@@ -2264,46 +2598,47 @@
       function openOperatorDetailModal(c) {
         playSFX('dossier_open');
         var modal = document.getElementById('operatorDetailModal');
-        var cardId = c.cardId || c.Card_ID || c.id || "OP_R_01";
-        var imgUrl = c.imageUrl || c.Image_URL || (R2_BASE + "/Cards/" + cardId + ".png");
+        var norm = normalizeOp(c);
 
         var imgEl = document.getElementById('detailOpImg');
-        imgEl.src = imgUrl; imgEl.style.cursor = "zoom-in";
-        imgEl.onclick = function() { openArtworkLightbox(imgUrl, c.nameZh || c.Name_ZH, c.nameEn || c.Name_EN); };
+        imgEl.src = norm.imageUrl; imgEl.style.cursor = "zoom-in";
+        imgEl.onclick = function() { openArtworkLightbox(norm.imageUrl, norm.nameZh, norm.nameEn); };
 
-        var rarity = c.rarity || c.Rarity || "R";
+        var rarity = norm.rarity || "R";
         var rBadge = document.getElementById('detailOpRarity');
         rBadge.innerText = rarity;
         rBadge.style.background = (rarity === 'SSR') ? 'var(--accent-gold)' : ((rarity === 'SR') ? 'var(--accent-purple)' : 'var(--noah-cyan)');
         rBadge.style.color = (rarity === 'SSR' || rarity === 'R') ? '#000' : '#fff';
 
-        document.getElementById('detailOpNameZh').innerText = c.nameZh || c.Name_ZH || "幹員";
-        document.getElementById('detailOpNameEn').innerText = c.nameEn || c.Name_EN || "Operative";
-        document.getElementById('detailOpFaction').innerText = c.faction || c.Faction || "中立";
-        document.getElementById('detailOpRole').innerText = c.role || c.Role || "戰術";
+        document.getElementById('detailOpNameZh').innerText = norm.nameZh;
+        document.getElementById('detailOpNameEn').innerText = norm.nameEn;
+        document.getElementById('detailOpFaction').innerText = norm.faction;
+        document.getElementById('detailOpRole').innerText = norm.role;
 
-        var breakLevel = Number(c.breakthrough || c.breakCount || 0);
+        // 依據背包 Duplicate_Count 計算星級
+        var invItem = playerInventory.find(i => (i.Card_ID || i.cardId) === norm.cardId);
+        var breakLevel = invItem ? Number(invItem.Duplicate_Count || 0) : 0;
         var filledStars = Math.min(5, breakLevel + 1);
         document.getElementById('detailOpBreakStars').innerText = "★".repeat(filledStars) + "☆".repeat(Math.max(0, 5 - filledStars));
         document.getElementById('detailOpBreakDesc').innerText = BREAKTHROUGH_EFFECTS[Math.min(5, breakLevel)];
 
-        var activeSkill = c.activeSkill || c.Active_Skill || "";
-        var chargeCost = c.chargeCost || c.Charge_Cost || 1;
-        document.getElementById('detailOpActive').innerHTML = activeSkill 
-          ? `<strong>${activeSkill}</strong> <span style="color:var(--accent-gold); font-size:11px;">(耗能: ${chargeCost} SP)</span>` 
+        document.getElementById('detailOpActive').innerHTML = norm.activeSkill 
+          ? `<strong>${norm.activeSkill}</strong> <span style="color:var(--accent-gold); font-size:11px;">(耗能: ${norm.chargeCost} SP)</span>` 
           : `<span style="color:#777;">無配置主動戰術</span>`;
 
-        var passiveSkill = c.passiveSkill || c.Passive_Skill || "";
-        document.getElementById('detailOpPassive').innerHTML = passiveSkill 
-          ? `<strong>${passiveSkill}</strong>` 
+        document.getElementById('detailOpPassive').innerHTML = norm.passiveSkill 
+          ? `<strong>${norm.passiveSkill}</strong>` 
           : `<span style="color:#777;">無配置被動共鳴</span>`;
 
-        var leaderAura = c.leaderAura || c.Leader_Aura || "";
         var leaderBox = document.getElementById('detailOpLeaderBox');
-        if (leaderAura) { leaderBox.style.display = "block"; document.getElementById('detailOpLeader').innerText = leaderAura; } 
-        else { leaderBox.style.display = "none"; }
+        if (norm.leaderAura) { 
+          leaderBox.style.display = "block"; 
+          document.getElementById('detailOpLeader').innerText = norm.leaderAura; 
+        } else { 
+          leaderBox.style.display = "none"; 
+        }
 
-        document.getElementById('detailOpProfile').innerText = c.profile || c.Profile || "檔案載入中...";
+        document.getElementById('detailOpProfile').innerText = norm.profile || "檔案載入中...";
         modal.style.display = "flex";
       }
 
@@ -2321,23 +2656,33 @@
         playSFX('click');
         var modal = document.getElementById('operatorArchiveModal');
         var listContainer = document.getElementById('archiveRosterList');
-        if (cachedOperatorRoster && cachedOperatorRoster.length > 0) {
-          renderArchiveList(cachedOperatorRoster); modal.style.display = "flex"; return;
+        
+        if (globalOperatorPool && globalOperatorPool.length > 0) {
+          renderArchiveList(globalOperatorPool); 
+          modal.style.display = "flex"; 
+          return;
         }
-        listContainer.innerHTML = "<div style='color:var(--noah-cyan); font-size:13px; padding:30px; text-align:center;'>🛰️ 正在同步最新幹員名冊...</div>";
         modal.style.display = "flex";
+        listContainer.innerHTML = "<div style='color:var(--noah-cyan); font-size:13px; padding:30px; text-align:center;'>🛰️ 正在同步最新幹員名冊...</div>";
+        
         fetch(API_URL, { method: 'POST', headers: { 'Content-Type': 'text/plain' }, body: JSON.stringify({ action: 'getOperatorPool' }) })
         .then(res => res.json())
         .then(res => {
-          if (res && res.success && res.operators) { cachedOperatorRoster = res.operators; renderArchiveList(cachedOperatorRoster); }
-          else { listContainer.innerHTML = "<div style='color:var(--accent-red); padding:20px;'>⚠️ 同步失敗</div>"; }
-        }).catch(() => { listContainer.innerHTML = "<div style='color:var(--accent-red); padding:20px;'>🚨 網絡異常</div>"; });
+          if (res && res.success && res.operators) { 
+            globalOperatorPool = res.operators.map(normalizeOp);
+            renderArchiveList(globalOperatorPool); 
+          } else {
+            listContainer.innerHTML = "<div style='color:var(--accent-red); padding:20px;'>⚠️ 同步失敗</div>"; 
+          }
+        }).catch(() => { 
+          listContainer.innerHTML = "<div style='color:var(--accent-red); padding:20px;'>🚨 網絡異常</div>"; 
+        });
       }
 
       function renderArchiveList(roster) {
         var listContainer = document.getElementById('archiveRosterList'); listContainer.innerHTML = "";
         ['SSR', 'SR', 'R'].forEach(rarity => {
-          var ops = roster.filter(o => (o.rarity || o.Rarity) === rarity); if (ops.length === 0) return;
+          var ops = roster.filter(o => o.rarity === rarity); if (ops.length === 0) return;
           var groupTitle = document.createElement('div');
           var color = (rarity==='SSR')?'var(--accent-gold)':((rarity==='SR')?'var(--accent-purple)':'var(--noah-cyan)');
           groupTitle.style.cssText = "color:var(--text-main); font-weight:900; font-size:12px; margin:12px 0 6px 0;";
@@ -2348,10 +2693,7 @@
           ops.forEach(op => {
             var item = document.createElement('div');
             item.style.cssText = "background:rgba(0,0,0,0.5); border:1px solid #333; border-radius:8px; padding:4px; cursor:pointer; text-align:center;";
-            var cardId = op.cardId || op.Card_ID || op.id || "OP_R_01";
-            var imgUrl = op.imageUrl || op.Image_URL || (R2_BASE + "/Cards/" + cardId + ".png");
-            var nameZh = op.nameZh || op.Name_ZH || "幹員";
-            item.innerHTML = `<div style="width:100%; aspect-ratio:2/3; border-radius:6px; overflow:hidden; background:#050a10; margin-bottom:4px;"><img src="${imgUrl}" style="width:100%; height:100%; object-fit:contain; object-position:center bottom;"></div><div style="font-size:10px; font-weight:bold; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; color:#ddd;">${nameZh.replace(/【.*?】/, '')}</div>`;
+            item.innerHTML = `<div style="width:100%; aspect-ratio:2/3; border-radius:6px; overflow:hidden; background:#050a10; margin-bottom:4px;"><img src="${op.imageUrl}" onerror="this.src='${R2_BASE}/Cards/OP_R_01.png'" style="width:100%; height:100%; object-fit:contain; object-position:center bottom;"></div><div style="font-size:10px; font-weight:bold; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; color:#ddd;">${op.nameZh.replace(/【.*?】/, '')}</div>`;
             item.onclick = function() { openOperatorDetailModal(op); };
             grid.appendChild(item);
           });
@@ -2411,9 +2753,6 @@
         window.requestAnimationFrame(step);
       }
 
-      // ==========================================
-      // 🚀 6. 登入快取與跨平台通訊監聽器 (完整保留)
-      // ==========================================
       window.addEventListener("load", function() {
           var savedId = localStorage.getItem('noah_id'), savedPin = localStorage.getItem('noah_pin');
           if(savedId && savedPin) {
