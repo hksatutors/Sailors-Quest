@@ -49,9 +49,9 @@
         pointer-events: none; z-index: 9000; text-shadow: 1px 1px 3px rgba(0,0,0,1), 0 0 5px rgba(0,0,0,0.8); 
       }
 
-      .bg-fallback { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; z-index: -20; background: radial-gradient(circle at center, #0a1f33 0%, #02050a 100%); }
+      .bg-fallback { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; z-index: -20; background: radial-gradient(circle at 50% 18%, #16324d 0%, #0b1c2e 42%, #05080e 100%); } .bg-fallback:after { content:''; position:absolute; inset:0; background-image: linear-gradient(rgba(0,229,255,0.05) 1px, transparent 1px), linear-gradient(90deg, rgba(0,229,255,0.04) 1px, transparent 1px); background-size: 42px 42px; mask-image: radial-gradient(circle at center, #000 30%, transparent 78%); pointer-events:none; }
       .bg-video-layer { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; z-index: -10; overflow: hidden; }
-      .bg-vid { position: absolute; top: 0; left: 0; width: 100%; height: 100%; object-fit: cover; opacity: 0; transition: opacity 1s ease-in-out; }
+      .bg-vid { position: absolute; top: 0; left: 0; width: 100%; height: 100%; object-fit: cover; opacity: 0; transition: opacity 1s ease-in-out; pointer-events: none; }
       .bg-vid.active-bg { opacity: 0.8; }
       
       #system-unlock-screen { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: #02050a; z-index: 20000; display: flex; flex-direction: column; justify-content: center; align-items: center; transition: opacity 0.8s ease-out; }
@@ -117,7 +117,7 @@
         filter: brightness(1.1) contrast(0.92);
         opacity: 0; transition: opacity 0.5s ease; z-index: 1;
       }
-      .q-stage-bg.loaded { opacity: 0.92; }
+      .q-stage-bg.loaded { opacity: 0.42; }
 
       .enemy-sprite {
         position: absolute; bottom: 2px; left: 50%;
@@ -229,9 +229,21 @@
       }
       .squad-slot-img {
         width: 100%; height: 100%; object-fit: cover;
-        object-position: center 25%;
-        filter: brightness(0.9);
+        object-position: center 12%;
+        filter: brightness(0.95);
       }
+      .squad-slot-meta { position: absolute; left: 0; right: 0; bottom: 4px; font-size: 8px; line-height: 1.15; color: #fff; text-align: center; background: linear-gradient(transparent, rgba(0,0,0,0.82)); padding: 8px 2px 2px; pointer-events: none; }
+      .squad-view { display: flex; flex-direction: column; gap: 8px; margin: 8px 0 14px; }
+      .squad-row { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+      .op-frame { position: relative; border-radius: 12px; overflow: hidden; background: #071018; border: 1px solid rgba(0,229,255,0.35); cursor: pointer; }
+      .op-frame.leader { height: 168px; border-color: var(--accent-gold); }
+      .op-frame.member { height: 112px; }
+      .op-frame img { width: 100%; height: 100%; object-fit: cover; object-position: center 10%; }
+      .op-frame .bust-name { position: absolute; left: 0; right: 0; bottom: 0; font-size: 11px; font-weight: 800; padding: 10px 4px 4px; background: linear-gradient(transparent, rgba(0,0,0,0.8)); }
+      .op-placeholder { width: 100%; height: 100%; min-height: 72px; }
+      #factionResonanceBar { display: none; margin-bottom: 10px; font-size: 12px; color: var(--accent-gold); border: 1px solid rgba(241,196,15,0.45); border-radius: 8px; padding: 6px 8px; background: rgba(241,196,15,0.08); }
+      #tutorialOverlay { display: none; position: fixed; inset: 0; z-index: 41000; background: rgba(3,8,16,0.94); align-items: center; justify-content: center; padding: 16px; }
+      .tutorial-card { width: 100%; max-width: 420px; background: #0c1622; border: 1px solid var(--noah-cyan); border-radius: 18px; padding: 18px; text-align: left; }
       .squad-sp-gauge { position: absolute; bottom: 0; left: 0; width: 100%; height: 4px; background: rgba(255,255,255,0.2); }
       .squad-sp-fill { height: 100%; background: var(--noah-cyan); width: 0%; transition: width 0.3s; }
       .squad-slot.is-ready .squad-sp-fill { background: var(--accent-gold); }
@@ -526,7 +538,10 @@
             <div style="color:var(--noah-cyan); font-weight:900; font-size:16px;">🛡️ 戰術小隊編成</div>
             <div style="font-size:10px; color:#888; font-family:monospace;">SQUAD PRESET & TACTICAL ASSIGNMENT</div>
           </div>
-          <button onclick="closeSquadFormationModal()" style="background:none; border:none; color:#aaa; font-size:22px; cursor:pointer;">✕</button>
+          <div style="display:flex; align-items:center; gap:6px;">
+            <div id="formationResonanceBadges" style="display:flex; gap:4px; flex-wrap:wrap; justify-content:flex-end; max-width:180px;"></div>
+            <button onclick="closeSquadFormationModal()" style="background:none; border:none; color:#aaa; font-size:22px; cursor:pointer;">✕</button>
+          </div>
         </div>
 
         <!-- 3 套預設分頁標籤 -->
@@ -729,14 +744,14 @@
 
     <!-- 背景影片層 -->
     <div class="bg-video-layer">
-      <video id="vid-login" class="bg-vid active-bg" autoplay loop muted playsinline><source src="https://pub-2a6f35ae1aea46f3a4762ecf8c1a6eae.r2.dev/Background/Login.mp4" type="video/mp4"></video>
-      <video id="vid-dashboard" class="bg-vid" autoplay loop muted playsinline><source src="https://pub-2a6f35ae1aea46f3a4762ecf8c1a6eae.r2.dev/Background/Main_Menu.mp4" type="video/mp4"></video>
-      <video id="vid-vocab_basic" class="bg-vid" autoplay loop muted playsinline><source src="https://pub-2a6f35ae1aea46f3a4762ecf8c1a6eae.r2.dev/Background/Vocab_basic.mp4" type="video/mp4"></video>
-      <video id="vid-vocab_adv" class="bg-vid" autoplay loop muted playsinline><source src="https://pub-2a6f35ae1aea46f3a4762ecf8c1a6eae.r2.dev/Background/Vocab_advanced.mp4" type="video/mp4"></video>
-      <video id="vid-grammar" class="bg-vid" autoplay loop muted playsinline><source src="https://pub-2a6f35ae1aea46f3a4762ecf8c1a6eae.r2.dev/Background/Academy.mp4" type="video/mp4"></video>
-      <video id="vid-listening" class="bg-vid" autoplay loop muted playsinline><source src="https://pub-2a6f35ae1aea46f3a4762ecf8c1a6eae.r2.dev/Background/Memory_Terminal.mp4" type="video/mp4"></video>
-      <video id="vid-briefingRoom" class="bg-vid" autoplay loop muted playsinline><source src="https://pub-2a6f35ae1aea46f3a4762ecf8c1a6eae.r2.dev/Background/Briefing_room.mp4" type="video/mp4"></video>
-      <video id="vid-finishScreen" class="bg-vid" autoplay loop muted playsinline><source src="https://pub-2a6f35ae1aea46f3a4762ecf8c1a6eae.r2.dev/Background/Reward_Scene.mp4" type="video/mp4"></video>
+      <video id="vid-login" class="bg-vid active-bg" muted playsinline preload="none" loop><source src="https://pub-2a6f35ae1aea46f3a4762ecf8c1a6eae.r2.dev/Background/Login.mp4" type="video/mp4"></video>
+      <video id="vid-dashboard" class="bg-vid" muted playsinline preload="none" loop><source src="https://pub-2a6f35ae1aea46f3a4762ecf8c1a6eae.r2.dev/Background/Main_Menu.mp4" type="video/mp4"></video>
+      <video id="vid-vocab_basic" class="bg-vid" muted playsinline preload="none" loop><source src="https://pub-2a6f35ae1aea46f3a4762ecf8c1a6eae.r2.dev/Background/Vocab_basic.mp4" type="video/mp4"></video>
+      <video id="vid-vocab_adv" class="bg-vid" muted playsinline preload="none" loop><source src="https://pub-2a6f35ae1aea46f3a4762ecf8c1a6eae.r2.dev/Background/Vocab_advanced.mp4" type="video/mp4"></video>
+      <video id="vid-grammar" class="bg-vid" muted playsinline preload="none" loop><source src="https://pub-2a6f35ae1aea46f3a4762ecf8c1a6eae.r2.dev/Background/Academy.mp4" type="video/mp4"></video>
+      <video id="vid-listening" class="bg-vid" muted playsinline preload="none" loop><source src="https://pub-2a6f35ae1aea46f3a4762ecf8c1a6eae.r2.dev/Background/Memory_Terminal.mp4" type="video/mp4"></video>
+      <video id="vid-briefingRoom" class="bg-vid" muted playsinline preload="none" loop><source src="https://pub-2a6f35ae1aea46f3a4762ecf8c1a6eae.r2.dev/Background/Briefing_room.mp4" type="video/mp4"></video>
+      <video id="vid-finishScreen" class="bg-vid" muted playsinline preload="none" loop><source src="https://pub-2a6f35ae1aea46f3a4762ecf8c1a6eae.r2.dev/Background/Reward_Scene.mp4" type="video/mp4"></video>
     </div>
     
     <audio id="se-player"></audio>
@@ -819,10 +834,17 @@
         
         <!-- 作戰室三位先鋒預覽 (連動出戰小隊之前三名) -->
         <div class="squad-view" id="briefingSquadPreview">
-          <div class="op-frame member" id="roomOpSlot1"><div class="op-placeholder"></div></div>
           <div class="op-frame leader" id="roomOpSlot0"><div class="op-placeholder"></div></div>
-          <div class="op-frame member" id="roomOpSlot2"><div class="op-placeholder"></div></div>
+          <div class="squad-row">
+            <div class="op-frame member" id="roomOpSlot1"><div class="op-placeholder"></div></div>
+            <div class="op-frame member" id="roomOpSlot2"><div class="op-placeholder"></div></div>
+          </div>
+          <div class="squad-row">
+            <div class="op-frame member" id="roomOpSlot3"><div class="op-placeholder"></div></div>
+            <div class="op-frame member" id="roomOpSlot4"><div class="op-placeholder"></div></div>
+          </div>
         </div>
+        <div id="factionResonanceBar"></div>
 
         <button class="primary-btn btn-cyan" onclick="openSquadFormationModal()">🛡️ 小隊編成 (SQUAD FORMATION)</button>
         <button class="primary-btn btn-gold" onclick="openGachaScreen()">🎲 幹員招募 (RECRUIT)</button>
@@ -982,6 +1004,15 @@
       <div style="color:#ff3366; font-family:monospace; letter-spacing:4px; font-weight:900;">CAPTAIN DOWN</div>
       <div style="color:#fff; font-size:18px; font-weight:900; margin:10px 0;">隊長生命歸零，作戰中斷</div>
       <div style="color:#aaa; font-size:13px; max-width:320px; line-height:1.6;">已完成嘅題目仍會結算信用點同經驗。未作答嘅題目不會額外懲罰。</div>
+    </div>
+
+    <div id="tutorialOverlay">
+      <div class="tutorial-card">
+        <div style="color:var(--noah-cyan); font-family:monospace; letter-spacing:2px; font-size:12px;">ORIENTATION</div>
+        <h2 id="tutorialTitle" style="margin:8px 0; color:#fff;">歡迎歸隊</h2>
+        <div id="tutorialBody" style="color:#cfd8dc; font-size:14px; line-height:1.65;"></div>
+        <button class="primary-btn btn-cyan" id="tutorialNextBtn" onclick="advanceTutorial()">下一步</button>
+      </div>
     </div>
 
     <!-- 升階動效彈窗 -->
@@ -1163,6 +1194,7 @@
       // 📋 3 套小隊預設 (Player_Squads)
       var playerPresets = { active: 1, preset1: [], preset2: [], preset3: [] };
       var missionAborted = false;
+      var scribeForgiveUsed = false, guildBossCritUsed = false, scribeMarked = false;
 
       // 出戰小隊實體陣列 (長度 5，包含 SP 蓄能)
       var battleSquad = [];
@@ -1213,12 +1245,25 @@
           if(!isError) setTimeout(function(){ sysMsgBox.style.display = "none"; }, 4000); 
       }
 
-      function playSFX(key) { 
-        if(MEDIA.sfx[key]) { 
-          sePlayer.src = MEDIA.sfx[key]; 
-          sePlayer.volume = 0.65; 
-          sePlayer.play().catch(function(){}); 
-        } 
+      var sfxPool = {};
+      function preloadSfx() {
+        Object.keys(MEDIA.sfx || {}).forEach(function(key) {
+          if (sfxPool[key]) return;
+          var audio = new Audio(); audio.preload = "auto"; audio.src = MEDIA.sfx[key]; sfxPool[key] = audio;
+        });
+      }
+      function playSFX(key) {
+        var base = sfxPool[key] || (MEDIA.sfx[key] ? (sfxPool[key] = new Audio(MEDIA.sfx[key])) : null);
+        if (!base) return;
+        var node = base.cloneNode(); node.volume = 0.65;
+        var attempt = node.play(); if (attempt && attempt.catch) attempt.catch(function(){});
+      }
+      function bindLongPress(el, onLong, onTap) {
+        var timer = null, fired = false;
+        el.onpointerdown = function() { fired = false; timer = setTimeout(function() { fired = true; onLong(); }, 480); };
+        function clearHold() { clearTimeout(timer); }
+        el.onpointerup = clearHold; el.onpointercancel = clearHold; el.onpointerleave = clearHold;
+        el.onclick = function(ev) { if (fired) { ev.preventDefault(); ev.stopPropagation(); return; } if (onTap) onTap(ev); };
       }
 
       function playVoice(text, rate) {
@@ -1353,18 +1398,35 @@
         }
       }
 
+      function assetList() {
+        var list = [];
+        document.querySelectorAll('.bg-vid source').forEach(function(node) { if (node.src) list.push(node.src); });
+        Object.keys(MEDIA.sfx || {}).forEach(function(key) { list.push(MEDIA.sfx[key]); });
+        (MEDIA.bgm || []).forEach(function(track) { list.push(track.url); });
+        if (MEDIA.gachaBgm) list.push(MEDIA.gachaBgm);
+        return list;
+      }
+      function startAssetPreload() {
+        preloadSfx(); if (!window.caches) return;
+        var urls = assetList(), overlay = document.getElementById('loadingOverlay'), text = document.getElementById('loadingText'), done = 0;
+        overlay.style.display = 'flex';
+        caches.open('noah-assets-v1').then(function(cache) {
+          return urls.reduce(function(chain, url) {
+            return chain.then(function() {
+              done++; if (text) text.innerText = 'PRELOAD ' + done + '/' + urls.length;
+              return cache.match(url).then(function(hit) { return hit || cache.add(url).catch(function(){}); });
+            });
+          }, Promise.resolve());
+        }).catch(function(){}).then(function() { overlay.style.display = 'none'; });
+      }
       function unlockSystemMedia() {
-        document.querySelectorAll('.bg-vid').forEach(function(vid) { vid.play().catch(function(){}); });
-        elevenPlayer.load(); sePlayer.load();
-        
-        shuffleBGM();
-        bgmPlayer.volume = 0;
-        var bp = bgmPlayer.play();
-        if(bp) bp.then(function() { bgmPlayer.pause(); }).catch(function(){});
-        
+        elevenPlayer.load(); preloadSfx(); shuffleBGM(); bgmPlayer.volume = 0;
+        var bp = bgmPlayer.play(); if (bp) bp.then(function() { bgmPlayer.pause(); }).catch(function(){});
         playSFX('click');
+        if ('serviceWorker' in navigator) navigator.serviceWorker.register('sw.js').catch(function(){});
+        startAssetPreload();
         document.getElementById('system-unlock-screen').style.opacity = '0';
-        setTimeout(() => {
+        setTimeout(function() {
           document.getElementById('system-unlock-screen').style.display = 'none';
           document.getElementById('app-container').classList.add('visible');
         }, 800);
@@ -1377,7 +1439,15 @@
         
         var targetVidId = MEDIA.videos[screenId] || (screenId === 'missionScreen' ? MEDIA.videos[currentMissionType] : MEDIA.videos.dashboardScreen);
         
-        document.querySelectorAll('.bg-vid').forEach(function(vid) { if (vid.id === targetVidId) vid.classList.add('active-bg'); else vid.classList.remove('active-bg'); });
+        document.querySelectorAll('.bg-vid').forEach(function(vid) {
+          var active = vid.id === targetVidId;
+          vid.classList.toggle('active-bg', active);
+          if (!active) { vid.pause(); return; }
+          var source = vid.querySelector('source');
+          if (source && !vid.currentSrc) vid.src = source.getAttribute('src');
+          var playAttempt = vid.play();
+          if (playAttempt && playAttempt.catch) playAttempt.catch(function(){});
+        });
         document.getElementById('bgmController').style.display = (screenId === 'loginScreen') ? 'none' : 'flex';
       }
 
@@ -1425,7 +1495,8 @@
                   updateUI(); 
                   navTo('dashboardScreen'); 
                   isMissionActive = false; 
-                  if(isBgmPlaying) bgmPlayer.volume = 0.3; 
+                  if(isBgmPlaying) bgmPlayer.volume = 0.3;
+                  maybeStartTutorial();
                 }, 850);
 
             } else { 
@@ -1553,13 +1624,104 @@
       }
 
       // 渲染作戰室中央 3 位先鋒立繪 (0: 隊長, 1: 隊員1, 2: 隊員2)
+      function factionKey(raw) {
+        var text = String(raw || "").toLowerCase();
+        if (text.indexOf("urc") >= 0 || text.indexOf("復興") >= 0 || text.indexOf("united") >= 0) return "URC";
+        if (text.indexOf("scribe") >= 0 || text.indexOf("司書") >= 0) return "Scribes";
+        if (text.indexOf("guild") >= 0 || text.indexOf("傭兵") >= 0 || text.indexOf("深潛") >= 0) return "Guild";
+        if (text.indexOf("prometheus") >= 0 || text.indexOf("普羅") >= 0 || text.indexOf("重工") >= 0) return "Prometheus";
+        return "";
+      }
+      function resonanceState() {
+        var counts = { URC: 0, Scribes: 0, Guild: 0, Prometheus: 0 };
+        battleSquad.forEach(function(op) { var key = factionKey(op && op.faction); if (key) counts[key]++; });
+        function level(key) { return counts[key] >= 3 ? 2 : (counts[key] >= 2 ? 1 : 0); }
+        var leader = factionKey(battleSquad[0] && battleSquad[0].faction);
+        return { counts: counts, urc: level("URC"), scribes: level("Scribes"), guild: level("Guild"), prometheus: level("Prometheus"), leaderUrc: leader === "URC" && level("URC") === 2, leaderScribes: leader === "Scribes" && level("Scribes") === 2, leaderGuild: leader === "Guild" && level("Guild") === 2, leaderPrometheus: leader === "Prometheus" && level("Prometheus") === 2 };
+      }
+      var RESONANCE_TEXT = { URC: ["2人：結算信用點同 EXP +10%。", "3人：結算 +25%，開局全員 SP +1。隊長同勢再得 1 層護盾。"], Scribes: ["2人：全場第一次答錯保留 Combo。", "3人：除錯／詞尾答對雙倍結算，解密技能 SP -1。隊長同勢會標記第 1 題一個錯項。"], Guild: ["2人：2 連擊已有暴擊音效，Combo 上限 35%。", "3人：每 4 連擊隨機回 1 SP，Combo 上限 50%。隊長同勢且 5 連擊打 Boss 首中扣 2 心。"], Prometheus: ["2人：隊長生命上限 4。", "3人：答對額外充能，護盾抵消 2 次。隊長放技後全員回 1 SP。"] };
+      function renderResonanceBadges(targetId) {
+        var box = document.getElementById(targetId); if (!box) return;
+        var state = resonanceState(); box.innerHTML = "";
+        ["URC","Scribes","Guild","Prometheus"].forEach(function(key) {
+          var level = state[key.toLowerCase()]; if (!level) return;
+          var badge = document.createElement("button"); badge.type = "button"; badge.innerText = key + " Lv." + level;
+          badge.style.cssText = "border:1px solid var(--accent-gold); color:var(--accent-gold); background:rgba(241,196,15,0.1); border-radius:8px; font-size:10px; padding:3px 5px;";
+          badge.onclick = function(ev) { ev.stopPropagation(); showSysMsg(RESONANCE_TEXT[key][level - 1], false); };
+          box.appendChild(badge);
+        });
+      }
+      function renderFactionResonance() {
+        renderResonanceBadges("formationResonanceBadges");
+        var bar = document.getElementById("factionResonanceBar"); if (!bar) return;
+        var state = resonanceState();
+        var active = ["URC","Scribes","Guild","Prometheus"].filter(function(key) { return state[key.toLowerCase()]; });
+        bar.style.display = active.length ? "block" : "none";
+        bar.innerText = active.map(function(key) { return key + " Lv." + state[key.toLowerCase()]; }).join("  ·  ");
+      }
+      function effectiveSkillCost(op) {
+        var cost = Number(op.chargeCost) || 1;
+        if (resonanceState().scribes >= 2 && ((op.activeSkill || "") === "超頻解析" || (op.activeSkill || "") === "深度掃描")) cost = Math.max(1, cost - 1);
+        return cost;
+      }
       function renderBriefingRoomSquad() {
-        [0, 1, 2].forEach(function(idx) {
+        for (var idx = 0; idx < 5; idx++) {
           var el = document.getElementById('roomOpSlot' + idx);
-          if (!el) return;
+          if (!el) continue;
           var op = battleSquad[idx];
-          if (!op) { el.innerHTML = '<div class="op-placeholder"></div>'; return; }
-          el.innerHTML = '<img src="' + opImg(op.imageUrl) + '" onerror="this.onerror=null;this.src=OP_PLACEHOLDER" style="width:100%; height:100%; object-fit:contain; object-position:center bottom;">';
+          if (!op) { el.innerHTML = '<div class="op-placeholder"></div>'; continue; }
+          el.innerHTML = '<img src="' + opImg(op.imageUrl) + '" onerror="this.onerror=null;this.src=OP_PLACEHOLDER"><div class="bust-name">' + (idx === 0 ? "隊長 · " : "") + (op.nameZh || op.cardId) + '<br>長按睇檔案</div>';
+          bindLongPress(el, (function(card){ return function(){ openOperatorDetailModal(card); }; })(op), null);
+        }
+        renderFactionResonance();
+      }
+
+      var tutorialStep = 0;
+      function maybeStartTutorial() {
+        if (!currentUserData) return;
+        var claimed = localStorage.getItem('noah_tutorial_' + currentUserData.studentId) === '1';
+        if (claimed) return;
+        if ((Number(currentUserData.coins) || 0) > 0 || (Number(currentUserData.totalExp) || 0) > 0) return;
+        tutorialStep = 0;
+        document.getElementById('tutorialOverlay').style.display = 'flex';
+        advanceTutorial();
+      }
+      function advanceTutorial() {
+        var title = document.getElementById('tutorialTitle');
+        var body = document.getElementById('tutorialBody');
+        var btn = document.getElementById('tutorialNextBtn');
+        var steps = [
+          ["1/4 選任務", "大廳四個任務卡就係副本。答對得信用點同經驗，經驗決定稱號。"],
+          ["2/4 編成", "短按背包幹員放入選中槽。長按先開檔案，睇完再決定上唔上陣。"],
+          ["3/4 戰鬥", "副本短按滿能量槽先放技能，長按先睇技能同背景。2 人初階共鳴，3 人高階。"],
+          ["4/4 教學獎勵", "完成導航領 1000 信用點，只此一次。"]
+        ];
+        if (tutorialStep >= steps.length) { claimTutorialReward(); return; }
+        title.innerText = steps[tutorialStep][0];
+        body.innerText = steps[tutorialStep][1];
+        btn.innerText = tutorialStep === steps.length - 1 ? "領取 1000 信用點" : "下一步";
+        tutorialStep++;
+      }
+      function claimTutorialReward() {
+        var btn = document.getElementById('tutorialNextBtn');
+        btn.disabled = true;
+        fetch(API_URL, {
+          method: 'POST', headers: { 'Content-Type': 'text/plain' },
+          body: JSON.stringify({ action: 'claimTutorialReward', studentId: currentUserData.studentId })
+        }).then(function(r){ return r.json(); }).then(function(res) {
+          if (res && res.success) {
+            currentUserData.coins = res.coins;
+            localStorage.setItem('noah_tutorial_' + currentUserData.studentId, '1');
+            updateUI();
+            document.getElementById('tutorialOverlay').style.display = 'none';
+            showSysMsg("教學完成，已存入 1000 信用點", false);
+          } else {
+            btn.disabled = false;
+            showSysMsg(res && res.message ? res.message : "教學獎勵未部署，請更新 GAS", true);
+          }
+        }).catch(function() {
+          btn.disabled = false;
+          showSysMsg("教學獎勵未部署，請更新 GAS", true);
         });
       }
 
@@ -1655,7 +1817,7 @@
             <div style="font-size:9px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">${op.nameZh.replace(/【.*?】/, '')}</div>
           `;
 
-          cardDiv.onclick = function() {
+          bindLongPress(cardDiv, function() { openOperatorDetailModal(op); }, function() {
             if (isAlreadyEquipped || !op.cardId) return;
             playSFX('click');
             currentPresetCardIds[selectedSlotIndex] = op.cardId;
@@ -1713,17 +1875,16 @@
           var fillPercent = Math.min(100, Math.floor((op.currentSp / op.chargeCost) * 100));
 
           slot.innerHTML = `
-            <img class="squad-slot-img" src="${op.imageUrl}" onerror="this.onerror=null;this.src=OP_PLACEHOLDER">
+            <img class="squad-slot-img" src="${opImg(op.imageUrl)}" onerror="this.onerror=null;this.src=OP_PLACEHOLDER">
+            <div class="squad-slot-meta">${op.nameZh || "幹員"}<br>${op.activeSkill || "技能"}</div>
             <div class="squad-sp-gauge"><div class="squad-sp-fill" style="width:${fillPercent}%;"></div></div>
           `;
 
-          slot.onclick = function() {
-            if (isReady && !isQuestionLocked) {
-              castOperatorSkill(idx);
-            } else if (!isReady) {
-              showSysMsg("⚠️ SP 充能中 (" + op.currentSp + "/" + op.chargeCost + ")，答對題目可充能！", false);
-            }
-          };
+          slot.className = "squad-slot" + (idx === 0 ? " is-leader" : "") + (op.currentSp >= effectiveSkillCost(op) ? " is-ready" : "");
+          bindLongPress(slot, function() { openOperatorDetailModal(op); }, function() {
+            if (op.currentSp >= effectiveSkillCost(op) && !isQuestionLocked) castOperatorSkill(idx);
+            else showSysMsg("長按可睇檔案。SP " + op.currentSp + "/" + effectiveSkillCost(op), false);
+          });
           dock.appendChild(slot);
         });
       }
@@ -1757,6 +1918,7 @@
         var op = battleSquad[opIdx];
         if (op.currentSp < op.chargeCost) return;
         op.currentSp = 0;
+        if (opIdx === 0 && resonanceState().leaderPrometheus) battleSquad.forEach(function(member) { member.currentSp += 1; });
         renderTacticalDock();
         playSFX('skill_cast');
 
@@ -1782,7 +1944,7 @@
           });
           spawnFloatingText("✂️ 排除 2 個干擾項！", true);
         } else if (op.activeSkill === "護盾過載") {
-          activeShieldCount++;
+          activeShieldCount += resonanceState().prometheus >= 2 ? 2 : 1;
           spawnFloatingText("🛡️ 戰術護盾就緒！", true);
         } else if (op.activeSkill === "連擊狂潮") {
           currentCombo += 2;
@@ -1881,8 +2043,13 @@
                 currentCombo = 0; wrongQuestionsList = []; activeShieldCount = 0;
                 updateComboUI();
 
+                var resonance = resonanceState();
+                playerMaxHp = resonance.prometheus >= 1 ? 4 : 3;
                 playerCurrentHp = playerMaxHp;
                 updatePlayerHpUI();
+                if (resonance.urc >= 2) battleSquad.forEach(function(op) { op.currentSp += 1; });
+                if (resonance.leaderUrc) activeShieldCount++;
+                scribeForgiveUsed = false; guildBossCritUsed = false; scribeMarked = false;
 
                 var totalQ = missionQueue.length;
                 if (totalQ <= 5) { bossStartIndex = 3; maxBossHp = 1; }
@@ -1896,6 +2063,7 @@
 
                 // 重新依據出戰 preset 構建陣容並賦予 2 SP
                 buildActiveBattleSquad();
+                if (factionResonance().count >= 3) activeShieldCount++;
                 renderTacticalDock();
 
                 clearInterval(timerInterval); 
@@ -1945,6 +2113,13 @@
         
         updateBattleEnemy();
         renderTacticalDock();
+        if (currentIdx === 0 && resonanceState().leaderScribes && !scribeMarked) {
+          scribeMarked = true;
+          setTimeout(function() {
+            var wrong = document.querySelector('#answerArea .option-btn');
+            if (wrong) { wrong.style.opacity = '0.25'; wrong.style.pointerEvents = 'none'; }
+          }, 500);
+        }
 
         var imgEl = document.getElementById('qImage');
         imgEl.classList.remove('loaded'); 
@@ -2135,13 +2310,14 @@
           spawnFloatingText("🛡️ 護盾抵消一次失誤！", true);
           return;
         }
+        if (!correct && resonanceState().scribes >= 1 && !scribeForgiveUsed) { scribeForgiveUsed = true; spawnFloatingText("司書共鳴：Combo 保留", true); }
+        else if (!correct) { currentCombo = 0; }
 
         if (!correct && wrongAttempts === 0) {
             wrongAttempts++; 
             playSFX('enemy_attack'); 
             if(btn) btn.classList.add('wrong');
-            currentCombo = 0; updateComboUI();
-            
+            updateComboUI();
             playerCurrentHp = Math.max(0, playerCurrentHp - 1);
             updatePlayerHpUI();
             if (playerCurrentHp <= 0) { triggerCaptainRetreat(q); return; }
@@ -2180,7 +2356,7 @@
           void slashVfx.offsetWidth;
           slashVfx.classList.add('slash-active');
 
-          if (currentCombo >= 3 || (isBossPhase && currentBossHp <= 1)) {
+          if (currentCombo >= (resonanceState().guild >= 1 ? 2 : 3) || (isBossPhase && currentBossHp <= 1)) {
             playSFX('hit_critical');
           } else {
             playSFX('hit_normal');
@@ -2192,7 +2368,9 @@
           setTimeout(() => { enemySpriteEl.classList.remove('enemy-hit'); }, 350);
 
           if (isBossPhase) {
-            currentBossHp = Math.max(0, currentBossHp - 1);
+            var bossDamage = (resonanceState().leaderGuild && currentCombo >= 5 && !guildBossCritUsed) ? 2 : 1;
+            if (bossDamage === 2) guildBossCritUsed = true;
+            currentBossHp = Math.max(0, currentBossHp - bossDamage);
             var heartsStr = "♥".repeat(Math.max(0, currentBossHp)) + "🖤".repeat(Math.max(0, maxBossHp - currentBossHp));
             document.getElementById('enemyHpHearts').innerText = heartsStr || "K.O.";
 
@@ -2207,7 +2385,11 @@
             spawnFloatingText(currentCombo >= 3 ? "🔥 COMBO x" + currentCombo + "!" : "+50 EXP ⚡", currentCombo >= 3, btn || document.getElementById('answerArea'));
           }
 
-          chargeSquadSP(1);
+          chargeSquadSP(resonanceState().prometheus >= 2 ? 2 : 1);
+          if (resonanceState().guild >= 2 && currentCombo > 0 && currentCombo % 4 === 0) {
+            var lucky = battleSquad[Math.floor(Math.random() * battleSquad.length)];
+            if (lucky) lucky.currentSp += 1;
+          }
 
         } else { 
           playSFX('wrong'); 
@@ -2216,7 +2398,8 @@
         }
         updateComboUI();
 
-        missionResults.push({ qId: q.Question_ID, isCorrect: correct });
+        var qType = String(q.type || q.Type || "");
+        missionResults.push({ qId: q.Question_ID, isCorrect: correct, doubleScore: !!(correct && resonanceState().scribes >= 2 && (qType.indexOf("BUG") >= 0 || qType.indexOf("SUFFIX") >= 0)) });
         var panel = document.getElementById('feedback-panel'); 
         panel.className = 'active ' + (correct ? 'correct' : 'wrong');
         document.getElementById('feedbackTitle').innerHTML = correct ? "🛡️ INTEL SECURED" : "❌ CONNECTION LOST";
@@ -2313,7 +2496,7 @@
 
         fetch(API_URL, {
             method: 'POST', headers: { 'Content-Type': 'text/plain' },
-            body: JSON.stringify({ action: 'submitMissionResults', studentId: currentUserData.studentId, results: missionResults, missionType: currentMissionType })
+            body: JSON.stringify({ action: 'submitMissionResults', studentId: currentUserData.studentId, results: missionResults, missionType: currentMissionType, resonance: (function(){ var st = resonanceState(); return { coinMult: st.urc >= 2 ? 1.25 : (st.urc >= 1 ? 1.1 : 1), expMult: st.urc >= 2 ? 1.25 : (st.urc >= 1 ? 1.1 : 1), comboCap: st.guild >= 2 ? 0.5 : (st.guild >= 1 ? 0.35 : 0.3) }; })() })
         })
         .then(res => res.json())
         .then(res => {
