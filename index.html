@@ -1407,23 +1407,17 @@
         return list;
       }
       function startAssetPreload() {
-        preloadSfx(); if (!window.caches) return;
-        var urls = assetList(), overlay = document.getElementById('loadingOverlay'), text = document.getElementById('loadingText'), done = 0;
-        overlay.style.display = 'flex';
-        caches.open('noah-assets-v1').then(function(cache) {
-          return urls.reduce(function(chain, url) {
-            return chain.then(function() {
-              done++; if (text) text.innerText = 'PRELOAD ' + done + '/' + urls.length;
-              return cache.match(url).then(function(hit) { return hit || cache.add(url).catch(function(){}); });
-            });
-          }, Promise.resolve());
-        }).catch(function(){}).then(function() { overlay.style.display = 'none'; });
+        preloadSfx();
+        document.querySelectorAll('.bg-vid').forEach(function(vid) {
+          var source = vid.querySelector('source');
+          if (source && !vid.currentSrc) vid.preload = 'metadata';
+        });
       }
       function unlockSystemMedia() {
         elevenPlayer.load(); preloadSfx(); shuffleBGM(); bgmPlayer.volume = 0;
         var bp = bgmPlayer.play(); if (bp) bp.then(function() { bgmPlayer.pause(); }).catch(function(){});
         playSFX('click');
-        if ('serviceWorker' in navigator) navigator.serviceWorker.register('sw.js').catch(function(){});
+        if ('serviceWorker' in navigator) navigator.serviceWorker.getRegistrations().then(function(regs) { regs.forEach(function(reg) { reg.unregister(); }); });
         startAssetPreload();
         document.getElementById('system-unlock-screen').style.opacity = '0';
         setTimeout(function() {
