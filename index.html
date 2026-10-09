@@ -1195,6 +1195,7 @@
       var playerPresets = { active: 1, preset1: [], preset2: [], preset3: [] };
       var missionAborted = false;
       var scribeForgiveUsed = false, guildBossCritUsed = false, scribeMarked = false;
+      var skillState = { calibrate: 0, decoy: false, bypass: false, harvest: false, freeze: 0, paradox: false, timerPause: 0, started: 0 };
 
       // 出戰小隊實體陣列 (長度 5，包含 SP 蓄能)
       var battleSquad = [];
@@ -1656,6 +1657,7 @@
       function effectiveSkillCost(op) {
         var cost = Number(op.chargeCost) || 1;
         if (resonanceState().scribes >= 2 && ((op.activeSkill || "") === "超頻解析" || (op.activeSkill || "") === "深度掃描")) cost = Math.max(1, cost - 1);
+        if (currentCombo >= 10 && hasPassive("暗影收割")) cost = Math.max(1, cost - 1);
         return cost;
       }
       function renderBriefingRoomSquad() {
@@ -1908,6 +1910,51 @@
         renderTacticalDock();
       }
 
+
+      function hasPassive(name) { return battleSquad.some(function(op) { return String(op.passiveSkill || "").indexOf(name) >= 0 || String(op.activeSkill || "").indexOf(name) >= 0; }); }
+      function letterGap(a, b) { a = String(a||""); b = String(b||""); var n = Math.abs(a.length - b.length), i = 0; if (n > 1) return 9; while (i < a.length && i < b.length && a[i] === b[i]) i++; return n + (a.slice(i) === b.slice(i + (b.length > a.length ? 1 : 0)) ? 0 : 1); }
+      function showSkillHint(text) { var bar = document.getElementById("skillHintBar"); if (!bar) { bar = document.createElement("div"); bar.id = "skillHintBar"; bar.style.cssText = "margin:8px 0; padding:8px; border:1px solid var(--noah-cyan); border-radius:8px; color:#d5dde3; font-size:13px; text-align:left;"; var q = document.getElementById("qText"); if (q) q.insertAdjacentElement("afterend", bar); } bar.innerText = text; }
+      function excludeWrong(n) { var wrong = Array.from(document.querySelectorAll(".option-btn")).filter(function(b){ return b.innerText.trim().toLowerCase() !== String(targetCurrentAnswer||"").toLowerCase(); }); wrong.slice(0, n).forEach(function(b){ b.style.opacity = "0.2"; b.style.pointerEvents = "none"; b.style.textDecoration = "line-through"; }); }
+      function applyActiveSkill(op) {
+        var name = op.activeSkill || "";
+        var q = missionQueue[currentIdx] || {};
+        if (name === "超頻解析") { excludeWrong(2); spawnFloatingText("排除 2 個干擾項", true); }
+        else if (name === "深度掃描") { var root = q.Root || q.Vocabulary || targetCurrentAnswer; var el = document.getElementById("qText"); if (el && root) el.innerHTML = el.innerText.replace(new RegExp(String(root).replace(/[.*+?^${}()|[\]\\]/g, "\\$&"), "ig"), "<mark style='background:#f1c40f;color:#000;'>$&</mark>"); spawnFloatingText("詞根已高亮", true); }
+        else if (name === "EMP 脈衝") { var el2 = document.getElementById("qText"); if (el2) el2.innerText = el2.innerText.replace(/\[.*?\]/g, targetCurrentAnswer); showSkillHint("遮蔽結構已還原"); }
+        else if (name === "詞形固化") { excludeWrong(2); showSkillHint("已過濾非目標詞性選項"); }
+        else if (name === "數據透鏡") { showSkillHint("高頻對照：" + (q.Example || q.Collocation || targetCurrentAnswer)); }
+        else if (name === "機率校準") { skillState.calibrate = 3; spawnFloatingText("之後 3 題不扣心", true); }
+        else if (name === "光學誘餌") { skillState.decoy = true; spawnFloatingText("誘餌就緒", true); }
+        else if (name === "戰術撤回") { targetCurrentAnswer = q.Vocabulary || targetCurrentAnswer; document.getElementById("qText").innerText = "基礎撤回：輸入 " + (q.PartOfSpeech || "word"); showSkillHint("本題改為基礎詞"); }
+        else if (name === "慢速聚焦") { skillState.timerPause = Date.now() + 8000; spawnFloatingText("計時暫停 8 秒", true); }
+        else if (name === "連擊狂潮") { currentCombo += 3; updateComboUI(); spawnFloatingText("COMBO +3", true); }
+        else if (name === "破譯直通") { skillState.bypass = true; spawnFloatingText("本場 EXP +25%", true); }
+        else if (name === "能量回收") { skillState.harvest = true; spawnFloatingText("答對額外信用點", true); }
+        else if (name === "聲軌切片" || name === "全息母音" || name === "聲學濾波") { playVoice(targetCurrentAnswer, name === "全息母音" ? 0.6 : 0.75); showSkillHint(name + "：慢速重播 " + targetCurrentAnswer); }
+        else if (name === "逆向線索") { showSkillHint("詞綴線索：" + targetCurrentAnswer.slice(0, 3) + " … " + targetCurrentAnswer.slice(-3)); }
+        else if (name === "字根探針") { var inp = document.getElementById("userIn"); if (inp) inp.placeholder = targetCurrentAnswer[0] + " _ " + targetCurrentAnswer.slice(-1); }
+        else if (name === "引力對齊") { var inp2 = document.getElementById("userIn"); if (inp2) inp2.value = String(targetCurrentAnswer).replace(/[^aeiou]/ig, "_"); }
+        else if (name === "全息錨定") { showSkillHint("首尾已鎖定：" + targetCurrentAnswer.split(/\s+/)[0] + " … " + targetCurrentAnswer.split(/\s+/).slice(-1)[0]); }
+        else if (name === "語法藍圖") { showSkillHint("句型主幹：Subject + Verb + Object / Complement"); }
+        else if (name === "因果律斷裂") { if (isBossPhase) { skillState.paradox = true; spawnFloatingText("下次答對多扣 2 心", true); } else showSkillHint("只在 Boss 戰生效"); }
+        else if (name === "時態停滯") { if (isBossPhase) { skillState.freeze = 2; spawnFloatingText("Boss 兩次答錯不狂暴", true); } else showSkillHint("只在 Boss 戰生效"); }
+        else if (name === "神經鏈同調") { if (isBossPhase && battleSquad[0] && battleSquad[1] && battleSquad[0].currentSp >= 0 && battleSquad[1].currentSp + battleSquad[1].chargeCost >= battleSquad[1].chargeCost) { currentBossHp = 0; spawnFloatingText("合體技擊破 Boss", true); updateBattleEnemy(); } else showSkillHint("需 Boss 戰，且隊長與副手曾充滿能量"); }
+        else if (name === "護盾過載") { activeShieldCount += resonanceState().prometheus >= 2 ? 2 : 1; spawnFloatingText("護盾就緒", true); }
+        else if (name === "介詞雷達") { var el3 = document.getElementById("qText"); if (el3) el3.innerHTML = el3.innerText.replace(/\b(of|for|in|on|at|with|to|from|by)\b/ig, "<mark style='background:#00e5ff;color:#000;'>$&</mark>"); }
+        else if (name === "主謂對齊器") { showSkillHint("主語與動詞已以虛線提示，請核對單複數"); document.querySelectorAll(".bug-chip").forEach(function(ch, i){ if (i < 2) ch.style.borderBottom = "2px dashed var(--accent-gold)"; }); }
+        else if (name === "時態變位鏡") { showSkillHint("三態：" + targetCurrentAnswer + " / 過去式 / 過去分詞"); }
+        else spawnFloatingText("戰術同調啟動", true);
+      }
+      function applyQuestionAuras(q) {
+        skillState.started = Date.now();
+        if (skillState.calibrate > 0 && currentIdx > 0) {}
+        if (currentIdx === 0 && hasPassive("駭客後門") && Math.random() < 0.2) { spawnFloatingText("駭客後門解開第 1 題", true); setTimeout(function(){ checkAnswer(targetCurrentAnswer); }, 400); }
+        var pos = String(q.PartOfSpeech || q.POS || "");
+        if (hasPassive("詞性感知") && /adverb|preposition|conjunction/i.test(pos)) showSkillHint("冷門詞性：" + pos);
+        if (resonanceState().scribes >= 2 && hasPassive("禁書目錄")) document.querySelectorAll(".bug-chip").forEach(function(ch){ ch.title = "詞性已展開"; });
+        if (hasPassive("介詞雷達")) {}
+      }
+
       function castOperatorSkill(opIdx) {
         var op = battleSquad[opIdx];
         if (op.currentSp < op.chargeCost) return;
@@ -1929,24 +1976,7 @@
           cutinOverlay.style.display = "none";
         }, 500);
 
-        if (op.activeSkill === "超頻解析" || op.activeSkill === "深度掃描") {
-          var wrongBtns = Array.from(document.querySelectorAll('.option-btn')).filter(b => b.innerText.trim().toLowerCase() !== targetCurrentAnswer.toLowerCase());
-          wrongBtns.slice(0, 2).forEach(b => {
-            b.style.opacity = "0.2";
-            b.style.pointerEvents = "none";
-            b.style.textDecoration = "line-through";
-          });
-          spawnFloatingText("✂️ 排除 2 個干擾項！", true);
-        } else if (op.activeSkill === "護盾過載") {
-          activeShieldCount += resonanceState().prometheus >= 2 ? 2 : 1;
-          spawnFloatingText("🛡️ 戰術護盾就緒！", true);
-        } else if (op.activeSkill === "連擊狂潮") {
-          currentCombo += 2;
-          updateComboUI();
-          spawnFloatingText("🔥 COMBO +2！", true);
-        } else {
-          spawnFloatingText("⚡ 戰術同調啟動！", true);
-        }
+        applyActiveSkill(op);
       }
 
       // ==========================================
@@ -2057,11 +2087,12 @@
 
                 // 重新依據出戰 preset 構建陣容並賦予 2 SP
                 buildActiveBattleSquad();
-                if (factionResonance().count >= 3) activeShieldCount++;
+                if (resonanceState().urc >= 2 && resonanceState().leaderUrc) activeShieldCount++;
                 renderTacticalDock();
 
                 clearInterval(timerInterval); 
                 timerInterval = setInterval(function(){ 
+                    if (skillState.timerPause > Date.now()) return;
                     timerVal++; 
                     var m=String(Math.floor(timerVal/60)).padStart(2,'0'), s=String(timerVal%60).padStart(2,'0'); 
                     document.getElementById('missionTimer').innerText=m+":"+s; 
@@ -2283,6 +2314,7 @@
             opts.forEach(function(o){ var b = document.createElement('button'); b.className='option-btn'; b.innerText=o; b.onclick=function(e){checkAnswer(o, e.target);}; grid.appendChild(b); });
             ansArea.appendChild(grid);
         }
+        applyQuestionAuras(q);
       }
 
       function checkAnswer(sel, btn) {
@@ -2294,10 +2326,13 @@
         function cleanStr(str) { return String(str).trim().toLowerCase().replace(/\s+/g, " "); }
         var cUser = cleanStr(userAns); var cTarget = cleanStr(targetCurrentAnswer); var correct = (cUser === cTarget);
         if (!correct) { var rawUser = cUser.replace(/[^a-z0-9\u4e00-\u9fa5]/ig, ""); var rawTarget = cTarget.replace(/[^a-z0-9\u4e00-\u9fa5]/ig, ""); if (rawUser === rawTarget && rawTarget !== "") correct = true; }
+        if (!correct && hasPassive("精準調頻") && currentMissionType === "listening" && letterGap(cUser, cTarget) === 1) correct = true;
 
         var appCont = document.getElementById('app-container');
         var enemySpriteEl = document.getElementById('enemySprite');
 
+        if (!correct && skillState.calibrate > 0) { skillState.calibrate--; spawnFloatingText("機率校準：不扣心", true); return; }
+        if (!correct && skillState.decoy) { skillState.decoy = false; spawnFloatingText("光學誘餌：改為提示", true); showSkillHint("誘餌提示：答案與 " + targetCurrentAnswer.slice(0, 1).toUpperCase() + " 開頭"); return; }
         if (!correct && activeShieldCount > 0) {
           activeShieldCount--;
           playSFX('shield_block');
@@ -2312,7 +2347,9 @@
             playSFX('enemy_attack'); 
             if(btn) btn.classList.add('wrong');
             updateComboUI();
-            playerCurrentHp = Math.max(0, playerCurrentHp - 1);
+            if (!(isBossPhase && skillState.freeze > 0)) playerCurrentHp = Math.max(0, playerCurrentHp - 1);
+            if (isBossPhase && skillState.freeze > 0) skillState.freeze--;
+            if (playerCurrentHp <= 0 && hasPassive("動力核心過載") && currentIdx < missionQueue.length - 1) playerCurrentHp = 1;
             updatePlayerHpUI();
             if (playerCurrentHp <= 0) { triggerCaptainRetreat(q); return; }
 
@@ -2364,6 +2401,8 @@
           if (isBossPhase) {
             var bossDamage = (resonanceState().leaderGuild && currentCombo >= 5 && !guildBossCritUsed) ? 2 : 1;
             if (bossDamage === 2) guildBossCritUsed = true;
+            if (skillState.paradox) { bossDamage += 2; skillState.paradox = false; }
+            if (Date.now() - skillState.started < 3000 && hasPassive("疾速同調")) bossDamage *= 2;
             currentBossHp = Math.max(0, currentBossHp - bossDamage);
             var heartsStr = "♥".repeat(Math.max(0, currentBossHp)) + "🖤".repeat(Math.max(0, maxBossHp - currentBossHp));
             document.getElementById('enemyHpHearts').innerText = heartsStr || "K.O.";
@@ -2384,6 +2423,8 @@
             var lucky = battleSquad[Math.floor(Math.random() * battleSquad.length)];
             if (lucky) lucky.currentSp += 1;
           }
+          if (hasPassive("連鎖反應") && currentCombo > 0 && currentCombo % 5 === 0) chargeSquadSP(1);
+          if (skillState.harvest) { skillState.harvest = false; skillState.bonusCoins = (skillState.bonusCoins || 0) + 10 + Math.floor(Math.random() * 11); spawnFloatingText("能量回收", true); }
 
         } else { 
           playSFX('wrong'); 
@@ -2393,7 +2434,9 @@
         updateComboUI();
 
         var qType = String(q.type || q.Type || "");
-        missionResults.push({ qId: q.Question_ID, isCorrect: correct, doubleScore: !!(correct && resonanceState().scribes >= 2 && (qType.indexOf("BUG") >= 0 || qType.indexOf("SUFFIX") >= 0)) });
+        var fast = correct && Date.now() - skillState.started < 3000 && hasPassive("疾速同調");
+        var suffixBonus = correct && hasPassive("後綴拆解") && (qType.indexOf("SUFFIX") >= 0 || String(currentBadge).indexOf("SUFFIX") >= 0);
+        missionResults.push({ qId: q.Question_ID, isCorrect: correct, doubleScore: !!((correct && resonanceState().scribes >= 2 && (qType.indexOf("BUG") >= 0 || qType.indexOf("SUFFIX") >= 0)) || fast || suffixBonus) });
         var panel = document.getElementById('feedback-panel'); 
         panel.className = 'active ' + (correct ? 'correct' : 'wrong');
         document.getElementById('feedbackTitle').innerHTML = correct ? "🛡️ INTEL SECURED" : "❌ CONNECTION LOST";
@@ -2490,7 +2533,10 @@
 
         fetch(API_URL, {
             method: 'POST', headers: { 'Content-Type': 'text/plain' },
-            body: JSON.stringify({ action: 'submitMissionResults', studentId: currentUserData.studentId, results: missionResults, missionType: currentMissionType, resonance: (function(){ var st = resonanceState(); return { coinMult: st.urc >= 2 ? 1.25 : (st.urc >= 1 ? 1.1 : 1), expMult: st.urc >= 2 ? 1.25 : (st.urc >= 1 ? 1.1 : 1), comboCap: st.guild >= 2 ? 0.5 : (st.guild >= 1 ? 0.35 : 0.3) }; })() })
+            body: JSON.stringify({ action: 'submitMissionResults', studentId: currentUserData.studentId, results: missionResults, missionType: currentMissionType, resonance: (function(){ var st = resonanceState(); var coin = st.urc >= 2 ? 1.25 : (st.urc >= 1 ? 1.1 : 1); var exp = st.urc >= 2 ? 1.25 : (st.urc >= 1 ? 1.1 : 1);
+              if (hasPassive("賞金合約")) coin += 0.15; if (hasPassive("文法大師") && currentMissionType === "grammar") exp += 0.3; if (hasPassive("聽覺特化") && currentMissionType === "listening") exp += 0.5; if (skillState.bypass) exp += 0.25;
+              var urc = resonanceState().counts.URC || 0; if (urc && Math.random() < urc * 0.1) coin *= 2;
+              return { coinMult: coin, expMult: exp, comboCap: st.guild >= 2 ? 0.5 : (st.guild >= 1 ? 0.35 : 0.3), bonusCoins: skillState.bonusCoins || 0 }; })() })
         })
         .then(res => res.json())
         .then(res => {
@@ -2856,6 +2902,10 @@
         "極限過載（滿階）：解鎖專屬高階戰術光環，全隊信用點與經驗結算獲取 +25%！"
       ];
 
+      function skillBlurb(name) {
+        var book = { "超頻解析":"排除 2 個錯項。", "深度掃描":"高亮詞根或關鍵詞。", "EMP 脈衝":"還原被遮蔽句子。", "詞形固化":"過濾非目標詞性。", "數據透鏡":"顯示高頻例句。", "機率校準":"之後 3 題答錯不扣心。", "光學誘餌":"一次失誤改為提示。", "戰術撤回":"本題改為基礎詞。", "慢速聚焦":"計時暫停 8 秒。", "連擊狂潮":"Combo +3。", "破譯直通":"本場 EXP +25%。", "能量回收":"答對額外 10 至 20 信用點。", "聲軌切片":"慢放關鍵詞。", "聲學濾波":"聽力降噪重播。", "全息母音":"0.6 倍速讀詞。", "逆向線索":"顯示詞綴。", "字根探針":"標首尾字母。", "引力對齊":"自動填元音。", "全息錨定":"鎖定重組題首尾。", "語法藍圖":"顯示句型主幹。", "護盾過載":"主動施放後獲得護盾。", "因果律斷裂":"Boss 戰答對多扣 2 心。", "時態停滯":"Boss 戰之後兩次答錯不狂暴。", "神經鏈同調":"Boss 戰隊長與副手聯動擊破。", "文法大師":"文法任務 EXP +30%。", "聽覺特化":"聆聽任務經驗 1.5 倍。", "賞金合約":"結算信用點 +15%。", "連鎖反應":"每 5 連擊隨機 +1 SP。", "防過勞補正":"每日第三次起衰減減半。", "詞性感知":"冷門詞性中文提示。", "後綴拆解":"詞尾題雙倍評分旗標。", "駭客後門":"20% 解開第 1 題。", "疾速同調":"3 秒內答對雙倍削血。", "能量同調":"充能加快。", "精準調頻":"聽寫可錯 1 個字母。", "介詞雷達":"高亮介詞搭配。", "主謂對齊器":"改錯題標主謂。", "時態變位鏡":"顯示動詞三態。", "暗影收割":"10 連擊後技能消耗 -1。", "動力核心過載":"非最後一題鎖 1 點生命。", "禁書目錄":"司書 3 人時改錯題展開詞性。" };
+        return book[name] || "已接入戰鬥。";
+      }
       function openOperatorDetailModal(c) {
         playSFX('dossier_open');
         var modal = document.getElementById('operatorDetailModal');
@@ -2883,13 +2933,8 @@
         document.getElementById('detailOpBreakStars').innerText = "★".repeat(filledStars) + "☆".repeat(Math.max(0, 5 - filledStars));
         document.getElementById('detailOpBreakDesc').innerText = BREAKTHROUGH_EFFECTS[Math.min(5, breakLevel)];
 
-        document.getElementById('detailOpActive').innerHTML = norm.activeSkill 
-          ? `<strong>${norm.activeSkill}</strong> <span style="color:var(--accent-gold); font-size:11px;">(耗能: ${norm.chargeCost} SP)</span>` 
-          : `<span style="color:#777;">無配置主動戰術</span>`;
-
-        document.getElementById('detailOpPassive').innerHTML = norm.passiveSkill 
-          ? `<strong>${norm.passiveSkill}</strong>` 
-          : `<span style="color:#777;">無配置被動共鳴</span>`;
+        document.getElementById('detailOpActive').innerHTML = norm.activeSkill ? "<strong>" + norm.activeSkill + "</strong> <span style='color:var(--accent-gold); font-size:11px;'>(耗能: " + norm.chargeCost + " SP)</span><div style='color:#b7c4ce; font-size:12px; margin-top:4px;'>" + skillBlurb(norm.activeSkill) + "</div>" : "<span style='color:#777;'>無配置主動戰術</span>";
+        document.getElementById('detailOpPassive').innerHTML = norm.passiveSkill ? "<strong>" + norm.passiveSkill + "</strong><div style='color:#b7c4ce; font-size:12px; margin-top:4px;'>" + skillBlurb(norm.passiveSkill) + "</div>" : "<span style='color:#777;'>無配置被動共鳴</span>";
 
         var leaderBox = document.getElementById('detailOpLeaderBox');
         if (norm.leaderAura) { 
