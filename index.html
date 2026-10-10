@@ -231,9 +231,10 @@
         from { transform: translateY(0); }
         to { transform: translateY(-3px); box-shadow: 0 0 20px rgba(241, 196, 15, 1); }
       }
+      .squad-slot { height: 86px; }
       .squad-slot-img {
         width: 100%; height: 100%; object-fit: cover;
-        object-position: center 12%;
+        object-position: center top;
         filter: brightness(0.95);
       }
       .squad-slot-meta { position: absolute; left: 0; right: 0; bottom: 4px; font-size: 8px; line-height: 1.15; color: #fff; text-align: center; background: linear-gradient(transparent, rgba(0,0,0,0.82)); padding: 8px 2px 2px; pointer-events: none; }
@@ -1239,11 +1240,11 @@
       function toggleBGM() { 
         isBgmPlaying = !isBgmPlaying;
         var btn = document.getElementById('bgmToggleBtn');
-        if(isBgmPlaying) { bgmPlayer.volume = isMissionActive ? 0.05 : 0.3; bgmPlayer.play(); btn.innerText = "🔊"; } 
+        if(isBgmPlaying) { bgmPlayer.volume = isMissionActive ? 0.16 : 0.3; bgmPlayer.play(); btn.innerText = "🔊"; } 
         else { bgmPlayer.pause(); btn.innerText = "🔇"; } 
       }
       function duckBGM() { if(isBgmPlaying) bgmPlayer.volume = 0.02; }
-      function unduckBGM() { if(isBgmPlaying) bgmPlayer.volume = isMissionActive ? 0.05 : 0.3; }
+      function unduckBGM() { if(isBgmPlaying) bgmPlayer.volume = isMissionActive ? 0.16 : 0.3; }
 
       function showSysMsg(msg, isError) { 
           sysMsgBox.style.display = "block";
@@ -1263,8 +1264,8 @@
       function playSFX(key) {
         var urls = sfxUrls(key); if (!urls.length) return;
         var url = urls[Math.floor(Math.random() * urls.length)];
-        var base = sfxPool[url] || (sfxPool[url] = new Audio(url));
-        var node = base.cloneNode(); node.volume = 0.65;
+        var node = new Audio(url);
+        node.volume = 1;
         var attempt = node.play(); if (attempt && attempt.catch) attempt.catch(function(){});
       }
       function bindLongPress(el, onLong, onTap) {
@@ -1422,8 +1423,18 @@
           if (source && !vid.currentSrc) vid.preload = 'metadata';
         });
       }
+      function playBackground(id) {
+        var vid = document.getElementById(id);
+        if (!vid) return;
+        var source = vid.querySelector("source");
+        if (source && !vid.currentSrc) vid.src = source.getAttribute("src");
+        vid.classList.add("active-bg");
+        var attempt = vid.play();
+        if (attempt && attempt.catch) attempt.catch(function(){});
+      }
       function unlockSystemMedia() {
         elevenPlayer.load(); preloadSfx(); shuffleBGM(); bgmPlayer.volume = 0;
+        playBackground("vid-login");
         var bp = bgmPlayer.play(); if (bp) bp.then(function() { bgmPlayer.pause(); }).catch(function(){});
         playSFX('click');
         if ('serviceWorker' in navigator) navigator.serviceWorker.getRegistrations().then(function(regs) { regs.forEach(function(reg) { reg.unregister(); }); });
@@ -1462,7 +1473,7 @@
         if(!id || !pin) return showSysMsg("⚠️ Please enter ID and PIN", true);
         if(!isBgmPlaying) { 
             isBgmPlaying = true; 
-            document.getElementById('bgmToggleBtn').innerText = "🔊"; bgmPlayer.volume = 0.05; bgmPlayer.play().catch(function(){}); 
+            document.getElementById('bgmToggleBtn').innerText = "🔊"; bgmPlayer.volume = 0.16; bgmPlayer.play().catch(function(){}); 
         }
         
         var transOverlay = document.getElementById('loginTransitionOverlay');
@@ -2087,7 +2098,7 @@
                 }
 
                 playSFX(currentMissionType.split('_')[0]); isMissionActive = true; 
-                if(isBgmPlaying) bgmPlayer.volume = 0.05;
+                if(isBgmPlaying) bgmPlayer.volume = 0.16;
                 missionQueue = res.missionData; currentIdx = 0; missionResults = []; timerVal = 0;
                 currentCombo = 0; wrongQuestionsList = []; activeShieldCount = 0;
                 updateComboUI();
