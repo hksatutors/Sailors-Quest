@@ -17,6 +17,10 @@
       * { box-sizing: border-box; }
 
       html { margin: 0; padding: 0; height: 100%; width: 100%; }
+      * { scrollbar-width: thin; scrollbar-color: #00e5ff rgba(0,229,255,0.08); }
+      *::-webkit-scrollbar { width: 8px; height: 8px; }
+      *::-webkit-scrollbar-track { background: rgba(0,229,255,0.06); border-radius: 8px; }
+      *::-webkit-scrollbar-thumb { background: linear-gradient(180deg, #00e5ff, #14697a); border-radius: 8px; border: 1px solid rgba(0,0,0,0.4); }
       body { 
         margin: 0 auto; padding: 45px 0 0 0; box-sizing: border-box; height: 100%; width: 100%;
         font-family: 'Segoe UI', sans-serif; background: transparent; color: var(--text-main); 
@@ -482,8 +486,8 @@
       .R .card-badge-rarity { background: var(--noah-cyan); color: #000; }
       
       .card-badge-new { position: absolute; top: 3px; right: 3px; font-size: 7px; font-weight: 900; background: var(--accent-red); color: #fff; padding: 1px 3px; border-radius: 4px; z-index: 3; animation: pulse 1.5s infinite; }
-      .card-badge-break { position: absolute; top: 3px; right: 3px; font-size: 7px; font-weight: 900; background: rgba(0,0,0,0.7); border: 1px solid var(--accent-gold); color: var(--accent-gold); padding: 1px 3px; border-radius: 4px; z-index: 3; }
-      .layout-single .card-badge-new, .layout-single .card-badge-break { font-size: 10px; padding: 2px 5px; }
+      .card-badge-break { position: absolute; top: 6px; right: 6px; font-size: 14px; font-weight: 900; background: rgba(0,0,0,0.82); border: 1px solid var(--accent-gold); color: var(--accent-gold); padding: 4px 7px; border-radius: 8px; z-index: 5; letter-spacing: 1px; box-shadow: 0 0 12px rgba(241,196,15,0.7); }
+      .layout-single .card-badge-new { font-size: 12px; padding: 3px 6px; } .layout-single .card-badge-break { font-size: 20px; padding: 7px 12px; }
 
       .card-img { width: 100%; height: 100%; object-fit: contain; object-position: center bottom; }
       .card-name-bar { position: absolute; bottom: 0; left: 0; width: 100%; background: rgba(0,0,0,0.85); padding: 2px 1px; font-size: 8px; font-weight: bold; text-align: center; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; color: #fff; }
@@ -664,7 +668,7 @@
     </div>
 
     <!-- 幹員詳細情報檔案 Modal -->
-    <div id="operatorDetailModal" style="position:fixed; top:0; left:0; width:100vw; height:100vh; background:rgba(0,0,0,0.92); backdrop-filter:blur(22px); z-index:37000; display:none; flex-direction:column; justify-content:center; align-items:center; padding:15px;">
+    <div id="operatorDetailModal" style="position:fixed; top:0; left:0; width:100vw; height:100vh; background:rgba(0,0,0,0.92); backdrop-filter:blur(22px); z-index:46000; display:none; flex-direction:column; justify-content:center; align-items:center; padding:15px;">
       <div style="background:linear-gradient(135deg, rgba(8,18,30,0.98), rgba(4,10,16,0.98)); border:2px solid var(--noah-cyan); border-radius:24px; width:100%; max-width:440px; max-height:88vh; display:flex; flex-direction:column; overflow:hidden; box-shadow:0 0 45px rgba(0,229,255,0.35);">
         <div style="display:flex; justify-content:space-between; align-items:center; padding:12px 18px; border-bottom:1px solid rgba(255,255,255,0.1);">
           <div style="font-size:12px; color:var(--noah-cyan); font-family:monospace; letter-spacing:2px; font-weight:bold;">TACTICAL PERSONNEL DOSSIER</div>
@@ -721,7 +725,7 @@
     </div>
 
     <!-- 幹員立繪高清大圖檢視器 -->
-    <div id="opArtworkLightbox" style="position:fixed; top:0; left:0; width:100vw; height:100vh; background:rgba(3,6,12,0.96); backdrop-filter:blur(25px); z-index:40000; display:none; flex-direction:column; justify-content:center; align-items:center; cursor:pointer;" onclick="closeArtworkLightbox()">
+    <div id="opArtworkLightbox" style="position:fixed; top:0; left:0; width:100vw; height:100vh; background:rgba(3,6,12,0.96); backdrop-filter:blur(25px); z-index:47000; display:none; flex-direction:column; justify-content:center; align-items:center; cursor:pointer;" onclick="closeArtworkLightbox()">
       <div style="position:absolute; top:20px; right:25px; color:#aaa; font-family:monospace; font-size:13px; background:rgba(0,0,0,0.6); padding:6px 12px; border-radius:20px; border:1px solid #444;">[ ✕ 點擊任意處關閉 ]</div>
       <div style="width:90%; max-width:440px; height:75vh; display:flex; justify-content:center; align-items:center; position:relative;">
         <img id="lightboxOpImg" src="" style="width:100%; height:100%; object-fit:contain; filter:drop-shadow(0 0 35px rgba(0,229,255,0.4)); animation:screenIn 0.4s ease forwards;">
@@ -1163,9 +1167,12 @@
           promotion: R2_BASE + "/SFX/promotion.mp3", gacha_ssr_stinger: R2_BASE + "/SFX/gacha_ssr_stinger.mp3",
           gacha_flip_r: R2_BASE + "/SFX/gacha_flip_r.mp3", gacha_flip_sr: R2_BASE + "/SFX/gacha_flip_sr.mp3", 
           gacha_flip_ssr: R2_BASE + "/SFX/gacha_flip_ssr.mp3", dossier_open: R2_BASE + "/SFX/dossier_open.mp3",
-          hit_normal: R2_BASE + "/SFX/sfx_hit_normal.mp3", hit_critical: R2_BASE + "/SFX/sfx_hit_critical.mp3",
-          shield_block: R2_BASE + "/SFX/sfx_shield_block.mp3", enemy_attack: R2_BASE + "/SFX/sfx_enemy_attack.mp3",
-          skill_cast: R2_BASE + "/SFX/sfx_skill_cast.mp3", boss_alarm: R2_BASE + "/SFX/sfx_boss_alarm.mp3"
+          hit_normal: [1,2,3,4,5].map(function(n){ return R2_BASE + "/SFX/sfx_hit_normal" + n + ".mp3"; }),
+          hit_critical: [1,2,3].map(function(n){ return R2_BASE + "/SFX/sfx_hit_critical" + n + ".mp3"; }),
+          skill_cast: [R2_BASE + "/SFX/sfx_skill_cast1.mp3", R2_BASE + "/SFX/sfx_skill_cast2.mp3"],
+          shield_block: R2_BASE + "/SFX/sfx_shield_block.mp3",
+          enemy_attack: [1,2,3,4,5].map(function(n){ return R2_BASE + "/SFX/sfx_hit_normal" + n + ".mp3"; }),
+          boss_alarm: R2_BASE + "/SFX/sfx_boss_alarm.mp3"
         }
       };
 
@@ -1247,15 +1254,16 @@
       }
 
       var sfxPool = {};
+      function sfxUrls(key) { var entry = MEDIA.sfx && MEDIA.sfx[key]; return !entry ? [] : (Array.isArray(entry) ? entry : [entry]); }
       function preloadSfx() {
         Object.keys(MEDIA.sfx || {}).forEach(function(key) {
-          if (sfxPool[key]) return;
-          var audio = new Audio(); audio.preload = "auto"; audio.src = MEDIA.sfx[key]; sfxPool[key] = audio;
+          sfxUrls(key).forEach(function(url) { if (!sfxPool[url]) { var audio = new Audio(); audio.preload = "auto"; audio.src = url; sfxPool[url] = audio; } });
         });
       }
       function playSFX(key) {
-        var base = sfxPool[key] || (MEDIA.sfx[key] ? (sfxPool[key] = new Audio(MEDIA.sfx[key])) : null);
-        if (!base) return;
+        var urls = sfxUrls(key); if (!urls.length) return;
+        var url = urls[Math.floor(Math.random() * urls.length)];
+        var base = sfxPool[url] || (sfxPool[url] = new Audio(url));
         var node = base.cloneNode(); node.volume = 0.65;
         var attempt = node.play(); if (attempt && attempt.catch) attempt.catch(function(){});
       }
@@ -1614,7 +1622,7 @@
         var cardIds = asIdList(playerPresets[activeKey]).slice(0, 5);
         battleSquad = cardIds.map(function(cid) {
           var found = resolveOperator(cid);
-          return Object.assign({}, found, { currentSp: Math.min(2, Number(found.chargeCost) || 2) });
+          return Object.assign({}, found, { currentSp: 0 });
         });
       }
 
@@ -1877,9 +1885,9 @@
           `;
 
           slot.className = "squad-slot" + (idx === 0 ? " is-leader" : "") + (op.currentSp >= effectiveSkillCost(op) ? " is-ready" : "");
-          bindLongPress(slot, function() { openOperatorDetailModal(op); }, function() {
+          bindLongPress(slot, function() { showSkillHint((op.nameZh || "幹員") + "・" + (op.activeSkill || "無技能") + "：" + skillBlurb(op.activeSkill)); }, function() {
             if (op.currentSp >= effectiveSkillCost(op) && !isQuestionLocked) castOperatorSkill(idx);
-            else showSysMsg("長按可睇檔案。SP " + op.currentSp + "/" + effectiveSkillCost(op), false);
+            else showSysMsg("SP " + op.currentSp + "/" + effectiveSkillCost(op) + "。長按睇技能效果", false);
           });
           dock.appendChild(slot);
         });
@@ -1915,6 +1923,22 @@
       function letterGap(a, b) { a = String(a||""); b = String(b||""); var n = Math.abs(a.length - b.length), i = 0; if (n > 1) return 9; while (i < a.length && i < b.length && a[i] === b[i]) i++; return n + (a.slice(i) === b.slice(i + (b.length > a.length ? 1 : 0)) ? 0 : 1); }
       function showSkillHint(text) { var bar = document.getElementById("skillHintBar"); if (!bar) { bar = document.createElement("div"); bar.id = "skillHintBar"; bar.style.cssText = "margin:8px 0; padding:8px; border:1px solid var(--noah-cyan); border-radius:8px; color:#d5dde3; font-size:13px; text-align:left;"; var q = document.getElementById("qText"); if (q) q.insertAdjacentElement("afterend", bar); } bar.innerText = text; }
       function excludeWrong(n) { var wrong = Array.from(document.querySelectorAll(".option-btn")).filter(function(b){ return b.innerText.trim().toLowerCase() !== String(targetCurrentAnswer||"").toLowerCase(); }); wrong.slice(0, n).forEach(function(b){ b.style.opacity = "0.2"; b.style.pointerEvents = "none"; b.style.textDecoration = "line-through"; }); }
+      function skillAllowed(name) {
+        var hasOptions = document.querySelectorAll(".option-btn").length > 0;
+        var hasInput = !!document.getElementById("userIn");
+        var listening = currentMissionType === "listening";
+        var grammar = currentMissionType === "grammar";
+        var bug = currentBadge === "BUG_HUNTER" || !!document.querySelector(".bug-chip");
+        var unscramble = String(currentBadge).indexOf("UNSCRAMBLE") >= 0;
+        if (name === "超頻解析" || name === "詞形固化") return hasOptions;
+        if (name === "聲軌切片" || name === "聲學濾波" || name === "全息母音") return listening;
+        if (name === "字根探針" || name === "引力對齊") return hasInput;
+        if (name === "全息錨定") return unscramble;
+        if (name === "語法藍圖") return grammar;
+        if (name === "主謂對齊器") return bug;
+        if (name === "因果律斷裂" || name === "時態停滯" || name === "神經鏈同調") return isBossPhase;
+        return true;
+      }
       function applyActiveSkill(op) {
         var name = op.activeSkill || "";
         var q = missionQueue[currentIdx] || {};
@@ -1957,7 +1981,8 @@
 
       function castOperatorSkill(opIdx) {
         var op = battleSquad[opIdx];
-        if (op.currentSp < op.chargeCost) return;
+        if (op.currentSp < effectiveSkillCost(op)) return;
+        if (!skillAllowed(op.activeSkill)) { showSysMsg("此技能不適用目前題型", true); return; }
         op.currentSp = 0;
         if (opIdx === 0 && resonanceState().leaderPrometheus) battleSquad.forEach(function(member) { member.currentSp += 1; });
         renderTacticalDock();
