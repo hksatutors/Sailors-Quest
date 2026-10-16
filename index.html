@@ -2679,35 +2679,32 @@
         setTimeout(function() { claimDailySupply(); }, 600);
       }
 
+      // 🚀 修正版：防無限刷錢漏洞的新手 1,000 信用點發放邏輯
       function claimTutorialReward(studentId) {
         var safeId = String(studentId || "").trim();
         var props = PropertiesService.getScriptProperties();
         var key = "tutorial_claimed_" + safeId;
-
         var sheet = SpreadsheetApp.getActiveSpreadsheet().getSheetByName("Player_Data");
         var data = sheet.getDataRange().getValues();
         var colMap = getColumnMap(data[0]);
-
         var curCoins = 0, curExp = 0, curMissions = 0;
-         for (var i = 1; i < data.length; i++) {
-           if (String(data[i][colMap["Student_ID"]]).trim() === safeId) {
-             curCoins = Number(data[i][colMap["Coins"]]) || 0;
-             curExp = Number(data[i][colMap["Total_EXP"]]) || 0;
-             curMissions = Number(data[i][colMap["Total_Missions"]]) || 0;
-             break;
-           }
-         }
+        for (var i = 1; i < data.length; i++) {
+          if (String(data[i][colMap["Student_ID"]]).trim() === safeId) {
+            curCoins = Number(data[i][colMap["Coins"]]) || 0;
+            curExp = Number(data[i][colMap["Total_EXP"]]) || 0;
+            curMissions = Number(data[i][colMap["Total_Missions"]]) || 0;
+            break;
+          }
+        }
         // 判斷是否為「全新帳號 / 導師手動將三大核心數據完全歸零」
         var isCompletelyFreshAccount = (curCoins === 0 && curExp === 0 && curMissions === 0);
-
-  // 只要該帳號已經有過任何 EXP、任務紀錄，或者曾經領取過（且非完全歸零狀態），一律拒絕再次派發！
-           if (!isCompletelyFreshAccount && (props.getProperty(key) === "1" || curExp > 0 || curMissions > 0)) {
-             return { success: false, message: "新手啟動資金只限新任艦長領取一次", coins: curCoins };
-           }
-
+        // 只要該帳號已經有過任何 EXP、任務紀錄，或者曾經領取過（且非完全歸零狀態），一律拒絕再次派發！
+        if (!isCompletelyFreshAccount && (props.getProperty(key) === "1" || curExp > 0 || curMissions > 0)) {
+          return { success: false, message: "新手啟動資金只限新任艦長領取一次", coins: curCoins };
+        }
         var newCoins = addCoins_(safeId, 1000);
-             props.setProperty(key, "1");
-             return { success: true, coins: newCoins };
+        props.setProperty(key, "1");
+        return { success: true, coins: newCoins };
       }
 
       function claimDailySupply() {
