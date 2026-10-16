@@ -2655,12 +2655,6 @@
         localStorage.setItem('noah_tutorial_' + currentUserData.studentId, '1');
         document.getElementById('tutorialOverlay').style.display = 'none';
         showSysMsg("🎉 歡迎就任！快去招募終端進行首次十連抽吧！", false);
-      }
-
-      function finishTutorial() {
-        localStorage.setItem('noah_tutorial_' + currentUserData.studentId, '1');
-        document.getElementById('tutorialOverlay').style.display = 'none';
-        showSysMsg("🎉 歡迎就任！快去招募終端進行首次十連抽吧！", false);
         // 🚀 新生完成晒 6 步教學關閉視窗後，先至彈出「🎁 每日作戰補給箱」，兩個視窗唔會撞埋一齊！
         setTimeout(function() { claimDailySupply(); }, 600);
       }
