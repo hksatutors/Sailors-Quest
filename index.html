@@ -1614,7 +1614,8 @@
         listening: 15  // 聆聽副本處決：15 秒
       };
 
-      // 🎙️ 專屬雙導航員池（已綁定你提供嘅男/女 ElevenLabs Voice ID，日後可自由擴充新導航員）
+      // 🎙️ 1. 升級版 NAVIGATOR_POOL（支援直連 R2 MP3 秒播 + 自動後備 TTS）
+      const NAV_VOICE_BASE = R2_BASE + "/Voice/Navigators/";
       const NAVIGATOR_POOL = {
         lyra: {
           id: "lyra",
@@ -1626,10 +1627,10 @@
           unlockedByDefault: true,
           cost: 0,
           quotes: [
-            { en: "Welcome back to N.O.A.H., Captain! Let's keep our synchronization streak alive!", zh: "歡迎返嚟 N.O.A.H.，艦長！今日都要繼續保持完美同步呀！" },
-            { en: "Don't worry about making mistakes! You can always review them in the Error Vault.", zh: "答錯咗都唔使驚㗎！隨時可以去記憶修復艙重溫返。" },
-            { en: "Before each question, try selecting the Hack stance if you want double SP!", zh: "進入下一題前，如果想快速儲氣放技，可以試下揀「⚡駭入姿態」攞雙倍 SP！" },
-            { en: "You've saved up quite a lot of Coins! Want to check out the Operation Supply Store?", zh: "艦長儲咗唔少信用點喎！要去行動補給站睇下有無心水實體獎品嗎？" }
+            { audioUrl: NAV_VOICE_BASE + "lyra_quote_1.mp3", en: "Welcome back to N.O.A.H., Captain! Let's keep our synchronization streak alive!", zh: "歡迎返嚟 N.O.A.H.，艦長！今日都要繼續保持完美同步呀！" },
+            { audioUrl: NAV_VOICE_BASE + "lyra_quote_2.mp3", en: "Don't worry about making mistakes! You can always review them in the Error Vault.", zh: "答錯咗都唔使驚㗎！隨時可以去記憶修復艙重溫返。" },
+            { audioUrl: NAV_VOICE_BASE + "lyra_quote_3.mp3", en: "Before each question, try selecting the Hack stance if you want double SP!", zh: "進入下一題前，如果想快速儲氣放技，可以試下揀「⚡駭入姿態」攞雙倍 SP！" },
+            { audioUrl: NAV_VOICE_BASE + "lyra_quote_4.mp3", en: "You've saved up quite a lot of Coins! Want to check out the Operation Supply Store?", zh: "艦長儲咗唔少信用點喎！要去行動補給站睇下有無心水實體獎品嗎？" }
           ]
         },
         kael: {
@@ -1642,10 +1643,10 @@
           unlockedByDefault: true,
           cost: 0,
           quotes: [
-            { en: "All tactical channels are clear, Captain. Which sector are we striking today?", zh: "所有戰術頻道暢通，艦長。我哋今日進攻邊個區域？" },
-            { en: "Each sector Boss requires a specialized combat protocol. Stay sharp.", zh: "每個戰區嘅守門 Boss 都有專屬破防機制（格擋、接線、符文、狙擊），保持警覺。" },
-            { en: "When you are 100% confident, deploy the Overcharge stance for double damage.", zh: "當你有十足把握時，部署「💥強襲姿態」可以直接打出雙倍傷害同額外賞金。" },
-            { en: "Consistency is our strongest weapon. Never miss your daily supply drop.", zh: "持之以恆係我哋最強嘅武器，記得每晚準時領取作戰補給箱。" }
+            { audioUrl: NAV_VOICE_BASE + "kael_quote_1.mp3", en: "All tactical channels are clear, Captain. Which sector are we striking today?", zh: "所有戰術頻道暢通，艦長。我哋今日進攻邊個區域？" },
+            { audioUrl: NAV_VOICE_BASE + "kael_quote_2.mp3", en: "Each sector Boss requires a specialized combat protocol. Stay sharp.", zh: "每個戰區嘅守門 Boss 都有專屬破防機制（格擋、接線、符文、狙擊），保持警覺。" },
+            { audioUrl: NAV_VOICE_BASE + "kael_quote_3.mp3", en: "When you are 100% confident, deploy the Overcharge stance for double damage.", zh: "當你有十足把握時，部署「💥強襲姿態」可以直接打出雙倍傷害同額外賞金。" },
+            { audioUrl: NAV_VOICE_BASE + "kael_quote_4.mp3", en: "Consistency is our strongest weapon. Never miss your daily supply drop.", zh: "持之以恆係我哋最強嘅武器，記得每晚準時領取作戰補給箱。" }
           ]
         }
       };
@@ -2245,13 +2246,38 @@
         triggerAdjutantVoice();
       }
 
+      // 🚀 2. 優先播放 Cloudflare R2 預錄語音（0 延遲），若檔案尚未上傳則自動退回 ElevenLabs API
+      function playNavigatorClipOrTTS(r2AudioUrl, fallbackText, navObj) {
+        var nav = navObj || NAVIGATOR_POOL[currentNavigatorId] || NAVIGATOR_POOL.lyra;
+        if (!r2AudioUrl) {
+          playSpecificVoiceTTS(fallbackText, nav.voiceId, nav.gender, false);
+          return;
+        }
+        duckBGM();
+        elevenPlayer.onerror = function() {
+          elevenPlayer.onerror = null;
+          playSpecificVoiceTTS(fallbackText, nav.voiceId, nav.gender, false);
+        };
+        elevenPlayer.onended = unduckBGM;
+        elevenPlayer.src = r2AudioUrl;
+        elevenPlayer.playbackRate = 1.0;
+        var p = elevenPlayer.play();
+        if (p && p.catch) {
+          p.catch(function() {
+            elevenPlayer.onerror = null;
+            playSpecificVoiceTTS(fallbackText, nav.voiceId, nav.gender, false);
+          });
+        }
+      }
+
+      // 替換大廳導航員點擊語音函數
       function triggerAdjutantVoice() {
         playSFX('click');
         var nav = NAVIGATOR_POOL[currentNavigatorId] || NAVIGATOR_POOL.lyra;
         var q = nav.quotes[Math.floor(Math.random() * nav.quotes.length)];
         var lineEl = document.getElementById('lobbyAdjutantLine');
         if (lineEl) lineEl.innerHTML = '"' + q.en + '"<br><span style="color:#94a3b8; font-size:11px;">' + q.zh + '</span>';
-        playSpecificVoiceTTS(q.en, nav.voiceId, nav.gender, false);
+        playNavigatorClipOrTTS(q.audioUrl, q.en, nav);
       }
 
       function updateUI() {
@@ -2584,6 +2610,7 @@
         checkTutorialFinalReady();
       }
 
+      // 🚀 3. 替換教學推進與純前端 claimTutorialReward（徹底解決 PropertiesService is not defined）
       function advanceTutorial() {
         var title = document.getElementById('tutorialTitle');
         var body = document.getElementById('tutorialBody');
@@ -2597,6 +2624,7 @@
           {
             speaker: "lyra",
             screen: "dashboardScreen",
+            audioUrl: NAV_VOICE_BASE + "tut_step1_lyra.mp3",
             title: "🧭 1/6 歡迎登上 N.O.A.H. 指揮艦！",
             voiceEn: "Welcome aboard N.O.A.H., Captain! I am Chief Navigator Lyra.",
             html: "• <strong>♀ 萊拉：</strong>「神經連結接通！歡迎你，新任艦長！我係首席領航員萊拉。」<br>• <strong>階級與心情：</strong>上方顯示你嘅 13 階稱號經驗條；每次登入揀選嘅心情會決定作戰題量（8 至 15 題）。<br>• <strong>信用點用途：</strong>答題賺取嘅信用點，除咗用嚟招募幹員，仲可以去【🏪行動補給站】換領實體獎品！"
@@ -2604,6 +2632,7 @@
           {
             speaker: "kael",
             screen: "dashboardScreen",
+            audioUrl: NAV_VOICE_BASE + "tut_step2_kael.mp3",
             title: "⚔️ 2/6 四大戰區與專屬 Boss 破防機制",
             voiceEn: "I am Tactical Officer Kael. Each sector Boss requires a unique combat protocol.",
             html: "• <strong>♂ 凱爾：</strong>「我係戰術通信官凱爾。大廳中央係四大常規戰區，每個戰區最後都有守門 Boss：」<br>• <strong>📡 偵察任務：</strong>基礎生字 ➔ Boss 戰啟動【神盾光劍・一閃格擋】<br>• <strong>⚡ 駭客潛行：</strong>進階生字 ➔ Boss 戰啟動【神經迴路・駭客接線】<br>• <strong>🏛️ 戰術學院 / 💾 記憶終端：</strong>文法【四色符文矩陣】與聆聽【全息準星狙擊】！"
@@ -2611,6 +2640,7 @@
           {
             speaker: "lyra",
             screen: "gachaScreen",
+            audioUrl: NAV_VOICE_BASE + "tut_step3_lyra.mp3",
             title: "🎁 3/6 發放新手啟動資金 (1,000 信用點)",
             voiceEn: "Headquarters has approved 1,000 Credits for your first recruitment!",
             html: "• <strong>♀ 萊拉：</strong>「工欲善其事，必先利其器！總部已批出一次性 <strong>1,000 信用點</strong> 啟動資金！」<br>• 我哋已經幫你切換到【🎲 幹員招募終端】。<br>• 完成引導後，記住即刻用 900 點進行首次<strong>⚡十連招募</strong>擴充小隊！"
@@ -2618,6 +2648,7 @@
           {
             speaker: "kael",
             screen: "briefingRoom",
+            audioUrl: NAV_VOICE_BASE + "tut_step4_kael.mp3",
             title: "🛡️ 4/6 作戰會議室、勢力共鳴與換膚",
             voiceEn: "In the Briefing Room, deploy operators of the same faction to activate Resonance.",
             html: "• <strong>♂ 凱爾：</strong>「嚟到【🛡️ 作戰會議室】，撳<strong>小隊編成</strong>即可配置 5 人出戰陣容。」<br>• <strong>勢力共鳴：</strong>湊齊 2 或 3 名同勢力幹員（復興/司書/傭兵/重工）可啟動全隊光環。<br>• <strong>檢視檔案與換衫：</strong>長按任何幹員卡或直接篤卡片左上角 <strong>[🔍]</strong>，即可查看技能同切換造型（Skin）！"
@@ -2625,6 +2656,7 @@
           {
             speaker: "lyra",
             screen: "briefingRoom",
+            audioUrl: NAV_VOICE_BASE + "tut_step5_lyra.mp3",
             title: "⚡ 5/6 下一題戰術姿態 (強襲 / 穩守 / 駭入)",
             voiceEn: "Deploy your tactical stance before each question to maximize rewards or SP!",
             html: "• <strong>♀ 萊拉：</strong>「喺每題答完去下一題之前，艦長仲可以預先部署<strong>下一題戰術姿態</strong>：」<br>• <strong>💥 強襲：</strong>答啱雙倍削血＋12信用點（答錯扣 2 心）<br>• <strong>🛡️ 穩守：</strong>本題答錯免扣血（每場限用 2 次）<br>• <strong>⚡ 駭入：</strong>下一題作答限時減半，但答啱獲 <strong>雙倍充能 (+2 SP)</strong>！"
@@ -2632,6 +2664,7 @@
           {
             speaker: "both",
             screen: "dashboardScreen",
+            audioUrl: NAV_VOICE_BASE + "tut_step6_both.mp3",
             title: "⏰ 6/6 綁定每日提醒 & 揀選你嘅導航員",
             voiceEn: "Bind your daily reminder and choose your primary navigator to begin!",
             html: "• <strong>♂ 凱爾 & ♀ 萊拉：</strong>「最後一步！請完成下方兩項設定：」<br>  1. 綁定每晚練習提醒（保住每日最高 300 點連登補給箱）<br>  2. 揀選由邊一位導航員優先陪你執勤（之後隨時可喺大廳右上角撳 <strong>[⇄ 切換導航員]</strong>）！"
@@ -2654,7 +2687,7 @@
         speakerTag.innerText = cur.speaker === 'kael' ? "♂ 戰術通信官 凱爾 (Kael)" : (cur.speaker === 'lyra' ? "♀ 首席領航員 萊拉 (Lyra)" : "🎙️ 雙導航員 聯合簡報");
 
         var activeNav = (cur.speaker === 'kael') ? NAVIGATOR_POOL.kael : NAVIGATOR_POOL.lyra;
-        playSpecificVoiceTTS(cur.voiceEn, activeNav.voiceId, activeNav.gender, false);
+        playNavigatorClipOrTTS(cur.audioUrl, cur.voiceEn, activeNav);
 
         if (calBox) calBox.style.display = (tutorialStep === steps.length - 1) ? "block" : "none";
 
@@ -2675,36 +2708,27 @@
         localStorage.setItem('noah_tutorial_' + currentUserData.studentId, '1');
         document.getElementById('tutorialOverlay').style.display = 'none';
         showSysMsg("🎉 歡迎就任！快去招募終端進行首次十連抽吧！", false);
-        // 🚀 新生完成晒 6 步教學關閉視窗後，先至彈出「🎁 每日作戰補給箱」，兩個視窗唔會撞埋一齊！
         setTimeout(function() { claimDailySupply(); }, 600);
       }
 
-      // 🚀 修正版：防無限刷錢漏洞的新手 1,000 信用點發放邏輯
-      function claimTutorialReward(studentId) {
-        var safeId = String(studentId || "").trim();
-        var props = PropertiesService.getScriptProperties();
-        var key = "tutorial_claimed_" + safeId;
-        var sheet = SpreadsheetApp.getActiveSpreadsheet().getSheetByName("Player_Data");
-        var data = sheet.getDataRange().getValues();
-        var colMap = getColumnMap(data[0]);
-        var curCoins = 0, curExp = 0, curMissions = 0;
-        for (var i = 1; i < data.length; i++) {
-          if (String(data[i][colMap["Student_ID"]]).trim() === safeId) {
-            curCoins = Number(data[i][colMap["Coins"]]) || 0;
-            curExp = Number(data[i][colMap["Total_EXP"]]) || 0;
-            curMissions = Number(data[i][colMap["Total_Missions"]]) || 0;
-            break;
+      // ✅ 呢個先係屬於前端 index.html 嘅 claimTutorialReward（絕對唔好喺入面寫 PropertiesService）
+      function claimTutorialReward(keepOpen) {
+        fetch(API_URL, {
+          method: 'POST',
+          headers: { 'Content-Type': 'text/plain' },
+          body: JSON.stringify({ action: 'claimTutorialReward', studentId: currentUserData.studentId })
+        })
+        .then(function(r) { return r.json(); })
+        .then(function(res) {
+          if (res && res.success) {
+            currentUserData.coins = res.coins;
+            updateUI();
+            showSysMsg("💰 已存入 1,000 信用點！", false);
+          } else if (!keepOpen && res && res.message) {
+            showSysMsg("⚠️ " + res.message, true);
           }
-        }
-        // 判斷是否為「全新帳號 / 導師手動將三大核心數據完全歸零」
-        var isCompletelyFreshAccount = (curCoins === 0 && curExp === 0 && curMissions === 0);
-        // 只要該帳號已經有過任何 EXP、任務紀錄，或者曾經領取過（且非完全歸零狀態），一律拒絕再次派發！
-        if (!isCompletelyFreshAccount && (props.getProperty(key) === "1" || curExp > 0 || curMissions > 0)) {
-          return { success: false, message: "新手啟動資金只限新任艦長領取一次", coins: curCoins };
-        }
-        var newCoins = addCoins_(safeId, 1000);
-        props.setProperty(key, "1");
-        return { success: true, coins: newCoins };
+        })
+        .catch(function() {});
       }
 
       function claimDailySupply() {
