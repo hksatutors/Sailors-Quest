@@ -8,7 +8,7 @@
     <title>⚓ Sailors' Quest</title>
     <style>
       /* =========================================
-         ⚓ Sailors' Quest (V25.0 戰術互動變革旗艦版)
+         ⚓ Sailors' Quest (V26.0 雙導航員與四大Boss戰專武旗艦版)
          ========================================= */
       :root {
         --noah-cyan: #00e5ff; --noah-dark: #0a0f16; --text-main: #ecf0f1; 
@@ -99,16 +99,22 @@
       .btn-purple:hover:not(:disabled) { background: var(--accent-purple); color: #fff; box-shadow: 0 5px 20px rgba(168,85,247,0.45); transform: translateY(-2px); }
 
       /* =========================================
-         🌟 大廳看板娘、升階進度條、懸賞與世界 Boss 面板
+         🌟 專屬雙導航員卡片、升階進度條、懸賞與世界 Boss 面板
          ========================================= */
       .lobby-adjutant-card {
-        display: flex; align-items: center; gap: 12px; background: linear-gradient(135deg, rgba(0,229,255,0.08), rgba(0,0,0,0.55));
-        border: 1px solid rgba(0,229,255,0.3); border-radius: 16px; padding: 10px 12px; margin-bottom: 12px; cursor: pointer; position: relative; overflow: hidden;
+        display: flex; align-items: center; gap: 12px; background: linear-gradient(135deg, rgba(0,229,255,0.1), rgba(0,0,0,0.6));
+        border: 1px solid rgba(0,229,255,0.35); border-radius: 16px; padding: 10px 12px; margin-bottom: 12px; cursor: pointer; position: relative; overflow: hidden;
       }
-      .adjutant-avatar { width: 58px; height: 58px; border-radius: 12px; border: 1.5px solid var(--accent-gold); overflow: hidden; flex-shrink: 0; background: #050b14; }
+      .adjutant-avatar { width: 62px; height: 62px; border-radius: 12px; border: 1.5px solid var(--accent-gold); overflow: hidden; flex-shrink: 0; background: #050b14; }
       .adjutant-avatar img { width: 100%; height: 100%; object-fit: cover; object-position: center top; }
-      .adjutant-speech { flex: 1; text-align: left; font-size: 12px; line-height: 1.45; color: #dbeafe; }
-      .adjutant-name-tag { font-size: 10px; font-family: monospace; color: var(--accent-gold); font-weight: 900; letter-spacing: 0.5px; margin-bottom: 2px; }
+      .adjutant-speech { flex: 1; text-align: left; font-size: 12px; line-height: 1.45; color: #dbeafe; padding-right: 4px; }
+      .adjutant-header-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 3px; }
+      .adjutant-name-tag { font-size: 11px; font-family: monospace; color: var(--accent-gold); font-weight: 900; letter-spacing: 0.5px; }
+      .nav-switch-mini-btn {
+        background: rgba(0,229,255,0.15); border: 1px solid var(--noah-cyan); color: var(--noah-cyan);
+        font-size: 10px; font-family: monospace; font-weight: bold; padding: 2px 7px; border-radius: 8px; cursor: pointer; transition: 0.2s;
+      }
+      .nav-switch-mini-btn:hover { background: var(--noah-cyan); color: #000; }
 
       .rank-exp-bar-wrap { width: 100%; background: rgba(255,255,255,0.08); height: 6px; border-radius: 6px; overflow: hidden; margin-top: 5px; border: 1px solid rgba(0,229,255,0.25); }
       .rank-exp-bar-fill { height: 100%; background: linear-gradient(90deg, var(--noah-cyan), var(--accent-gold)); width: 0%; transition: width 0.6s ease; }
@@ -118,7 +124,7 @@
         border-radius: 14px; padding: 9px 12px; margin-bottom: 12px; text-align: left; display: flex; justify-content: space-between; align-items: center; cursor: pointer;
       }
       .raid-boss-card {
-        display: none; /* 預設隱藏，由 FEATURE_FLAGS.raidBoss 控制啟用 */
+        display: none;
         background: linear-gradient(135deg, rgba(40,8,20,0.85), rgba(10,15,26,0.92)); border: 1.5px solid rgba(255,51,102,0.65);
         border-radius: 16px; padding: 10px 12px; margin-bottom: 14px; text-align: left; position: relative; overflow: hidden; cursor: pointer;
         box-shadow: 0 0 18px rgba(255,51,102,0.2);
@@ -143,9 +149,9 @@
       }
       .spec-op-btn:hover { border-color: var(--accent-gold); transform: translateY(-2px); background: rgba(241,196,15,0.12); }
 
-      /* ========================================
-         ⚔️ 戰鬥舞台、ATB 破盾條、戰術姿態押注與特效
-         ======================================== */
+      /* =========================================
+         ⚔️ 戰鬥舞台、ATB 兩段式計時條與戰術姿態選擇器
+         ========================================= */
       .mission-track-wrap { position: relative; width: 100%; height: 6px; background: rgba(255,255,255,0.1); border-radius: 6px; margin-bottom: 8px; overflow: visible; }
       .mission-track-fill { height: 100%; background: linear-gradient(90deg, var(--noah-cyan), var(--accent-green)); border-radius: 6px; width: 0%; transition: width 0.3s ease; }
       .boss-node-marker { position: absolute; top: -5px; transform: translateX(-50%); font-size: 11px; filter: drop-shadow(0 0 4px #ff3366); pointer-events: none; }
@@ -169,7 +175,6 @@
       .q-image-box.overdrive-gold { border-color: var(--accent-gold); box-shadow: 0 0 30px rgba(241, 196, 15, 0.55); }
       .q-image-box.overdrive-max { border-color: var(--accent-purple); box-shadow: 0 0 35px rgba(168, 85, 247, 0.75); }
 
-      /* 變革 3：敵方 ATB 蓄力與黃金破盾窗口條 */
       .enemy-atb-wrap {
         position: absolute; bottom: 0; left: 0; width: 100%; height: 6px;
         background: rgba(0,0,0,0.75); z-index: 7; overflow: hidden;
@@ -181,26 +186,140 @@
       .enemy-atb-label {
         position: absolute; bottom: 8px; left: 10px; z-index: 7;
         font-family: monospace; font-size: 10px; font-weight: 900;
-        color: var(--accent-gold); background: rgba(0,0,0,0.7);
-        padding: 1px 6px; border-radius: 4px; border: 1px solid rgba(241,196,15,0.5);
+        color: var(--accent-gold); background: rgba(0,0,0,0.75);
+        padding: 2px 7px; border-radius: 4px; border: 1px solid rgba(241,196,15,0.5);
       }
 
-      /* 變革 1 & 5：元認知戰術姿態押注與拆彈切換列 */
+      /* 戰鬥內即時工具列（拆彈 + 透視） */
       .tactical-stance-bar {
-        display: grid; grid-template-columns: repeat(4, 1fr); gap: 5px;
-        margin-bottom: 10px; width: 100%;
+        display: grid; grid-template-columns: 1fr 1fr; gap: 6px;
+        margin-bottom: 8px; width: 100%;
       }
       .stance-btn {
         background: rgba(10, 18, 28, 0.85); border: 1px solid #334; border-radius: 8px;
-        padding: 6px 2px; color: #aaa; font-size: 11px; font-weight: bold;
-        cursor: pointer; transition: 0.2s; display: flex; flex-direction: column;
-        align-items: center; gap: 1px; font-family: monospace;
+        padding: 6px 4px; color: #aaa; font-size: 11px; font-weight: bold;
+        cursor: pointer; transition: 0.2s; display: flex; align-items: center; justify-content: center; gap: 4px; font-family: monospace;
       }
-      .stance-btn span.sub { font-size: 8px; opacity: 0.75; font-weight: normal; }
-      .stance-btn.active-overcharge { border-color: var(--accent-red); background: rgba(255,51,102,0.18); color: #fff; box-shadow: 0 0 12px rgba(255,51,102,0.5); }
-      .stance-btn.active-guard { border-color: var(--accent-green); background: rgba(46,204,113,0.18); color: #fff; box-shadow: 0 0 12px rgba(46,204,113,0.4); }
+      .stance-btn span.sub { font-size: 9px; opacity: 0.8; font-weight: normal; }
       .stance-btn.active-wirecut { border-color: var(--accent-gold); background: rgba(241,196,15,0.18); color: var(--accent-gold); box-shadow: 0 0 12px rgba(241,196,15,0.45); }
       .stance-btn:hover:not(:disabled) { border-color: var(--noah-cyan); color: #fff; }
+
+      /* 下一題戰術姿態選擇器（出現於任務簡報與每題結算面板） */
+      .next-stance-box { margin-top: 12px; padding: 10px 12px; background: rgba(0, 229, 255, 0.05); border: 1px solid rgba(0, 229, 255, 0.3); border-radius: 14px; text-align: left; }
+      .next-stance-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 6px; margin-top: 6px; }
+      .next-stance-card { background: rgba(10, 18, 28, 0.9); border: 1.5px solid #334; border-radius: 10px; padding: 7px 8px; text-align: left; cursor: pointer; transition: 0.2s; color: #ccc; }
+      .next-stance-card.selected { border-color: var(--accent-gold); background: rgba(241, 196, 15, 0.16); color: #fff; box-shadow: 0 0 12px rgba(241, 196, 15, 0.35); }
+      .next-stance-card .st-title { font-size: 12px; font-weight: 900; font-family: monospace; display: block; color: var(--accent-gold); }
+      .next-stance-card .st-desc { font-size: 10px; color: #94a3b8; display: block; margin-top: 2px; line-height: 1.3; }
+      .next-stance-card.selected .st-desc { color: #e2e8f0; }
+
+      /* =========================================
+         🎮 四大副本 Boss 戰專屬互動玩法樣式 (Schemes E / G / B / F)
+         ========================================= */
+      .boss-mechanic-box {
+        background: radial-gradient(circle at center, rgba(16, 28, 44, 0.95), rgba(6, 10, 18, 0.98));
+        border: 1.5px solid var(--accent-gold); border-radius: 16px; padding: 12px;
+        margin-bottom: 10px; box-shadow: 0 0 25px rgba(241, 196, 15, 0.25); position: relative;
+      }
+      .boss-mech-header {
+        display: flex; justify-content: space-between; align-items: center;
+        font-family: monospace; font-size: 11px; font-weight: 900; color: var(--accent-gold);
+        margin-bottom: 8px; border-bottom: 1px dashed rgba(241,196,15,0.3); padding-bottom: 4px;
+      }
+      /* 方案 E：神盾光劍・一閃格擋 (vocab_basic Boss) */
+      .parry-arena {
+        position: relative; height: 125px; display: flex; flex-direction: column;
+        align-items: center; justify-content: center; background: rgba(0,0,0,0.5);
+        border-radius: 12px; border: 1px solid rgba(0,229,255,0.3); overflow: hidden; margin-bottom: 10px;
+      }
+      .parry-ring {
+        position: absolute; width: 110px; height: 110px; border-radius: 50%;
+        border: 3px solid var(--accent-gold); box-shadow: 0 0 20px var(--accent-gold);
+        pointer-events: none; transition: transform 0.15s linear;
+      }
+      .parry-word-core {
+        z-index: 2; font-size: 18px; font-weight: 900; color: #fff;
+        background: rgba(8, 16, 28, 0.9); padding: 8px 16px; border-radius: 10px;
+        border: 1.5px solid var(--noah-cyan); text-align: center; max-width: 90%;
+      }
+      .parry-pedals-row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+      .parry-btn-deflect {
+        background: linear-gradient(135deg, rgba(0,229,255,0.22), rgba(0,40,80,0.8));
+        border: 2px solid var(--noah-cyan); color: var(--noah-cyan); border-radius: 12px;
+        padding: 12px 6px; font-weight: 900; font-size: 14px; cursor: pointer;
+      }
+      .parry-btn-slash {
+        background: linear-gradient(135deg, rgba(241,196,15,0.28), rgba(120,40,0,0.85));
+        border: 2px solid var(--accent-gold); color: var(--accent-gold); border-radius: 12px;
+        padding: 12px 6px; font-weight: 900; font-size: 14px; cursor: pointer;
+      }
+
+      /* 方案 G：神經迴路・駭客接線 (vocab_adv Boss) */
+      .circuit-board-wrap { display: flex; flex-direction: column; gap: 8px; }
+      .circuit-nodes-row { display: flex; align-items: center; justify-content: space-between; gap: 6px; background: rgba(0,0,0,0.45); padding: 8px; border-radius: 10px; }
+      .pipe-node-btn {
+        width: 44px; height: 44px; border-radius: 8px; background: #081420;
+        border: 1.5px solid var(--noah-cyan); color: var(--noah-cyan); font-size: 22px;
+        font-weight: 900; cursor: pointer; display: flex; align-items: center; justify-content: center;
+        transition: transform 0.2s, border-color 0.2s, box-shadow 0.2s;
+      }
+      .pipe-node-btn.aligned { border-color: var(--accent-green); color: var(--accent-green); box-shadow: 0 0 12px rgba(46,204,113,0.6); }
+      .circuit-sockets-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; }
+      .circuit-socket-btn {
+        background: rgba(255,255,255,0.05); border: 1.5px dashed #555; border-radius: 10px;
+        padding: 10px 8px; color: #ddd; font-size: 14px; font-weight: bold; cursor: pointer; text-align: left;
+      }
+      .circuit-socket-btn.powered { border-style: solid; border-color: var(--accent-gold); color: var(--accent-gold); background: rgba(241,196,15,0.12); }
+
+      /* 方案 B：四色符文・策略連攜矩陣 (grammar Boss) */
+      .rune-matrix-grid {
+        display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px;
+        background: rgba(0,0,0,0.5); padding: 8px; border-radius: 12px; margin-bottom: 8px;
+      }
+      .rune-cell {
+        height: 44px; border-radius: 8px; font-size: 18px; display: flex;
+        align-items: center; justify-content: center; cursor: pointer;
+        border: 1.5px solid rgba(255,255,255,0.2); transition: 0.15s; user-select: none;
+      }
+      .rune-cell.selected { transform: scale(1.1); border: 2px solid #fff; box-shadow: 0 0 14px #fff; }
+      .rune-cell.matched { opacity: 0.25; transform: scale(0.85); pointer-events: none; }
+      .rune-urc { background: rgba(0, 229, 255, 0.2); border-color: var(--noah-cyan); }
+      .rune-scribes { background: rgba(168, 85, 247, 0.22); border-color: var(--accent-purple); }
+      .rune-guild { background: rgba(241, 196, 15, 0.22); border-color: var(--accent-gold); }
+      .rune-prometheus { background: rgba(255, 51, 102, 0.22); border-color: var(--accent-red); }
+
+      /* 方案 F：全息戰機・準星鎖定狙擊 (listening Boss) */
+      .sniper-radar-stage {
+        position: relative; width: 100%; height: 185px; background:
+          radial-gradient(circle, rgba(0,229,255,0.08) 1px, transparent 1px),
+          radial-gradient(circle at center, rgba(0,40,60,0.5) 0%, rgba(2,8,16,0.95) 80%);
+        background-size: 20px 20px, 100% 100%; border: 1.5px solid var(--noah-cyan);
+        border-radius: 14px; overflow: hidden;
+      }
+      .sniper-drone-target {
+        position: absolute; padding: 7px 12px; border-radius: 20px;
+        background: rgba(8, 20, 34, 0.92); border: 1.5px solid var(--noah-cyan);
+        color: #fff; font-size: 13px; font-weight: bold; cursor: crosshair;
+        box-shadow: 0 0 12px rgba(0,229,255,0.4); transition: top 1.3s ease-in-out, left 1.3s ease-in-out, transform 0.2s;
+        max-width: 78%; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+      }
+      .sniper-drone-target:hover, .sniper-drone-target.locking {
+        border-color: var(--accent-gold); color: var(--accent-gold);
+        box-shadow: 0 0 22px var(--accent-gold); transform: scale(1.06); z-index: 5;
+      }
+
+      /* 雙導航員對話式教學樣式 */
+      .tut-dual-stage { display: flex; justify-content: space-between; align-items: flex-end; gap: 10px; margin-bottom: 10px; }
+      .tut-nav-portrait {
+        width: 74px; height: 92px; border-radius: 12px; overflow: hidden;
+        border: 2px solid #445; background: #050b14; opacity: 0.4; transition: 0.25s; flex-shrink: 0; position: relative;
+      }
+      .tut-nav-portrait.speaking {
+        opacity: 1; border-color: var(--accent-gold); transform: translateY(-4px) scale(1.04);
+        box-shadow: 0 0 18px rgba(241,196,15,0.6);
+      }
+      .tut-nav-portrait img { width: 100%; height: 100%; object-fit: cover; object-position: center top; }
+      .tut-nav-label { position: absolute; bottom: 0; inset-inline: 0; background: rgba(0,0,0,0.82); font-size: 9px; font-weight: bold; text-align: center; padding: 2px 0; color: var(--accent-gold); }
 
       .q-stage-bg { 
         position: absolute; top: 0; left: 0; width: 100%; height: 100%; 
@@ -343,12 +462,12 @@
       .op-frame { position: relative; border-radius: 12px; overflow: hidden; background: #071018; border: 1px solid rgba(0,229,255,0.35); cursor: pointer; }
       .op-frame.leader { height: 168px; border-color: var(--accent-gold); }
       .op-frame.member { height: 112px; }
-      .op-frame img { width: 100%; height: 100%; object-fit: cover; object-position: center 10%; }
+      .op-frame img { width: 100%; height: 100%; object-fit: cover; object-position: center 10%; pointer-events: none; }
       .op-frame .bust-name { position: absolute; left: 0; right: 0; bottom: 0; font-size: 11px; font-weight: 800; padding: 10px 4px 4px; background: linear-gradient(transparent, rgba(0,0,0,0.8)); }
       .op-placeholder { width: 100%; height: 100%; min-height: 72px; }
       #factionResonanceBar { display: none; margin-bottom: 10px; font-size: 12px; color: var(--accent-gold); border: 1px solid rgba(241,196,15,0.45); border-radius: 8px; padding: 6px 8px; background: rgba(241,196,15,0.08); cursor: pointer; }
-      #tutorialOverlay { display: none; position: fixed; inset: 0; z-index: 41000; background: rgba(3,8,16,0.94); align-items: center; justify-content: center; padding: 16px; }
-      .tutorial-card { width: 100%; max-width: 420px; background: #0c1622; border: 1px solid var(--noah-cyan); border-radius: 18px; padding: 18px; text-align: left; }
+      #tutorialOverlay { display: none; position: fixed; inset: 0; z-index: 41000; background: rgba(2,6,14,0.75); align-items: flex-end; justify-content: center; padding: 14px 14px 20px; }
+      .tutorial-card { width: 100%; max-width: 430px; background: rgba(10, 18, 28, 0.98); border: 1.5px solid var(--noah-cyan); border-radius: 20px; padding: 16px; text-align: left; box-shadow: 0 15px 45px rgba(0,0,0,0.95); }
       .squad-sp-gauge { position: absolute; bottom: 0; left: 0; width: 100%; height: 4px; background: rgba(255,255,255,0.2); }
       .squad-sp-fill { height: 100%; background: var(--noah-cyan); width: 0%; transition: width 0.3s; }
       .squad-slot.is-ready .squad-sp-fill { background: var(--accent-gold); }
@@ -432,7 +551,7 @@
       .formation-slot-item.is-leader { border-color: var(--accent-gold); }
       .formation-slot-label {
         position: absolute; top: 2px; left: 2px; font-size: 8px; font-family: monospace;
-        background: rgba(0,0,0,0.7); padding: 1px 3px; border-radius: 3px; color: var(--accent-gold);
+        background: rgba(0,0,0,0.7); padding: 1px 3px; border-radius: 3px; color: var(--accent-gold); z-index: 3;
       }
       .faction-filter-bar { display: flex; gap: 4px; margin-bottom: 8px; overflow-x: auto; padding-bottom: 2px; }
       .filter-chip-btn {
@@ -452,12 +571,21 @@
       .inv-item-card.equipped { opacity: 0.78; border-color: var(--accent-gold); }
       .inv-equipped-tag {
         position: absolute; top: 2px; right: 2px; background: var(--accent-gold); color: #000;
-        font-size: 8px; font-weight: 900; padding: 1px 4px; border-radius: 4px; font-family: monospace; z-index: 2;
+        font-size: 8px; font-weight: 900; padding: 1px 4px; border-radius: 4px; font-family: monospace; z-index: 4;
+      }
+      .card-info-zoom-btn {
+        position: absolute; top: 2px; left: 2px; z-index: 6; background: rgba(0,0,0,0.82);
+        border: 1px solid var(--noah-cyan); color: var(--noah-cyan); border-radius: 5px;
+        font-size: 10px; padding: 1px 4px; cursor: pointer; line-height: 1.2;
       }
 
       /* =========================================
-         題型樣式、拆彈電線、特務通訊窗、晶體密碼鎖
+         題型樣式、底線改錯標記、拆彈電線、特務通訊窗
          ========================================= */
+      .error-underline {
+        color: var(--accent-red); text-decoration: underline wavy var(--accent-red);
+        font-weight: 900; padding: 0 4px; background: rgba(255,51,102,0.12); border-radius: 4px;
+      }
       @keyframes correctPop { 0% { transform: scale(1); } 40% { transform: scale(1.08); } 70% { transform: scale(0.96); } 100% { transform: scale(1); } }
       .options-grid { display: grid; gap: 10px; width: 100%; }
       .option-btn { background: rgba(255,255,255,0.05); border: 1px solid #444; color: #fff; padding: 15px; border-radius: 10px; text-align: left; cursor: pointer; transition: 0.2s; font-size: 16px; position: relative; }
@@ -479,7 +607,6 @@
       .tfng-stamp-btn.stamp-false { border-color: var(--accent-red); color: var(--accent-red); }
       .tfng-stamp-btn.stamp-ng { border-color: var(--noah-cyan); color: var(--noah-cyan); }
 
-      /* 變革 4：特務即時通訊窗 (Intercepted Comms UI) */
       .comms-chat-box {
         background: rgba(4, 12, 20, 0.75); border: 1px solid rgba(0,229,255,0.25);
         border-radius: 12px; padding: 8px 10px; margin-bottom: 10px; max-height: 115px; overflow-y: auto; text-align: left;
@@ -507,7 +634,7 @@
       .floating-score { position: fixed; z-index: 99999; font-family: monospace; font-size: 24px; font-weight: 900; color: var(--accent-gold); text-shadow: 0 0 15px rgba(241,196,15,0.9), 0 0 30px rgba(241,196,15,0.5); pointer-events: none; animation: floatUpScore 1.6s cubic-bezier(0.2, 0.8, 0.2, 1) forwards; white-space: nowrap; }
 
       @keyframes feedbackSpring { 0% { transform: translate(-50%, 120%); opacity: 0; } 60% { transform: translate(-50%, -10px); opacity: 1; } 80% { transform: translate(-50%, 4px); } 100% { transform: translate(-50%, 0); opacity: 1; } }
-      #feedback-panel { position: fixed; bottom: 25px; left: 50%; width: 95%; max-width: 460px; background: rgba(14, 20, 28, 0.98); backdrop-filter: blur(25px); padding: 20px 18px; border: 2px solid var(--noah-cyan); border-radius: 26px; transform: translate(-50%, 150%); z-index: 100; text-align: left; box-shadow: 0 25px 60px rgba(0,0,0,0.95); max-height: 80vh; overflow-y: auto; }
+      #feedback-panel { position: fixed; bottom: 20px; left: 50%; width: 95%; max-width: 460px; background: rgba(14, 20, 28, 0.98); backdrop-filter: blur(25px); padding: 18px; border: 2px solid var(--noah-cyan); border-radius: 26px; transform: translate(-50%, 150%); z-index: 100; text-align: left; box-shadow: 0 25px 60px rgba(0,0,0,0.95); max-height: 82vh; overflow-y: auto; }
       #feedback-panel.active { animation: feedbackSpring 0.35s cubic-bezier(0.175, 0.885, 0.32, 1.2) forwards; }
       #feedback-panel.correct { border-color: var(--accent-green); box-shadow: 0 0 35px rgba(46, 204, 113, 0.35); }
       #feedback-panel.wrong { border-color: var(--accent-red); box-shadow: 0 0 35px rgba(255, 51, 102, 0.35); }
@@ -617,7 +744,7 @@
       .card-badge-break { position: absolute; top: 6px; right: 6px; font-size: 14px; font-weight: 900; background: rgba(0,0,0,0.82); border: 1px solid var(--accent-gold); color: var(--accent-gold); padding: 4px 7px; border-radius: 8px; z-index: 5; letter-spacing: 1px; box-shadow: 0 0 12px rgba(241,196,15,0.7); }
       .layout-single .card-badge-new { font-size: 12px; padding: 3px 6px; } .layout-single .card-badge-break { font-size: 20px; padding: 7px 12px; }
 
-      .card-img { width: 100%; height: 100%; object-fit: contain; object-position: center bottom; }
+      .card-img { width: 100%; height: 100%; object-fit: contain; object-position: center bottom; pointer-events: none; }
       .card-name-bar { position: absolute; bottom: 0; left: 0; width: 100%; background: rgba(0,0,0,0.85); padding: 2px 1px; font-size: 8px; font-weight: bold; text-align: center; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; color: #fff; }
       .layout-single .card-name-bar { font-size: 14px; padding: 6px 4px; }
 
@@ -696,12 +823,12 @@
       </div>
     </div>
 
-    <!-- 💥 變革 7：Persona 5 式 Boss 破防「全員總攻擊處決」 6 秒閃電戰 Modal -->
+    <!-- 💥 變革 7：Persona 5 式 Boss 破防「全員總攻擊處決」閃電戰 Modal -->
     <div id="finisherQteModal" style="display:none; position:fixed; inset:0; z-index:38800; background:radial-gradient(circle, rgba(45,10,20,0.95), rgba(4,8,16,0.98)); backdrop-filter:blur(16px); align-items:center; justify-content:center; padding:16px;">
       <div class="tutorial-card" style="max-width:430px; border:2px solid var(--accent-gold); box-shadow:0 0 45px rgba(241,196,15,0.5); text-align:center;">
         <div style="color:var(--accent-red); font-family:monospace; font-size:12px; font-weight:900; letter-spacing:3px;">⚡ BOSS STAGGERED // ALL-OUT EXECUTION</div>
         <div style="font-size:20px; font-weight:900; color:var(--accent-gold); margin:4px 0;">🌟 全員總攻擊處決！</div>
-        <div id="finisherTimerBar" style="font-family:monospace; font-size:13px; color:#fff; margin-bottom:10px;">⏳ 限時 6 秒：極速點選本場 3 個核心目標完成處決！</div>
+        <div id="finisherTimerBar" style="font-family:monospace; font-size:13px; color:#fff; margin-bottom:10px;">⏳ 限時處決：極速點選本場 3 個核心目標完成處決！</div>
         <div id="finisherPromptArea" style="display:flex; flex-direction:column; gap:8px; text-align:left;"></div>
       </div>
     </div>
@@ -750,14 +877,14 @@
         </div>
 
         <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:5px;">
-          <span style="font-size:11px; color:#aaa;">👉 點選槽位，再點擊幹員入隊（點擊已入隊幹員可互換位置）：</span>
+          <span style="font-size:11px; color:#aaa;">👉 點選槽位，再點擊幹員入隊（長按或撳 🔍 檢視檔案/換 Skin）：</span>
           <button onclick="clearSelectedFormationSlot()" style="background:rgba(255,51,102,0.15); border:1px solid var(--accent-red); color:var(--accent-red); font-size:10px; padding:2px 6px; border-radius:4px; cursor:pointer;">✕ 清空槽位</button>
         </div>
 
         <div class="formation-slots-grid" id="formationSlotsGrid"></div>
 
         <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px;">
-          <div style="font-size:12px; color:var(--accent-gold); font-weight:bold;">🎒 幹員庫 (長按檢視檔案/換 Skin)</div>
+          <div style="font-size:12px; color:var(--accent-gold); font-weight:bold;">🎒 幹員庫 (點擊 🔍 或長按睇詳情)</div>
           <button id="btnSetActivePreset" style="background:rgba(241,196,15,0.15); border:1px solid var(--accent-gold); color:var(--accent-gold); font-size:11px; padding:4px 8px; border-radius:6px; cursor:pointer; font-weight:bold;" onclick="setActiveBattlePreset()">
             ⚡ 設為出戰小隊
           </button>
@@ -892,7 +1019,6 @@
             </div>
           </div>
 
-          <!-- 🎨 造型衣櫥 (支援標準 + 戰術差分 + P/Q/R 三欄自訂 Skin) -->
           <div style="background:rgba(0,229,255,0.05); border-radius:12px; border:1px solid rgba(0,229,255,0.25); padding:10px 12px; margin-bottom:10px; text-align:left;">
             <div style="color:var(--noah-cyan); font-size:11px; font-weight:900; font-family:monospace;">🎨 幹員造型衣櫥 (SKIN WARDROBE)</div>
             <div class="skin-wardrobe-row" id="detailSkinWardrobe"></div>
@@ -1067,12 +1193,15 @@
           <button style="background:rgba(0,0,0,0.5); border:1px solid #444; color:#888; padding:6px 10px; border-radius:8px; font-size:12px;" onclick="logout()">🚪 登出</button>
         </div>
 
-        <!-- 🌟 大廳秘書官／隊長看板娘互動區 -->
+        <!-- 🌟 專屬雙導航員互動區（支援一鍵切換 ♂ 凱爾 / ♀ 萊拉） -->
         <div class="lobby-adjutant-card" onclick="triggerAdjutantVoice()">
-          <div class="adjutant-avatar"><img id="lobbyAdjutantImg" src="" alt="Leader"></div>
+          <div class="adjutant-avatar"><img id="lobbyAdjutantImg" src="" alt="Navigator"></div>
           <div class="adjutant-speech">
-            <div id="lobbyAdjutantName" class="adjutant-name-tag">👑 領航秘書官 · 點擊對話</div>
-            <div id="lobbyAdjutantLine">"Welcome back, Captain! Consistent daily practice is the key to neural mastery."</div>
+            <div class="adjutant-header-row">
+              <span id="lobbyAdjutantName" class="adjutant-name-tag">♀ 首席領航員 · 萊拉 (Lyra)</span>
+              <button type="button" class="nav-switch-mini-btn" onclick="switchLobbyNavigator(event)">⇄ 切換導航員</button>
+            </div>
+            <div id="lobbyAdjutantLine">"Welcome back to N.O.A.H., Captain! Tap here for tactical voice briefing."</div>
           </div>
         </div>
         
@@ -1120,19 +1249,19 @@
         <div class="mission-grid">
           <div class="mission-card bg-vocab" onclick="showBriefing('vocab_basic')">
             <div id="srsBadge_vocab_basic" class="srs-due-badge">待溫習</div>
-            <span>📡</span><div class="label">偵察任務</div><div style="font-size:10px; color:#aaa;">[ 基礎生字記憶 ]</div>
+            <span>📡</span><div class="label">偵察任務</div><div style="font-size:10px; color:#aaa;">[ 基礎生字 · 一閃格擋 ]</div>
           </div>
           <div class="mission-card" style="background: linear-gradient(135deg, rgba(192,57,43,0.6), rgba(142,68,173,0.6)); border-color: var(--accent-red);" onclick="showBriefing('vocab_adv')">
             <div id="srsBadge_vocab_adv" class="srs-due-badge">待溫習</div>
-            <span>⚡</span><div class="label">駭客潛行</div><div style="font-size:10px; color:#aaa;">[ 進階生字應用 ]</div>
+            <span>⚡</span><div class="label">駭客潛行</div><div style="font-size:10px; color:#aaa;">[ 進階生字 · 迴路接線 ]</div>
           </div>
           <div class="mission-card bg-grammar" onclick="showBriefing('grammar')">
             <div id="srsBadge_grammar" class="srs-due-badge">待溫習</div>
-            <span>🏛️</span><div class="label">戰術學院</div><div style="font-size:10px; color:#aaa;">[ 文法解難 ]</div>
+            <span>🏛️</span><div class="label">戰術學院</div><div style="font-size:10px; color:#aaa;">[ 文法解難 · 符文連攜 ]</div>
           </div>
           <div class="mission-card bg-listening" onclick="showBriefing('listening')">
             <div id="srsBadge_listening" class="srs-due-badge">待溫習</div>
-            <span>💾</span><div class="label">記憶終端</div><div style="font-size:10px; color:#aaa;">[ 聆聽訓練 ]</div>
+            <span>💾</span><div class="label">記憶終端</div><div style="font-size:10px; color:#aaa;">[ 聆聽訓練 · 準星狙擊 ]</div>
           </div>
         </div>
 
@@ -1229,13 +1358,13 @@
       <!-- 5. 任務簡介 -->
       <div id="preMissionScreen" class="screen">
         <h1 style="font-size:28px;">MISSION BRIEFING</h1>
-        <h3 id="briefingTitle" style="color:var(--text-dim); margin-bottom:20px;">Operation</h3>
-        <div style="background:rgba(0,0,0,0.5); border-left:4px solid var(--noah-cyan); padding:20px; text-align:left; margin-bottom:30px; border-radius:12px;">
-          <strong style="color:var(--noah-cyan);">📋 Objectives:</strong>
-          <div id="briefingDesc" style="margin-top:10px; font-size:15px; line-height:1.8; white-space:pre-line;">Loading...</div>
+        <h3 id="briefingTitle" style="color:var(--text-dim); margin-bottom:14px;">Operation</h3>
+        <div style="background:rgba(0,0,0,0.5); border-left:4px solid var(--noah-cyan); padding:16px; text-align:left; margin-bottom:18px; border-radius:12px;">
+          <strong style="color:var(--noah-cyan);">📋 作戰目標與題型 (Objectives):</strong>
+          <div id="briefingDesc" style="margin-top:8px; font-size:14px; line-height:1.6;">Loading...</div>
         </div>
-        <button class="primary-btn btn-cyan" onclick="executeMission()">EXECUTE</button>
-        <button class="primary-btn" style="background:transparent; border:2px solid #fff; color:#fff; margin-top:10px;" onclick="navTo('dashboardScreen')">ABORT</button>
+        <button class="primary-btn btn-cyan" onclick="executeMission()">EXECUTE // 開始同步</button>
+        <button class="primary-btn" style="background:transparent; border:2px solid #fff; color:#fff; margin-top:10px;" onclick="navTo('dashboardScreen')">ABORT // 返回</button>
       </div>
 
       <!-- 6. ⚔️ 任務戰鬥核心介面 -->
@@ -1278,24 +1407,18 @@
           <img id="qImage" class="q-stage-bg" src="">
           <img id="enemySprite" class="enemy-sprite" src="" draggable="false">
 
-          <!-- 變革 3：敵方蓄力與黃金破盾窗口條 -->
+          <!-- 敵方兩段式蓄力與黃金破盾窗口條 -->
           <div id="enemyAtbLabel" class="enemy-atb-label">⚡ COUNTER WINDOW</div>
           <div class="enemy-atb-wrap"><div id="enemyAtbFill" class="enemy-atb-fill"></div></div>
         </div>
 
-        <!-- 變革 1 & 5：元認知戰術姿態押注與拆彈模式列 -->
+        <!-- 戰鬥內即時戰術工具列（拆彈剪線 & 弱點透視） -->
         <div class="tactical-stance-bar" id="tacticalStanceBar">
-          <button type="button" id="stanceBtnOvercharge" class="stance-btn" onclick="toggleTacticalStance('overcharge')">
-            <span>⚡ 強襲</span><span class="sub">雙倍傷/賞金</span>
-          </button>
-          <button type="button" id="stanceBtnGuard" class="stance-btn" onclick="toggleTacticalStance('guard')">
-            <span>🛡️ 穩守 (<span id="guardLeftCount">2</span>)</span><span class="sub">答錯不扣血</span>
-          </button>
           <button type="button" id="stanceBtnWirecut" class="stance-btn" onclick="toggleTacticalStance('wirecut')">
-            <span>💣 拆彈</span><span class="sub">剪錯線賺幣</span>
+            <span>💣 拆彈模式</span><span class="sub">(剪除錯項賺幣)</span>
           </button>
           <button type="button" id="stanceBtnScan" class="stance-btn" onclick="triggerTacticalScan()">
-            <span>📡 透視</span><span class="sub">耗1SP標線索</span>
+            <span>📡 戰術透視</span><span class="sub">(耗1SP標線索)</span>
           </button>
         </div>
 
@@ -1306,7 +1429,7 @@
         <div id="answerArea"></div>
         <button id="submitBtn" class="primary-btn btn-cyan" style="display:none;" onclick="checkAnswer()">SUBMIT DATA</button>
 
-        <!-- 變革 10：小隊學科專屬即時戰況對白氣泡 -->
+        <!-- 小隊學科專屬即時戰況對白氣泡 -->
         <div id="squadBanterBubble"></div>
 
         <!-- 🛡️ 底部 5 人小隊半身戰術框 -->
@@ -1388,19 +1511,42 @@
       </div>
     </div>
 
+    <!-- 🎙️ 雙導航員對話式新手引導浮層 -->
     <div id="tutorialOverlay">
       <div class="tutorial-card">
-        <div style="color:var(--noah-cyan); font-family:monospace; letter-spacing:2px; font-size:12px;">ORIENTATION</div>
-        <h2 id="tutorialTitle" style="margin:8px 0; color:#fff;">歡迎歸隊</h2>
-        <div id="tutorialBody" style="color:#cfd8dc; font-size:14px; line-height:1.65;"></div>
-        <div id="tutorialCalendarBox" style="display:none; margin-top:12px; padding:10px; background:rgba(241,196,15,0.1); border:1px solid var(--accent-gold); border-radius:10px;">
-          <div style="font-size:12px; color:var(--accent-gold); font-weight:bold; margin-bottom:6px;">⏰ 選擇每晚戰術提醒時間（必選步驟）：</div>
-          <div style="display:flex; gap:8px;">
-            <input type="time" id="tutReminderTime" value="20:00" class="input-field" style="margin:0; padding:8px; font-size:14px; width:125px;">
-            <button type="button" class="primary-btn btn-gold" style="margin:0; padding:8px; font-size:13px; flex:1;" onclick="bindTutorialCalendar()">📅 綁定手機日曆提醒</button>
+        <div class="tut-dual-stage">
+          <div id="tutAvatarKael" class="tut-nav-portrait">
+            <img id="tutImgKael" src="" alt="Kael">
+            <div class="tut-nav-label">♂ 凱爾 Kael</div>
+          </div>
+          <div style="flex:1; text-align:center;">
+            <div style="color:var(--noah-cyan); font-family:monospace; letter-spacing:1.5px; font-size:11px;">N.O.A.H. ORIENTATION</div>
+            <div id="tutorialSpeakerTag" style="color:var(--accent-gold); font-weight:900; font-size:14px; margin-top:2px;">♀ 領航員 萊拉</div>
+          </div>
+          <div id="tutAvatarLyra" class="tut-nav-portrait speaking">
+            <img id="tutImgLyra" src="" alt="Lyra">
+            <div class="tut-nav-label">♀ 萊拉 Lyra</div>
           </div>
         </div>
-        <button class="primary-btn btn-cyan" id="tutorialNextBtn" onclick="advanceTutorial()">下一步</button>
+
+        <h3 id="tutorialTitle" style="margin:4px 0 8px; color:#fff; font-size:16px;">歡迎歸隊</h3>
+        <div id="tutorialBody" style="color:#dbeafe; font-size:13px; line-height:1.65;"></div>
+
+        <!-- 最後一步：強制綁定日曆提醒 + 揀選專屬導航員 -->
+        <div id="tutorialCalendarBox" style="display:none; margin-top:10px; padding:10px; background:rgba(241,196,15,0.08); border:1px solid var(--accent-gold); border-radius:12px;">
+          <div style="font-size:12px; color:var(--accent-gold); font-weight:bold; margin-bottom:6px;">⏰ Step A：設定每晚戰術提醒（必選）：</div>
+          <div style="display:flex; gap:8px; margin-bottom:10px;">
+            <input type="time" id="tutReminderTime" value="20:00" class="input-field" style="margin:0; padding:7px; font-size:14px; width:120px;">
+            <button type="button" class="primary-btn btn-gold" style="margin:0; padding:8px; font-size:12px; flex:1;" onclick="bindTutorialCalendar()">📅 1. 綁定手機日曆提醒</button>
+          </div>
+          <div style="font-size:12px; color:var(--noah-cyan); font-weight:bold; margin-bottom:6px;">🎙️ Step B：揀選你嘅主控台專屬導航員（之後可隨時切換）：</div>
+          <div style="display:grid; grid-template-columns:1fr 1fr; gap:8px;">
+            <button type="button" id="tutPickKaelBtn" class="option-btn" style="padding:8px; text-align:center; font-size:12px; border-color:var(--noah-cyan);" onclick="pickTutorialNavigator('kael')">♂ 凱爾 (Kael)<br><span style="font-size:10px; color:#aaa;">戰術通信官</span></button>
+            <button type="button" id="tutPickLyraBtn" class="option-btn" style="padding:8px; text-align:center; font-size:12px; border-color:var(--accent-gold);" onclick="pickTutorialNavigator('lyra')">♀ 萊拉 (Lyra)<br><span style="font-size:10px; color:#aaa;">首席領航員</span></button>
+          </div>
+        </div>
+
+        <button class="primary-btn btn-cyan" id="tutorialNextBtn" style="margin-top:12px; padding:12px;" onclick="advanceTutorial()">下一步 ➡️</button>
       </div>
     </div>
 
@@ -1442,35 +1588,68 @@
 
     <!-- 情報反饋面板 -->
     <div id="feedback-panel">
-      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px;">
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
         <h2 id="feedbackTitle" style="margin:0; font-size:20px; display:flex; align-items:center; gap:8px;">INTEL SECURED</h2>
         <button id="feedbackNextBtn" class="primary-btn btn-cyan" style="width:auto; margin:0; padding:8px 25px;" onclick="nextQuestion()">NEXT ➡️</button>
       </div>
-      <div id="feedbackContent" style="font-size:16px;"></div>
+      <div id="feedbackContent" style="font-size:15px;"></div>
     </div>
 
-<script>
+    <script>
       // ==========================================
-      // 🚀 1. 全域設定、功能開關與配置表
+      // 🚀 1. 全域設定、NAVIGATOR_POOL 與配置表
       // ==========================================
       const API_URL = "https://noah-api-proxy.hksatutors.workers.dev/";
       const R2_BASE = "https://pub-2a6f35ae1aea46f3a4762ecf8c1a6eae.r2.dev";
 
-      // 🔒 籌備中模式開關（日後準備好深淵 Boss 立繪或劇本後，將 false 改為 true 即可啟用）
       const FEATURE_FLAGS = {
         raidBoss: false,
         storyMode: false,
         limitedEvent: false
       };
 
-      // 💥 變革 7：Boss 破防「全員總攻擊處決」各副本限時設定（單位：秒）
       const FINISHER_TIME_CONFIG = {
-        vocab: 10,     // 生字副本：10 秒
-        grammar: 12,   // 文法副本：12 秒
-        listening: 15  // 聆聽副本：15 秒
+        vocab: 10,     // 生字副本處決：10 秒
+        grammar: 12,   // 文法副本處決：12 秒
+        listening: 15  // 聆聽副本處決：15 秒
       };
 
-      // 🏪 行動補給站 (Operation Supply Store) 商品配置表（可自由增減或修改價格）
+      // 🎙️ 專屬雙導航員池（已綁定你提供嘅男/女 ElevenLabs Voice ID，日後可自由擴充新導航員）
+      const NAVIGATOR_POOL = {
+        lyra: {
+          id: "lyra",
+          nameZh: "萊拉 (Lyra)",
+          title: "♀ 首席領航員",
+          gender: "Female",
+          voiceId: "WUyjxM8OTY6l8LhTmdkq",
+          img: R2_BASE + "/Characters/Navigators/nav_female.png",
+          unlockedByDefault: true,
+          cost: 0,
+          quotes: [
+            { en: "Welcome back to N.O.A.H., Captain! Let's keep our synchronization streak alive!", zh: "歡迎返嚟 N.O.A.H.，艦長！今日都要繼續保持完美同步呀！" },
+            { en: "Don't worry about making mistakes! You can always review them in the Error Vault.", zh: "答錯咗都唔使驚㗎！隨時可以去記憶修復艙重溫返。" },
+            { en: "Before each question, try selecting the Hack stance if you want double SP!", zh: "進入下一題前，如果想快速儲氣放技，可以試下揀「⚡駭入姿態」攞雙倍 SP！" },
+            { en: "You've saved up quite a lot of Coins! Want to check out the Operation Supply Store?", zh: "艦長儲咗唔少信用點喎！要去行動補給站睇下有無心水實體獎品嗎？" }
+          ]
+        },
+        kael: {
+          id: "kael",
+          nameZh: "凱爾 (Kael)",
+          title: "♂ 戰術通信官",
+          gender: "Male",
+          voiceId: "q1h5HGdnfVxp4TXTJRNN",
+          img: R2_BASE + "/Characters/Navigators/nav_male.png",
+          unlockedByDefault: true,
+          cost: 0,
+          quotes: [
+            { en: "All tactical channels are clear, Captain. Which sector are we striking today?", zh: "所有戰術頻道暢通，艦長。我哋今日進攻邊個區域？" },
+            { en: "Each sector Boss requires a specialized combat protocol. Stay sharp.", zh: "每個戰區嘅守門 Boss 都有專屬破防機制（格擋、接線、符文、狙擊），保持警覺。" },
+            { en: "When you are 100% confident, deploy the Overcharge stance for double damage.", zh: "當你有十足把握時，部署「💥強襲姿態」可以直接打出雙倍傷害同額外賞金。" },
+            { en: "Consistency is our strongest weapon. Never miss your daily supply drop.", zh: "持之以恆係我哋最強嘅武器，記得每晚準時領取作戰補給箱。" }
+          ]
+        }
+      };
+
       const SUPPLY_STORE_ITEMS = {
         real: [
           { id: "REAL_01", name: "🎁 戰術文具／貼紙盲盒", desc: "向導師出示核銷碼即可抽取實體盲盒 1 個", cost: 800 },
@@ -1480,34 +1659,32 @@
         ],
         virtual: [
           { id: "VIRT_SHIELD", name: "🛡️ 連登斷簽保護晶片", desc: "儲存於本機，下次斷簽時自動保住連登紀錄", cost: 300 },
-          { id: "VIRT_SKIN", name: "🎨 幹員特典造型解鎖券", desc: "立即為當前隊長解鎖全套 P/Q/R 特典造型", cost: 600 },
+          { id: "VIRT_SKIN", name: "🎨 幹員特典造型解鎖券", desc: "立即為全幹員解鎖 P/Q/R 特典造型衣櫥權限", cost: 600 },
           { id: "VIRT_OVERCLOCK", name: "⚡ 開局全隊滿載晶片", desc: "下一場任務開始時，全隊 5 人直接充滿 SP", cost: 250 }
         ]
       };
 
-      // 💬 變革 10：嚴格對應各副本學科內容的小隊即時戰況對白庫
       const BANTER_BY_MODE = {
         vocab: {
           start: ["📡 生字偵察開始！留意字根同前後綴（Prefix/Suffix）線索！", "🧭 保持專注，注意目標單字喺句子入面嘅固定搭配（Collocation）！"],
           combo: ["🔥 詞彙記憶同步率極高！連拼寫細節都無懈可擊！", "⚡ 漂亮！一眼就睇穿咗詞尾詞性變化！"],
           hurt: ["⚠️ 小心拼寫陷阱！望清楚元音字母同詞性（Noun/Verb/Adj）再出手！", "🛡️ 唔好急，先從上下文語境（Context）推敲個字嘅意思！"],
-          boss: ["🚨 守門領主出現！準備用高階詞彙同字根破開佢嘅裝甲！"]
+          boss: ["🚨 守門領主出現！準備啟動專屬 Boss 破防機制！"]
         },
         grammar: {
           start: ["🏛️ 進入語法學院！時刻檢查主謂一致（Subject-Verb Agreement）！", "📐 留意句中嘅時間狀語，鎖定正確時態（Tense）！"],
           combo: ["🔥 語法結構完全正確！敵方邏輯防線崩潰緊！", "⚡ 精準捕捉到連接詞同從句結構，繼續保持！"],
           hurt: ["⚠️ 語法警報！先檢查主語係單數定複數，再核對助動詞時態！", "🛡️ 留意不規則動詞變化同介系詞（Preposition）搭配！"],
-          boss: ["🚨 法則裁決者登場！集中火力找出句子入面嘅語法漏洞！"]
+          boss: ["🚨 審判騎士登場！準備啟動【四色符文連攜矩陣】破開法則裝甲！"]
         },
         listening: {
           start: ["💾 聲波終端連線！集中聽清楚說話者嘅語氣同開頭疑問詞（5W1H）！", "🎧 注意對話入面嘅轉折詞（but / however / actually），答案往往喺後面！"],
           combo: ["🔥 聲紋鎖定完美！連背景細節同數字資訊都一字不漏！", "⚡ 聽覺神經同調率 100%，情報破譯速度驚人！"],
           hurt: ["⚠️ 訊號受干擾！可以用分句頻道（📻 #1 / #2）或慢速重聽關鍵一句！", "🛡️ 小心同義詞替換陷阱，聽清楚說話者最終嘅決定！"],
-          boss: ["🚨 意識吞噬者突襲！過濾雜訊，捕捉最關鍵嘅語音密鑰！"]
+          boss: ["🚨 意識吞噬者突襲！聽完錄音後用【全息狙擊準星】鎖定真相浮游砲！"]
         }
       };
 
-      // 詞性標準化全寫字典
       const POS_STANDARDIZED = {
         "n": "Noun", "noun": "Noun",
         "v": "Verb", "verb": "Verb",
@@ -1518,11 +1695,10 @@
         "pron": "Pronoun", "pronoun": "Pronoun"
       };
 
-      // 13 階門檻陣列（用於計算距離下一階尚餘幾多 EXP）
       const RANK_THRESHOLDS = [
         { min: 0,      level: 1,  title: "候補學員",     icon: "📝" },
         { min: 2500,   level: 2,  title: "初階幹員",     icon: "🔰" },
-        { min: 7500,   level: 3,  title: "正式幹員",     icon: "⚓" },
+        { min: 7500,  level: 3,  title: "正式幹員",     icon: "⚓" },
         { min: 15000,  level: 4,  title: "資深幹員",     icon: "🧭" },
         { min: 25000,  level: 5,  title: "菁英幹員",     icon: "💠" },
         { min: 40000,  level: 6,  title: "特遣專員",     icon: "🎖️" },
@@ -1550,7 +1726,6 @@
       var OP_PLACEHOLDER = "data:image/svg+xml;utf8," + encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" width="240" height="360"><rect fill="#071018" width="100%" height="100%"/><text x="50%" y="52%" fill="#00e5ff" font-size="16" text-anchor="middle" font-family="monospace">NO SIGNAL</text></svg>');
       function opImg(url) { return url ? url : OP_PLACEHOLDER; }
 
-      // 🚀 幹員解析器：完整支援 P/Q/R 三欄 Skin (Skin_1 / Skin_2 / Skin_3) 與突破星級 (Duplicate_Count)
       function normalizeOp(raw) {
         if (!raw) return null;
         var cardId = raw.Card_ID || raw.cardId || raw.id || "";
@@ -1599,8 +1774,8 @@
       }
 
       var VOICE_POOL = {
-        "Male": ["L0Dsvb3SLTyegXwtm47J", "DYkrAHD8iwork3YSUBbs", "Bj9UqZbhQsanLzgalpEG", "oR4uRy4fHDUGGISL0Rev", "0SpgpJ4D3MpHCiWdyTg3", "rU18Fk3uSDhmg5Xh41o4"],
-        "Female": ["aMSt68OGf4xUZAnLpTU8", "flHkNRp1BlvT73UL6gyz", "weA4Q36twV5kwSaTEL0Q", "piI8Kku0DcvcL6TTSeQt", "lcMyyd2HUfFzxdCaC4Ta", "uYXf8XasLslADfZ2MB4u"]
+        "Male": ["q1h5HGdnfVxp4TXTJRNN", "L0Dsvb3SLTyegXwtm47J", "DYkrAHD8iwork3YSUBbs", "Bj9UqZbhQsanLzgalpEG", "oR4uRy4fHDUGGISL0Rev", "0SpgpJ4D3MpHCiWdyTg3"],
+        "Female": ["WUyjxM8OTY6l8LhTmdkq", "aMSt68OGf4xUZAnLpTU8", "flHkNRp1BlvT73UL6gyz", "weA4Q36twV5kwSaTEL0Q", "piI8Kku0DcvcL6TTSeQt", "lcMyyd2HUfFzxdCaC4Ta"]
       };
 
       var MEDIA = {
@@ -1642,7 +1817,16 @@
           skill_cast: [R2_BASE + "/SFX/sfx_skill_cast1.mp3", R2_BASE + "/SFX/sfx_skill_cast2.mp3"],
           shield_block: R2_BASE + "/SFX/sfx_shield_block.mp3",
           enemy_attack: [1,2,3,4,5].map(function(n){ return R2_BASE + "/SFX/sfx_hit_normal" + n + ".mp3"; }),
-          boss_alarm: R2_BASE + "/SFX/sfx_boss_alarm.mp3"
+          boss_alarm: R2_BASE + "/SFX/sfx_boss_alarm.mp3",
+          // 🎮 四大 Boss 戰專屬互動 SFX（若 R2 尚未上傳，播放時會自動無縫退回現有音效）
+          parry_clang: [R2_BASE + "/SFX/sfx_parry_clang.mp3", R2_BASE + "/SFX/sfx_shield_block.mp3"],
+          counter_slash: [R2_BASE + "/SFX/sfx_counter_slash.mp3", R2_BASE + "/SFX/sfx_hit_critical1.mp3"],
+          node_rotate: [R2_BASE + "/SFX/sfx_node_rotate.mp3", R2_BASE + "/SFX/click.mp3"],
+          circuit_surge: [R2_BASE + "/SFX/sfx_circuit_surge.mp3", R2_BASE + "/SFX/sfx_hit_critical2.mp3"],
+          rune_swap: [R2_BASE + "/SFX/sfx_rune_swap.mp3", R2_BASE + "/SFX/click.mp3"],
+          rune_match: [R2_BASE + "/SFX/sfx_rune_match.mp3", R2_BASE + "/SFX/sfx_skill_cast1.mp3"],
+          reticle_lock: [R2_BASE + "/SFX/sfx_reticle_lock.mp3", R2_BASE + "/SFX/click.mp3"],
+          railgun_fire: [R2_BASE + "/SFX/sfx_railgun_fire.mp3", R2_BASE + "/SFX/sfx_hit_critical3.mp3"]
         }
       };
 
@@ -1663,7 +1847,7 @@
           bossNames: ["【意識吞噬者・利維坦】", "【記憶暴食魔・阿巴頓】"]
         }
       };
-
+      // === PART 2 開始（緊接 PART 1） ===
       var globalOperatorPool = [];
       var playerInventory = [];
       var playerPresets = { active: 1, preset1: [], preset2: [], preset3: [] };
@@ -1671,7 +1855,7 @@
 
       var currentUserData = null, isBgmPlaying = false, missionQueue = [], currentIdx = 0;
       var currentMissionType = "", missionResults = [], wrongAttempts = 0, timerVal = 0, timerInterval;
-      var targetCurrentAnswer = "", currentListeningScript = "", isQuestionLocked = false, currentBadge = ""; 
+      var targetCurrentAnswer = "", alternateValidAnswer = "", currentListeningScript = "", isQuestionLocked = false, currentBadge = ""; 
       var currentLBData = null, isMissionActive = false, confettiAnimationId = null;
       var currentCombo = 0, wrongQuestionsList = [];
 
@@ -1680,17 +1864,19 @@
       var activeLockedBossIndex = null, activeShieldCount = 0;
       var playerMaxHp = 3, playerCurrentHp = 3;
       var missionAborted = false, scribeForgiveUsed = false, guildBossCritUsed = false, scribeMarked = false;
-      var skillState = { calibrate: 0, decoy: false, bypass: false, harvest: false, freeze: 0, paradox: false, timerPause: 0, started: 0, bossHeavy: 0, jammed: -1, bonusCoins: 0, rogueMult: 0,abyssMult: 1 };
+      var skillState = { calibrate: 0, decoy: false, bypass: false, harvest: false, freeze: 0, paradox: false, timerPause: 0, started: 0, bossHeavy: 0, jammed: -1, bonusCoins: 0, rogueMult: 0, abyssMult: 1 };
 
-      // 變革 1, 3, 5, 7, 9 專用狀態變數
-      var currentStance = "normal"; // normal | overcharge | guard | wirecut
+      // 戰術姿態、兩段式計時、Boss 專屬機關與導航員狀態
+      var currentStance = "normal"; // normal | overcharge | guard | hack | wirecut
       var guardUsesLeft = 2;
-      var atbInterval = null, atbElapsedMs = 0, isCounterWindow = false;
+      var atbInterval = null, atbElapsedMs = 0, atbStage = 1, isCounterWindow = false, atbWaitingForAudio = false;
+      var bossMechanicInterval = null;
       var finisherTimerInterval = null;
       var abyssalReserveQuestion = null, isPlayingAbyssalBonus = false, bossFinisherTriggered = false;
       var isTimeRushMode = false, timeRushRemaining = 90;
       var formationFactionFilter = "ALL";
       var tutorialCalendarBound = false;
+      var currentNavigatorId = "lyra";
 
       var bgmPlayer = document.getElementById('bgm-player'), sePlayer = document.getElementById('se-player'), elevenPlayer = document.getElementById('eleven-player');
       var bgmSelect = document.getElementById('bgmSelect'), sysMsgBox = document.getElementById('sysMsgBox');
@@ -1733,74 +1919,90 @@
           sfxUrls(key).forEach(function(url) { if (!sfxPool[url]) { var audio = new Audio(); audio.preload = "auto"; audio.src = url; sfxPool[url] = audio; } });
         });
       }
+      // 支援主音效失敗時自動 Fallback 到備用音效
       function playSFX(key) {
         var urls = sfxUrls(key); if (!urls.length) return;
-        var url = urls[Math.floor(Math.random() * urls.length)];
-        var node = new Audio(url);
+        var primaryUrl = urls[0];
+        var fallbackUrl = urls.length > 1 ? urls[1] : null;
+        var node = new Audio(primaryUrl);
         node.volume = 0.85;
-        var attempt = node.play(); if (attempt && attempt.catch) attempt.catch(function(){});
-      }
-      function bindLongPress(el, onLong, onTap) {
-        var timer = null, fired = false;
-        el.onpointerdown = function() { fired = false; timer = setTimeout(function() { fired = true; if(onLong) onLong(); }, 460); };
-        function clearHold() { clearTimeout(timer); }
-        el.onpointerup = clearHold; el.onpointercancel = clearHold; el.onpointerleave = clearHold;
-        el.onclick = function(ev) { if (fired) { ev.preventDefault(); ev.stopPropagation(); return; } if (onTap) onTap(ev); };
+        node.onerror = function() {
+          if (fallbackUrl) { var fb = new Audio(fallbackUrl); fb.volume = 0.85; fb.play().catch(function(){}); }
+        };
+        var attempt = node.play();
+        if (attempt && attempt.catch) {
+          attempt.catch(function() {
+            if (fallbackUrl) { var fb = new Audio(fallbackUrl); fb.volume = 0.85; fb.play().catch(function(){}); }
+          });
+        }
       }
 
-      function playVoice(text, rate) {
+      // 強化版長按綁定（封鎖手機瀏覽器預設圖片長按選單，防止滑動誤觸）
+      function bindLongPress(el, onLong, onTap) {
+        var timer = null, fired = false, startX = 0, startY = 0;
+        el.oncontextmenu = function(e) { e.preventDefault(); return false; };
+        el.onpointerdown = function(ev) {
+          fired = false;
+          startX = ev.clientX || 0; startY = ev.clientY || 0;
+          timer = setTimeout(function() {
+            fired = true;
+            if (onLong) onLong();
+          }, 420);
+        };
+        el.onpointermove = function(ev) {
+          if (Math.abs((ev.clientX || 0) - startX) > 12 || Math.abs((ev.clientY || 0) - startY) > 12) {
+            clearTimeout(timer);
+          }
+        };
+        function clearHold() { clearTimeout(timer); }
+        el.onpointerup = clearHold; el.onpointercancel = clearHold; el.onpointerleave = clearHold;
+        el.onclick = function(ev) {
+          if (fired) { ev.preventDefault(); ev.stopPropagation(); return; }
+          if (onTap) onTap(ev);
+        };
+      }
+
+      function playVoice(text, rate, genderHint) {
         window.speechSynthesis.cancel();
         var msg = new SpeechSynthesisUtterance(text); msg.lang = 'en-US'; msg.rate = rate || 1.0;
+        if (genderHint === "Male") msg.pitch = 0.85;
+        else if (genderHint === "Female") msg.pitch = 1.12;
         duckBGM(); msg.onend = unduckBGM; window.speechSynthesis.speak(msg);
       }
 
-      function spawnFloatingText(text, isGold, targetEl) {
-        var el = document.createElement('div');
-        el.className = 'floating-score';
-        if (!isGold) el.style.color = 'var(--accent-green)';
-        el.innerText = text;
-        var x = window.innerWidth / 2, y = window.innerHeight * 0.68;
-        if (targetEl && targetEl.getBoundingClientRect) {
-          var rect = targetEl.getBoundingClientRect();
-          x = rect.left + rect.width / 2; y = rect.top;
-        }
-        el.style.left = x + 'px'; el.style.top = y + 'px';
-        document.body.appendChild(el);
-        setTimeout(function() { el.remove(); }, 1500);
-      }
-
-      function getRandomMaskedWord(phrase) {
-        if (!phrase) return "";
-        var words = String(phrase).trim().split(/\s+/);
-        return words.map(function(word) {
-          if (word.length <= 1) return word;
-          var arr = word.split("");
-          var maskable = [];
-          for (var i = 1; i < arr.length; i++) { if (/[a-zA-Z0-9]/.test(arr[i])) maskable.push(i); }
-          maskable.sort(function() { return 0.5 - Math.random(); });
-          var hideSet = new Set(maskable.slice(0, Math.max(1, Math.floor(maskable.length * 0.5))));
-          return arr.map(function(c, idx) { return hideSet.has(idx) ? "_" : c; }).join(" ");
-        }).join("   ");
-      }
-
-      function playAudioLogic(text, isSlow) {
+      function playSpecificVoiceTTS(text, voiceId, genderHint, isSlow, onStartCallback) {
         if (!text) return;
         duckBGM();
         fetch(API_URL, {
           method: 'POST', headers: { 'Content-Type': 'text/plain' },
-          body: JSON.stringify({ action: 'tts', text: text, voiceId: VOICE_POOL.Female[0] })
+          body: JSON.stringify({ action: 'tts', text: text, voiceId: voiceId || VOICE_POOL.Female[0] })
         })
         .then(function(res) { return res.text(); }) 
         .then(function(textData) {
           var data = JSON.parse(textData);
           if (data.success && data.audioBase64) {
             elevenPlayer.src = data.audioBase64;
-            elevenPlayer.playbackRate = isSlow ? 0.6 : 0.92; 
+            elevenPlayer.playbackRate = isSlow ? 0.6 : 0.94; 
+            elevenPlayer.onplay = function() { if (onStartCallback) onStartCallback(); };
             elevenPlayer.onended = unduckBGM; 
             elevenPlayer.play();
           } else throw new Error("TTS fallback");
         })
-        .catch(function() { unduckBGM(); playVoice(text, isSlow ? 0.6 : 0.92); });
+        .catch(function() {
+          unduckBGM();
+          if (onStartCallback) onStartCallback();
+          playVoice(text, isSlow ? 0.6 : 0.94, genderHint);
+        });
+      }
+
+      function playAudioLogic(text, isSlow) {
+        var nav = NAVIGATOR_POOL[currentNavigatorId] || NAVIGATOR_POOL.lyra;
+        playSpecificVoiceTTS(text, nav.voiceId, nav.gender, isSlow, function() {
+          if (atbWaitingForAudio && !isQuestionLocked) {
+            atbWaitingForAudio = false;
+            startEnemyAtbTimer(true);
+          }
+        });
       }
       
       async function playListeningAudio(speedRate) { 
@@ -1833,6 +2035,13 @@
             } catch (parseErr) {}
           }
           if(validResults.length === 0) throw new Error("音頻合成失敗");
+
+          // 錄音成功載入並開始播放嗰一刻，正式啟動聆聽題計時！
+          if (atbWaitingForAudio && !isQuestionLocked) {
+            atbWaitingForAudio = false;
+            startEnemyAtbTimer(true);
+          }
+
           var playIdx = 0;
           function playNext() {
             if (playIdx < validResults.length) {
@@ -1848,6 +2057,10 @@
           playNext();
         } catch (err) {
           unduckBGM(); listenBtns.forEach(function(b) { b.disabled = false; });
+          if (atbWaitingForAudio && !isQuestionLocked) {
+            atbWaitingForAudio = false;
+            startEnemyAtbTimer(true);
+          }
           var fullText = scriptArr.map(function(l){ return String(l.text_en || l.text || l.dialogue || l.content || ""); }).join(". ");
           playVoice(fullText, speedRate || 1.0);
         }
@@ -1858,9 +2071,45 @@
           var arr = JSON.parse(currentListeningScript || "[]");
           if (arr[idx]) {
             var txt = String(arr[idx].text_en || arr[idx].text || "").replace(/[\[\]]/g, "");
-            playAudioLogic(txt, false);
+            var r = String(arr[idx].role || "Male").toUpperCase();
+            var isFem = (r.indexOf('F')>-1 || r.indexOf('WOMAN')>-1 || r.indexOf('GIRL')>-1);
+            playSpecificVoiceTTS(txt, isFem ? VOICE_POOL.Female[0] : VOICE_POOL.Male[0], isFem ? "Female" : "Male", false, function() {
+              if (atbWaitingForAudio && !isQuestionLocked) {
+                atbWaitingForAudio = false;
+                startEnemyAtbTimer(true);
+              }
+            });
           }
         } catch(e) {}
+      }
+
+      function spawnFloatingText(text, isGold, targetEl) {
+        var el = document.createElement('div');
+        el.className = 'floating-score';
+        if (!isGold) el.style.color = 'var(--accent-green)';
+        el.innerText = text;
+        var x = window.innerWidth / 2, y = window.innerHeight * 0.68;
+        if (targetEl && targetEl.getBoundingClientRect) {
+          var rect = targetEl.getBoundingClientRect();
+          x = rect.left + rect.width / 2; y = rect.top;
+        }
+        el.style.left = x + 'px'; el.style.top = y + 'px';
+        document.body.appendChild(el);
+        setTimeout(function() { el.remove(); }, 1500);
+      }
+
+      function getRandomMaskedWord(phrase) {
+        if (!phrase) return "";
+        var words = String(phrase).trim().split(/\s+/);
+        return words.map(function(word) {
+          if (word.length <= 1) return word;
+          var arr = word.split("");
+          var maskable = [];
+          for (var i = 1; i < arr.length; i++) { if (/[a-zA-Z0-9]/.test(arr[i])) maskable.push(i); }
+          maskable.sort(function() { return 0.5 - Math.random(); });
+          var hideSet = new Set(maskable.slice(0, Math.max(1, Math.floor(maskable.length * 0.5))));
+          return arr.map(function(c, idx) { return hideSet.has(idx) ? "_" : c; }).join(" ");
+        }).join("   ");
       }
 
       function startAssetPreload() {
@@ -1910,7 +2159,7 @@
       }
 
       // ==========================================
-      // 🚀 2. 登入、看板娘互動與大廳 UI 更新
+      // 🚀 2. 登入、雙導航員切換與大廳 UI
       // ==========================================
       function attemptLogin() {
         var id = String(document.getElementById('inputId').value).trim(), pin = String(document.getElementById('inputPin').value).trim();
@@ -1940,6 +2189,9 @@
           if(res && res.success) { 
             try { localStorage.setItem('noah_id', id); localStorage.setItem('noah_pin', pin); } catch(e) {}
             currentUserData = res.data;
+            var savedNav = localStorage.getItem('noah_navigator_' + currentUserData.studentId);
+            if (savedNav && NAVIGATOR_POOL[savedNav]) currentNavigatorId = savedNav;
+
             playSFX('login_success');
             titleEl.innerText = "NEURAL SYNC ESTABLISHED";
             greetEl.innerText = "WELCOME BACK, CAPTAIN " + (currentUserData.name || "OPERATIVE");
@@ -1968,19 +2220,38 @@
         });
       }
 
-      const ADJUTANT_QUOTES = [
-        { en: "Practice makes permanent. Ready for a quick 90-second Time Rush?", zh: "熟能生巧！準備好挑戰 90 秒極限衝刺未？" },
-        { en: "Every mistake in the Error Vault is a stepping stone to Rank S!", zh: "記憶修復艙入面嘅每一條錯題，都係升上 S 級嘅踏腳石！" },
-        { en: "Tip: Use 'Overcharge' stance when you are 100% sure of the answer!", zh: "戰術貼士：遇到十拿九穩嘅題目，開「⚡強襲」直接攞雙倍賞金！" },
-        { en: "Don't forget to check the Operation Supply Store with your Coins!", zh: "儲夠信用點記得去「行動補給站」換領實體獎品同特典造型！" }
-      ];
+      // 🎙️ 專屬雙導航員渲染、切換與語音播放
+      function updateLobbyAdjutant() {
+        var nav = NAVIGATOR_POOL[currentNavigatorId] || NAVIGATOR_POOL.lyra;
+        var imgEl = document.getElementById('lobbyAdjutantImg');
+        var nameEl = document.getElementById('lobbyAdjutantName');
+        if (imgEl) {
+          imgEl.src = opImg(nav.img);
+          imgEl.onerror = function() { this.onerror = null; this.src = OP_PLACEHOLDER; };
+        }
+        if (nameEl) nameEl.innerText = nav.title + " · " + nav.nameZh;
+      }
+
+      function switchLobbyNavigator(ev) {
+        if (ev) ev.stopPropagation();
+        playSFX('click');
+        var keys = Object.keys(NAVIGATOR_POOL);
+        var nextIdx = (keys.indexOf(currentNavigatorId) + 1) % keys.length;
+        currentNavigatorId = keys[nextIdx];
+        if (currentUserData && currentUserData.studentId) {
+          localStorage.setItem('noah_navigator_' + currentUserData.studentId, currentNavigatorId);
+        }
+        updateLobbyAdjutant();
+        triggerAdjutantVoice();
+      }
 
       function triggerAdjutantVoice() {
         playSFX('click');
-        var q = ADJUTANT_QUOTES[Math.floor(Math.random() * ADJUTANT_QUOTES.length)];
+        var nav = NAVIGATOR_POOL[currentNavigatorId] || NAVIGATOR_POOL.lyra;
+        var q = nav.quotes[Math.floor(Math.random() * nav.quotes.length)];
         var lineEl = document.getElementById('lobbyAdjutantLine');
         if (lineEl) lineEl.innerHTML = '"' + q.en + '"<br><span style="color:#94a3b8; font-size:11px;">' + q.zh + '</span>';
-        playVoice(q.en, 0.95);
+        playSpecificVoiceTTS(q.en, nav.voiceId, nav.gender, false);
       }
 
       function updateUI() {
@@ -2010,25 +2281,12 @@
         document.getElementById('dashTotalMissions').innerText = currentUserData.totalMissions || 0;
         document.getElementById('dashTotalQuestions').innerText = currentUserData.totalQuestions || 0;
 
-        // 顯示或隱藏籌備中嘅深淵世界 Boss 面板
         var raidCard = document.getElementById('raidBossBannerCard');
         if (raidCard) raidCard.style.display = FEATURE_FLAGS.raidBoss ? 'block' : 'none';
 
         updateErrorVaultBadge();
         updateLobbyAdjutant();
         renderBriefingRoomSquad();
-      }
-
-      function updateLobbyAdjutant() {
-        var leader = battleSquad[0] || globalOperatorPool[0];
-        var imgEl = document.getElementById('lobbyAdjutantImg');
-        var nameEl = document.getElementById('lobbyAdjutantName');
-        if (leader && imgEl) {
-          imgEl.src = opImg(leader.imageUrl);
-          if (nameEl) nameEl.innerText = "👑 秘書官 " + (leader.nameZh || "領航員") + " · 點擊語音互動";
-        } else if (imgEl) {
-          imgEl.src = OP_PLACEHOLDER;
-        }
       }
 
       function logout() { 
@@ -2232,16 +2490,18 @@
           if (!el) continue;
           var op = battleSquad[idx];
           if (!op) { el.innerHTML = '<div class="op-placeholder"></div>'; continue; }
-          el.innerHTML = '<img src="' + opImg(op.imageUrl) + '" onerror="this.onerror=null;this.src=OP_PLACEHOLDER"><div class="bust-name">' + (idx === 0 ? "👑 隊長 · " : "") + (op.nameZh || op.cardId) + '<br><span style="font-size:9px; color:var(--noah-cyan);">長按睇檔案/換造型</span></div>';
+          el.innerHTML = '<img src="' + opImg(op.imageUrl) + '" onerror="this.onerror=null;this.src=OP_PLACEHOLDER"><div class="bust-name">' + (idx === 0 ? "👑 隊長 · " : "") + (op.nameZh || op.cardId) + '<br><span style="font-size:9px; color:var(--noah-cyan);">點擊或長按睇檔案/換造型</span></div>';
           bindLongPress(el, (function(card){ return function(){ openOperatorDetailModal(card); }; })(op), (function(card){ return function(){ openOperatorDetailModal(card); }; })(op));
         }
         renderFactionResonance();
       }
 
       // ==========================================
-      // ⏰ 4. 新手教學（強制綁定日曆提醒）與每日補給
+      // 🎙️ 4. 雙導航員對話式教學（手把手跨畫面 + 揀選專屬導航員）
       // ==========================================
       var tutorialStep = 0;
+      var tutorialPickedNav = false;
+
       function maybeStartTutorial() {
         if (!currentUserData) return;
         var claimed = localStorage.getItem('noah_tutorial_' + currentUserData.studentId) === '1';
@@ -2249,19 +2509,49 @@
         if ((Number(currentUserData.coins) || 0) > 0 || (Number(currentUserData.totalExp) || 0) > 0) return;
         tutorialStep = 0;
         tutorialCalendarBound = false;
+        tutorialPickedNav = false;
+        document.getElementById('tutImgKael').src = opImg(NAVIGATOR_POOL.kael.img);
+        document.getElementById('tutImgLyra').src = opImg(NAVIGATOR_POOL.lyra.img);
         document.getElementById('tutorialOverlay').style.display = 'flex';
         advanceTutorial();
+      }
+
+      function checkTutorialFinalReady() {
+        var btn = document.getElementById('tutorialNextBtn');
+        if (!btn) return;
+        if (tutorialCalendarBound && tutorialPickedNav) {
+          btn.disabled = false;
+          btn.innerText = "🚀 準備就緒，正式開始執勤！";
+        } else if (!tutorialCalendarBound) {
+          btn.disabled = true;
+          btn.innerText = "🔒 請先完成 Step A (綁定日曆提醒)";
+        } else {
+          btn.disabled = true;
+          btn.innerText = "🔒 請完成 Step B (揀選專屬導航員)";
+        }
       }
 
       function bindTutorialCalendar() {
         var tVal = document.getElementById('tutReminderTime').value || "20:00";
         downloadCalendarReminder(tVal);
         tutorialCalendarBound = true;
-        var btn = document.getElementById('tutorialNextBtn');
-        if (btn) {
-          btn.disabled = false;
-          btn.innerText = "✔ 已綁定提醒，完成教學進入遊戲！";
+        checkTutorialFinalReady();
+      }
+
+      function pickTutorialNavigator(navId) {
+        playSFX('click');
+        currentNavigatorId = navId;
+        tutorialPickedNav = true;
+        if (currentUserData && currentUserData.studentId) {
+          localStorage.setItem('noah_navigator_' + currentUserData.studentId, navId);
         }
+        updateLobbyAdjutant();
+        document.getElementById('tutPickKaelBtn').style.background = (navId === 'kael') ? 'rgba(0,229,255,0.25)' : 'rgba(255,255,255,0.05)';
+        document.getElementById('tutPickLyraBtn').style.background = (navId === 'lyra') ? 'rgba(241,196,15,0.25)' : 'rgba(255,255,255,0.05)';
+        var nav = NAVIGATOR_POOL[navId];
+        playSpecificVoiceTTS(nav.quotes[0].en, nav.voiceId, nav.gender, false);
+        showSysMsg("🎙️ 已選擇【" + nav.nameZh + "】作為你嘅主控台導航員！", false);
+        checkTutorialFinalReady();
       }
 
       function advanceTutorial() {
@@ -2269,32 +2559,83 @@
         var body = document.getElementById('tutorialBody');
         var btn = document.getElementById('tutorialNextBtn');
         var calBox = document.getElementById('tutorialCalendarBox');
+        var speakerTag = document.getElementById('tutorialSpeakerTag');
+        var kaelBox = document.getElementById('tutAvatarKael');
+        var lyraBox = document.getElementById('tutAvatarLyra');
+
         var steps = [
-          ["1/7 登入與心情", "學號同 PIN 登入。心情決定題量：壓力爆煲 8 題、攰到抽筋 10 題、正正常常 12 題、好有鬥志 15 題。題量愈長，Boss 愈後出現，血量亦愈高。"],
-          ["2/7 戰術姿態與破盾", "答題前可開啟【⚡強襲】博取雙倍傷害與賞金，或用【💣拆彈】剪斷錯誤選項賺金幣！頭 5 秒黃金窗口答啱更會觸發【⚡極限破盾】！"],
-          ["3/7 行動補給站與獎品", "信用點除咗可以招募幹員，仲可以喺【🏪 行動補給站】兌換中心實體盲盒、飲品零食同免小測特權卡！"],
-          ["4/7 新手啟動資金", "而家發放 1,000 信用點（只此一次）。十連招募需要 900 點！"],
-          ["5/7 招募與造型衣櫥", "去招募終端按十連。喺幹員檔案入面仲可以隨時切換 P/Q/R 特典造型（Skin）！"],
-          ["6/7 勢力共鳴與協同處決", "編隊湊齊 2 或 3 名同陣營幹員可啟動【勢力共鳴】。答啱對應題型時，幹員更會自動發動【⚡協同處決】！"],
-          ["7/7 綁定每日戰術提醒（必選）", "為咗幫你保住每日連登補給箱（最高 300 信用點），請先點擊下方按鈕將每日練習提醒加入手機日曆！（日後如需取消，只需在手機日曆刪除此行程即可）"]
+          {
+            speaker: "lyra",
+            screen: "dashboardScreen",
+            title: "🧭 1/6 歡迎登上 N.O.A.H. 指揮艦！",
+            voiceEn: "Welcome aboard N.O.A.H., Captain! I am Chief Navigator Lyra.",
+            html: "• <strong>♀ 萊拉：</strong>「神經連結接通！歡迎你，新任艦長！我係首席領航員萊拉。」<br>• <strong>階級與心情：</strong>上方顯示你嘅 13 階稱號經驗條；每次登入揀選嘅心情會決定作戰題量（8 至 15 題）。<br>• <strong>信用點用途：</strong>答題賺取嘅信用點，除咗用嚟招募幹員，仲可以去【🏪行動補給站】換領實體獎品！"
+          },
+          {
+            speaker: "kael",
+            screen: "dashboardScreen",
+            title: "⚔️ 2/6 四大戰區與專屬 Boss 破防機制",
+            voiceEn: "I am Tactical Officer Kael. Each sector Boss requires a unique combat protocol.",
+            html: "• <strong>♂ 凱爾：</strong>「我係戰術通信官凱爾。大廳中央係四大常規戰區，每個戰區最後都有守門 Boss：」<br>• <strong>📡 偵察任務：</strong>基礎生字 ➔ Boss 戰啟動【神盾光劍・一閃格擋】<br>• <strong>⚡ 駭客潛行：</strong>進階生字 ➔ Boss 戰啟動【神經迴路・駭客接線】<br>• <strong>🏛️ 戰術學院 / 💾 記憶終端：</strong>文法【四色符文矩陣】與聆聽【全息準星狙擊】！"
+          },
+          {
+            speaker: "lyra",
+            screen: "gachaScreen",
+            title: "🎁 3/6 發放新手啟動資金 (1,000 信用點)",
+            voiceEn: "Headquarters has approved 1,000 Credits for your first recruitment!",
+            html: "• <strong>♀ 萊拉：</strong>「工欲善其事，必先利其器！總部已批出一次性 <strong>1,000 信用點</strong> 啟動資金！」<br>• 我哋已經幫你切換到【🎲 幹員招募終端】。<br>• 完成引導後，記住即刻用 900 點進行首次<strong>⚡十連招募</strong>擴充小隊！"
+          },
+          {
+            speaker: "kael",
+            screen: "briefingRoom",
+            title: "🛡️ 4/6 作戰會議室、勢力共鳴與換膚",
+            voiceEn: "In the Briefing Room, deploy operators of the same faction to activate Resonance.",
+            html: "• <strong>♂ 凱爾：</strong>「嚟到【🛡️ 作戰會議室】，撳<strong>小隊編成</strong>即可配置 5 人出戰陣容。」<br>• <strong>勢力共鳴：</strong>湊齊 2 或 3 名同勢力幹員（復興/司書/傭兵/重工）可啟動全隊光環。<br>• <strong>檢視檔案與換衫：</strong>長按任何幹員卡或直接篤卡片左上角 <strong>[🔍]</strong>，即可查看技能同切換造型（Skin）！"
+          },
+          {
+            speaker: "lyra",
+            screen: "briefingRoom",
+            title: "⚡ 5/6 下一題戰術姿態 (強襲 / 穩守 / 駭入)",
+            voiceEn: "Deploy your tactical stance before each question to maximize rewards or SP!",
+            html: "• <strong>♀ 萊拉：</strong>「喺每題答完去下一題之前，艦長仲可以預先部署<strong>下一題戰術姿態</strong>：」<br>• <strong>💥 強襲：</strong>答啱雙倍削血＋12信用點（答錯扣 2 心）<br>• <strong>🛡️ 穩守：</strong>本題答錯免扣血（每場限用 2 次）<br>• <strong>⚡ 駭入：</strong>下一題作答限時減半，但答啱獲 <strong>雙倍充能 (+2 SP)</strong>！"
+          },
+          {
+            speaker: "both",
+            screen: "dashboardScreen",
+            title: "⏰ 6/6 綁定每日提醒 & 揀選你嘅導航員",
+            voiceEn: "Bind your daily reminder and choose your primary navigator to begin!",
+            html: "• <strong>♂ 凱爾 & ♀ 萊拉：</strong>「最後一步！請完成下方兩項設定：」<br>  1. 綁定每晚練習提醒（保住每日最高 300 點連登補給箱）<br>  2. 揀選由邊一位導航員優先陪你執勤（之後隨時可喺大廳右上角撳 <strong>[⇄ 切換導航員]</strong>）！"
+          }
         ];
+
         if (tutorialStep >= steps.length) {
-          if (!tutorialCalendarBound) return showSysMsg("⚠️ 請先點擊黃色按鈕綁定手機日曆提醒！", true);
+          if (!tutorialCalendarBound || !tutorialPickedNav) return showSysMsg("⚠️ 請先完成 Step A (綁定提醒) 及 Step B (揀選導航員)！", true);
           finishTutorial();
           return;
         }
-        title.innerText = steps[tutorialStep][0];
-        body.innerText = steps[tutorialStep][1];
+
+        var cur = steps[tutorialStep];
+        navTo(cur.screen);
+        title.innerText = cur.title;
+        body.innerHTML = cur.html;
+
+        kaelBox.classList.toggle('speaking', cur.speaker === 'kael' || cur.speaker === 'both');
+        lyraBox.classList.toggle('speaking', cur.speaker === 'lyra' || cur.speaker === 'both');
+        speakerTag.innerText = cur.speaker === 'kael' ? "♂ 戰術通信官 凱爾 (Kael)" : (cur.speaker === 'lyra' ? "♀ 首席領航員 萊拉 (Lyra)" : "🎙️ 雙導航員 聯合簡報");
+
+        var activeNav = (cur.speaker === 'kael') ? NAVIGATOR_POOL.kael : NAVIGATOR_POOL.lyra;
+        playSpecificVoiceTTS(cur.voiceEn, activeNav.voiceId, activeNav.gender, false);
+
         if (calBox) calBox.style.display = (tutorialStep === steps.length - 1) ? "block" : "none";
 
-        if (tutorialStep === 3) {
-          btn.innerText = "🎁 領取 1000 信用點並繼續";
+        if (tutorialStep === 2) {
+          btn.innerText = "💰 領取 1,000 信用點並繼續 ➡️";
+          btn.disabled = false;
           claimTutorialReward(true);
         } else if (tutorialStep === steps.length - 1) {
-          btn.innerText = "🔒 請先點擊上方綁定日曆提醒";
-          btn.disabled = true;
+          checkTutorialFinalReady();
         } else {
-          btn.innerText = "下一步 ➡️";
+          btn.innerText = "下一步 (" + (tutorialStep + 1) + "/" + steps.length + ") ➡️";
           btn.disabled = false;
         }
         tutorialStep++;
@@ -2303,7 +2644,7 @@
       function finishTutorial() {
         localStorage.setItem('noah_tutorial_' + currentUserData.studentId, '1');
         document.getElementById('tutorialOverlay').style.display = 'none';
-        showSysMsg("🎉 教學完成！快去招募終端進行首次十連抽吧！", false);
+        showSysMsg("🎉 歡迎就任！快去招募終端進行首次十連抽吧！", false);
       }
 
       function claimTutorialReward(keepOpen) {
@@ -2311,7 +2652,7 @@
           method: 'POST', headers: { 'Content-Type': 'text/plain' },
           body: JSON.stringify({ action: 'claimTutorialReward', studentId: currentUserData.studentId })
         }).then(function(r){ return r.json(); }).then(function(res) {
-          if (res && res.success) { currentUserData.coins = res.coins; updateUI(); showSysMsg("💰 已存入 1000 信用點！", false); }
+          if (res && res.success) { currentUserData.coins = res.coins; updateUI(); showSysMsg("💰 已存入 1,000 信用點！", false); }
         }).catch(function() {});
       }
 
@@ -2330,7 +2671,6 @@
         }).catch(function(){});
       }
 
-      // 📅 下載手機原生 .ics 重複日曆通知（支援 iOS / Android）
       function downloadCalendarReminder(customTime) {
         playSFX('click');
         var timeStr = customTime || (document.getElementById('reminderTimeInput') ? document.getElementById('reminderTimeInput').value : "20:00") || "20:00";
@@ -2354,7 +2694,7 @@
           "DTEND:" + dtEnd,
           "RRULE:FREQ=DAILY",
           "SUMMARY:⚓ N.O.A.H. 每日戰術同步訓練 (領取連登補給箱)",
-          "DESCRIPTION:隊長，今日嘅作戰補給箱（+80~300信用點）正等待你領取！點擊連結即刻進入： " + appUrl,
+          "DESCRIPTION:艦長，今日嘅作戰補給箱（+80~300信用點）正等待你領取！點擊連結即刻進入： " + appUrl,
           "URL:" + appUrl,
           "BEGIN:VALARM",
           "TRIGGER:-PT0M",
@@ -2375,7 +2715,7 @@
       }
 
       // ==========================================
-      // 🛡️ 5. 小隊編成 Modal（支援陣營篩選 + 同隊換位 Swap）
+      // 🛡️ 5. 小隊編成 Modal（支援長按 + 左上角 🔍 掣 + 同隊換位）
       // ==========================================
       var currentEditingPresetTab = 1;
       var selectedSlotIndex = 0;
@@ -2423,7 +2763,6 @@
         playSFX('click');
         playerPresets.active = currentEditingPresetTab;
         buildActiveBattleSquad();
-        updateLobbyAdjutant();
         renderBriefingRoomSquad();
         renderFormationUI();
         showSysMsg("⚡ 已將 [小隊 " + currentEditingPresetTab + "] 設為出戰陣容！", false);
@@ -2453,12 +2792,25 @@
           var op = cid ? resolveOperator(cid) : { cardId: "", nameZh: "空位", imageUrl: "" };
           var slotDiv = document.createElement('div');
           slotDiv.className = "formation-slot-item" + (idx === 0 ? " is-leader" : "") + (idx === selectedSlotIndex ? " selected" : "");
-          slotDiv.innerHTML = '<div class="formation-slot-label">' + (idx === 0 ? "👑LEADER" : "SLOT " + (idx+1)) + '</div><img src="' + opImg(op.imageUrl) + '" onerror="this.onerror=null;this.src=OP_PLACEHOLDER" style="width:100%; height:100%; object-fit:contain; object-position:center bottom;">';
-          slotDiv.onclick = function() {
+          slotDiv.innerHTML = '<div class="formation-slot-label">' + (idx === 0 ? "👑LEADER" : "SLOT " + (idx+1)) + '</div><img src="' + opImg(op.imageUrl) + '" onerror="this.onerror=null;this.src=OP_PLACEHOLDER" style="width:100%; height:100%; object-fit:contain; object-position:center bottom; pointer-events:none;">';
+
+          if (cid) {
+            var zBtn = document.createElement('button');
+            zBtn.type = "button";
+            zBtn.className = "card-info-zoom-btn";
+            zBtn.style.top = "auto"; zBtn.style.bottom = "2px"; zBtn.style.right = "2px"; zBtn.style.left = "auto";
+            zBtn.innerText = "🔍";
+            zBtn.onclick = function(ev) { ev.stopPropagation(); openOperatorDetailModal(op); };
+            slotDiv.appendChild(zBtn);
+          }
+
+          bindLongPress(slotDiv, function() {
+            if (cid) openOperatorDetailModal(op);
+          }, function() {
             playSFX('click');
             selectedSlotIndex = idx;
             renderFormationUI();
-          };
+          });
           slotsGrid.appendChild(slotDiv);
         });
 
@@ -2486,7 +2838,14 @@
           cardDiv.className = "inv-item-card" + (isAlreadyEquipped ? " equipped" : "");
           var eqBadge = isAlreadyEquipped ? '<div class="inv-equipped-tag">' + (existingIdx === 0 ? "隊長" : "#" + (existingIdx + 1)) + '</div>' : '';
 
-          cardDiv.innerHTML = eqBadge + '<div style="font-size:8px; font-weight:bold; color:var(--accent-gold); text-align:left;">' + op.rarity + '</div><div style="width:100%; aspect-ratio:2/3; margin:2px 0; overflow:hidden;"><img src="' + opImg(op.imageUrl) + '" onerror="this.onerror=null;this.src=OP_PLACEHOLDER" style="width:100%; height:100%; object-fit:contain;"></div><div style="font-size:9px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">' + op.nameZh.replace(/【.*?】/, '') + '</div>';
+          cardDiv.innerHTML = eqBadge + '<div style="font-size:8px; font-weight:bold; color:var(--accent-gold); text-align:right; padding-right:2px;">' + op.rarity + '</div><div style="width:100%; aspect-ratio:2/3; margin:2px 0; overflow:hidden;"><img src="' + opImg(op.imageUrl) + '" onerror="this.onerror=null;this.src=OP_PLACEHOLDER" style="width:100%; height:100%; object-fit:contain; pointer-events:none;"></div><div style="font-size:9px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">' + op.nameZh.replace(/【.*?】/, '') + '</div>';
+
+          var zoomBtn = document.createElement('button');
+          zoomBtn.type = "button";
+          zoomBtn.className = "card-info-zoom-btn";
+          zoomBtn.innerText = "🔍";
+          zoomBtn.onclick = function(ev) { ev.stopPropagation(); openOperatorDetailModal(op); };
+          cardDiv.appendChild(zoomBtn);
 
           bindLongPress(cardDiv, function() { openOperatorDetailModal(op); }, function() {
             if (!op.cardId) return;
@@ -2500,7 +2859,6 @@
             }
             playerPresets[currentPresetKey] = currentPresetCardIds;
             buildActiveBattleSquad();
-            updateLobbyAdjutant();
             renderBriefingRoomSquad();
             renderFormationUI();
           });
@@ -2511,7 +2869,6 @@
       function saveAndCloseSquadFormation() {
         playSFX('click');
         buildActiveBattleSquad();
-        updateLobbyAdjutant();
         renderBriefingRoomSquad();
         if (currentUserData && currentUserData.studentId) {
           localStorage.setItem('noah_squad_presets_' + currentUserData.studentId, JSON.stringify(playerPresets));
@@ -2532,8 +2889,40 @@
       }
 
       // ==========================================
-      // ⚔️ 6. 戰術姿態 (變革1/5)、協同處決 (變革6)、ATB破盾 (變革3) & 技能
+      // ⚔️ 6. 下一題戰術姿態選擇器、兩段式 ATB 計時與技能
       // ==========================================
+      function renderStanceSelectorHTML() {
+        var stances = [
+          { key: "normal", title: "⚖️ 常規作戰 (NORMAL)", desc: "標準限時與傷害，無額外風險" },
+          { key: "overcharge", title: "💥 強襲 (OVERCHARGE)", desc: "答啱雙倍傷＋12幣｜答錯扣 2 心" },
+          { key: "guard", title: "🛡️ 穩守 (GUARD 剩:" + guardUsesLeft + ")", desc: "答錯免扣血｜答啱不加 Combo" },
+          { key: "hack", title: "⚡ 駭入 (HACK)", desc: "作答限時減半｜答啱雙倍充能 (+2 SP)" }
+        ];
+        return '<div class="next-stance-box">' +
+          '<div style="font-size:11px; font-weight:900; color:var(--noah-cyan); font-family:monospace;">🎯 部署下一題戰術姿態 (SELECT STANCE FOR NEXT QUESTION)：</div>' +
+          '<div class="next-stance-grid">' +
+          stances.map(function(st) {
+            var isSel = (currentStance === st.key);
+            return '<div class="next-stance-card ' + (isSel ? 'selected' : '') + '" data-stance-key="' + st.key + '" onclick="selectNextQuestionStance(\'' + st.key + '\')">' +
+              '<span class="st-title">' + st.title + '</span>' +
+              '<span class="st-desc">' + st.desc + '</span>' +
+            '</div>';
+          }).join("") +
+          '</div></div>';
+      }
+
+      function selectNextQuestionStance(mode) {
+        playSFX('click');
+        if (mode === 'guard' && guardUsesLeft <= 0) {
+          return showSysMsg("⚠️ 本場穩守姿態次數已用完！", true);
+        }
+        currentStance = mode;
+        document.querySelectorAll('.next-stance-card').forEach(function(card) {
+          card.classList.toggle('selected', card.getAttribute('data-stance-key') === mode);
+        });
+        updateActiveBuffsUI();
+      }
+
       function updateActiveBuffsUI() {
         var bar = document.getElementById('activeBuffsBar');
         if (!bar) return;
@@ -2544,25 +2933,22 @@
         if (skillState.paradox) pills.push('<span class="buff-pill red">💥 因果破甲 (+2傷)</span>');
         if (skillState.bypass) pills.push('<span class="buff-pill gold">🚀 破譯 EXP+25%</span>');
         if (skillState.rogueMult > 0) pills.push('<span class="buff-pill gold">⚔️ 遺物加成 +' + Math.round(skillState.rogueMult * 100) + '%</span>');
-        if (currentStance === 'overcharge') pills.push('<span class="buff-pill red">⚡ 強襲姿態 (雙倍傷/賞金)</span>');
+        if (currentStance === 'overcharge') pills.push('<span class="buff-pill red">💥 強襲姿態 (雙倍傷/賞金)</span>');
         if (currentStance === 'guard') pills.push('<span class="buff-pill">🛡️ 穩守姿態 (免扣血)</span>');
-        if (currentStance === 'wirecut') pills.push('<span class="buff-pill gold">💣 拆彈姿態 (點擊剪除錯項)</span>');
+        if (currentStance === 'hack') pills.push('<span class="buff-pill gold">⚡ 駭入姿態 (限時減半/答啱+2 SP)</span>');
+        if (currentStance === 'wirecut') pills.push('<span class="buff-pill gold">💣 拆彈模式 (點擊剪除錯項)</span>');
         bar.innerHTML = pills.join("");
       }
 
       function toggleTacticalStance(mode) {
         if (isQuestionLocked) return;
         playSFX('click');
-        if (mode === 'guard' && guardUsesLeft <= 0 && currentStance !== 'guard') {
-          return showSysMsg("⚠️ 本場任務穩守姿態次數已用完！", true);
-        }
         if (mode === 'wirecut' && document.querySelectorAll('.option-btn').length < 3) {
-          return showSysMsg("⚠️ 拆彈模式僅適用於多選題 (MCQ)！", true);
+          return showSysMsg("⚠️ 拆彈模式僅適用於標準選擇題 (MCQ)！", true);
         }
         currentStance = (currentStance === mode) ? "normal" : mode;
-        document.getElementById('stanceBtnOvercharge').classList.toggle('active-overcharge', currentStance === 'overcharge');
-        document.getElementById('stanceBtnGuard').classList.toggle('active-guard', currentStance === 'guard');
-        document.getElementById('stanceBtnWirecut').classList.toggle('active-wirecut', currentStance === 'wirecut');
+        var wBtn = document.getElementById('stanceBtnWirecut');
+        if (wBtn) wBtn.classList.toggle('active-wirecut', currentStance === 'wirecut');
         document.querySelectorAll('.option-btn').forEach(function(b) {
           b.classList.toggle('wirecut-mode', currentStance === 'wirecut');
         });
@@ -2586,47 +2972,84 @@
         spawnFloatingText("📡 弱點透視完成", true);
       }
 
-      // 變革 3：敵方 ATB 蓄力與 5 秒黃金破盾 Counter
-      function startEnemyAtbTimer() {
+      // 兩段式 ATB 計時（Stage 1 干擾 ➔ Stage 2 致命攻擊直接判錯扣血；聆聽模式播音後先計時）
+      function startEnemyAtbTimer(forceStartAfterAudio) {
         clearEnemyAtbTimer();
         var fill = document.getElementById('enemyAtbFill');
         var label = document.getElementById('enemyAtbLabel');
         if (!fill || !label) return;
+
+        if (currentEnemyMode === 'listening' && !forceStartAfterAudio && atbWaitingForAudio) {
+          fill.style.width = "100%";
+          fill.style.backgroundColor = "var(--noah-cyan)";
+          label.innerText = "📡 待命狀態：點擊播放錄音後開始計時";
+          label.style.color = "var(--noah-cyan)";
+          return;
+        }
+
         atbElapsedMs = 0;
+        atbStage = 1;
         isCounterWindow = true;
         fill.style.width = "100%";
         fill.style.backgroundColor = "var(--accent-gold)";
-        label.innerText = "⚡ COUNTER WINDOW (極限破盾)";
-        label.style.color = "var(--accent-gold)";
 
         var mood = document.getElementById('inputMood') ? document.getElementById('inputMood').value : "正正常常";
-        var counterLimit = (mood === "壓力爆煲" || mood === "攰到抽筋") ? 8000 : 5500;
-        var attackLimit = (mood === "壓力爆煲" || mood === "攰到抽筋") ? 18000 : 13000;
+        var baseAttackLimit = (mood === "壓力爆煲" || mood === "攰到抽筋") ? 18000 : 13000;
+        var baseCounterLimit = (mood === "壓力爆煲" || mood === "攰到抽筋") ? 7500 : 5000;
+
+        var timeMult = (currentStance === 'hack') ? 0.5 : 1.0;
+        var attackLimit = Math.round(baseAttackLimit * timeMult);
+        var counterLimit = Math.round(baseCounterLimit * timeMult);
+
+        label.innerText = (currentStance === 'hack') ? "⚡ HACK MODE (限時減半・雙倍SP)" : "⚡ COUNTER WINDOW (極限破盾)";
+        label.style.color = "var(--accent-gold)";
 
         atbInterval = setInterval(function() {
           if (isQuestionLocked || skillState.timerPause > Date.now()) return;
           atbElapsedMs += 250;
-          var pct = Math.max(0, 100 - (atbElapsedMs / attackLimit) * 100);
-          fill.style.width = pct + "%";
 
-          if (atbElapsedMs <= counterLimit) {
-            isCounterWindow = true;
-          } else if (isCounterWindow) {
-            isCounterWindow = false;
-            fill.style.backgroundColor = "var(--noah-cyan)";
-            label.innerText = "⏳ ENEMY CHARGING...";
-            label.style.color = "var(--noah-cyan)";
-          }
+          if (atbStage === 1) {
+            var pct1 = Math.max(0, 100 - (atbElapsedMs / attackLimit) * 100);
+            fill.style.width = pct1 + "%";
 
-          if (atbElapsedMs >= attackLimit) {
-            clearInterval(atbInterval);
-            label.innerText = "⚠️ SIGNAL JAMMED (點擊迷霧選項解鎖)";
-            label.style.color = "var(--accent-red)";
-            fill.style.backgroundColor = "var(--accent-red)";
-            var opts = document.querySelectorAll('.option-btn:not(.snow-jammed)');
-            if (opts.length > 1) {
-              var jamTarget = opts[Math.floor(Math.random() * opts.length)];
-              jamTarget.classList.add('snow-jammed');
+            if (atbElapsedMs <= counterLimit) {
+              isCounterWindow = true;
+            } else if (isCounterWindow) {
+              isCounterWindow = false;
+              fill.style.backgroundColor = "var(--noah-cyan)";
+              label.innerText = "⏳ 敵方干擾蓄力中...";
+              label.style.color = "var(--noah-cyan)";
+            }
+
+            if (atbElapsedMs >= attackLimit) {
+              atbStage = 2;
+              atbElapsedMs = 0;
+              playSFX('boss_alarm');
+              fill.style.width = "100%";
+              fill.style.backgroundColor = "var(--accent-red)";
+              label.innerText = "🚨 警告：敵方終極攻擊倒數（超時直接判錯扣血）！";
+              label.style.color = "var(--accent-red)";
+              var opts = document.querySelectorAll('.option-btn:not(.snow-jammed)');
+              if (opts.length > 1) {
+                var jamTarget = opts[Math.floor(Math.random() * opts.length)];
+                jamTarget.classList.add('snow-jammed');
+              }
+            }
+          } else if (atbStage === 2) {
+            var pct2 = Math.max(0, 100 - (atbElapsedMs / attackLimit) * 100);
+            fill.style.width = pct2 + "%";
+
+            if (atbElapsedMs >= attackLimit) {
+              clearEnemyAtbTimer();
+              showSysMsg("💥 作答超時！敵方發動直接攻擊！", true);
+              wrongAttempts = 1;
+              playerCurrentHp = Math.max(0, playerCurrentHp - 1);
+              updatePlayerHpUI();
+              if (playerCurrentHp <= 0) {
+                triggerCaptainRetreat(missionQueue[currentIdx]);
+              } else {
+                checkAnswer("__TIMEOUT_FAIL__");
+              }
             }
           }
         }, 250);
@@ -2634,9 +3057,9 @@
 
       function clearEnemyAtbTimer() {
         if (atbInterval) { clearInterval(atbInterval); atbInterval = null; }
+        if (bossMechanicInterval) { clearInterval(bossMechanicInterval); bossMechanicInterval = null; }
       }
 
-      // 變革 10：觸發與副本學科嚴格對應的幹員即時對白
       function triggerSquadBanter(eventType) {
         var bubble = document.getElementById('squadBanterBubble');
         if (!bubble || !battleSquad.length) return;
@@ -2672,7 +3095,6 @@
         });
       }
 
-      // 變革 6：防戰力膨脹的「⚡ 協同處決 (Tactical Execution)」與定向 1 SP 充能
       function chargeSquadSP(points, preferredOpIdx) {
         if (!battleSquad.length) return;
         var target = null;
@@ -2743,19 +3165,22 @@
         bar.innerText = text;
       }
       function excludeWrong(n) {
-        var wrong = Array.from(document.querySelectorAll(".option-btn, .tfng-stamp-btn")).filter(function(b) {
+        var wrong = Array.from(document.querySelectorAll(".option-btn, .tfng-stamp-btn, .circuit-socket-btn, .sniper-drone-target")).filter(function(b) {
           var val = b.getAttribute("data-opt-val") || b.innerText.trim();
-          return val.trim().toLowerCase() !== String(targetCurrentAnswer || "").trim().toLowerCase() && b.style.pointerEvents !== "none";
+          var low = val.trim().toLowerCase();
+          return low !== String(targetCurrentAnswer || "").trim().toLowerCase() &&
+                 low !== String(alternateValidAnswer || "").trim().toLowerCase() &&
+                 b.style.pointerEvents !== "none";
         });
         wrong.slice(0, n).forEach(function(b) {
           b.style.opacity = "0.2"; b.style.pointerEvents = "none"; b.style.textDecoration = "line-through";
         });
       }
       function skillAllowed(name) {
-        var hasOptions = document.querySelectorAll(".option-btn").length > 0;
+        var hasOptions = document.querySelectorAll(".option-btn, .circuit-socket-btn, .sniper-drone-target").length > 0 || isBossPhase;
         var hasInput = !!document.getElementById("userIn");
-        var listening = currentMissionType === "listening";
-        var grammar = currentMissionType === "grammar";
+        var listening = currentEnemyMode === "listening";
+        var grammar = currentEnemyMode === "grammar";
         var bug = currentBadge === "BUG_HUNTER" || !!document.querySelector(".bug-chip");
         var unscramble = String(currentBadge).indexOf("UNSCRAMBLE") >= 0;
         if (name === "超頻解析" || name === "詞形固化") return hasOptions;
@@ -2796,6 +3221,7 @@
         else if (name === "機率校準") { skillState.calibrate = 3; spawnFloatingText("🛡️ 之後 3 題不扣心", true); }
         else if (name === "光學誘餌") { skillState.decoy = true; spawnFloatingText("🎭 光學誘餌就緒", true); }
         else if (name === "戰術撤回") {
+          clearEnemyAtbTimer();
           targetCurrentAnswer = String(q.Vocabulary || q.Answer || targetCurrentAnswer).trim();
           var meaningHint = q.Meaning || q.Translation || q.Explanation || "請輸入目標核心字詞";
           document.getElementById("qText").innerText = "🔄【戰術撤回・基礎重組】\n提示：" + meaningHint;
@@ -2884,7 +3310,7 @@
       }
 
       // ==========================================
-      // 🚀 7. 圖片靜默預載器（根治 Next 下一題卡頓）& 任務啟動
+      // 🚀 7. 任務簡報 Objectives（清晰分行）與任務啟動
       // ==========================================
       function preloadUpcomingQuestionAssets() {
         for (var offset = 1; offset <= 2; offset++) {
@@ -2911,22 +3337,61 @@
       }
 
       function showBriefing(type) {
-        playSFX('click'); currentMissionType = type; 
-        let bTitle = "", bDesc = "";
-        if (type === 'vocab_basic') { bTitle = "🟢 偵察任務 [BASIC RECON]"; bDesc = "• 詞義辨識、語音拼寫與詞尾分析\n• 可使用【⚡強襲】或【💣拆彈】姿態加速推進"; } 
-        else if (type === 'vocab_adv') { bTitle = "🔴 駭客潛行 [ADVANCED HACK]"; bDesc = "• 語境填充、字根提取與固定搭配\n• 結算享 1.25x 經驗與信用點加成"; } 
-        else if (type === 'grammar') { bTitle = "🏛️ 戰術學院 [GRAMMAR BLUEPRINT]"; bDesc = "• 代碼除錯 (Bug Hunter)、語序重構與時態修正"; } 
-        else if (type === 'listening') { bTitle = "💾 記憶終端 [AUDIO LOGS]"; bDesc = "• 截聽特務加密對話、TFNG 戰術印章核實與分句重播"; }
-        else if (type === 'time_rush') { bTitle = "⏱️ 極限衝刺 [90s TIME RUSH]"; bDesc = "• 限時 90 秒全題庫無差別隨機抽題（包含已掌握與新題目）\n• 答啱獎勵 +2 秒，答錯扣減 -3 秒，測試極限反應！"; }
-        else if (type === 'mixed_chaos') { bTitle = "🌀 混沌裂縫 [CHAOS RIFT]"; bDesc = "• 同時從【生字 + 文法 + 聆聽】三大題庫混合抽題\n• 模擬真實綜合實戰，結算享 1.35x 豐厚獎勵！"; }
+        playSFX('click'); currentMissionType = type; currentStance = "normal"; guardUsesLeft = 2;
+        var bTitle = "", lines = [];
+        if (type === 'vocab_basic') {
+          bTitle = "🟢 偵察任務 [BASIC RECON]";
+          lines = [
+            "📌 <strong>詞義辨識 (Semantic Selection)：</strong>根據核心生字揀選正確中文解釋",
+            "📌 <strong>語音拼寫 (Audio & Spelling)：</strong>聆聽讀音或根據中文提示拼寫單字",
+            "📌 <strong>詞尾分析 (Suffix Analysis)：</strong>分析衍生詞字尾，判斷正確詞性 (Noun/Verb/Adj/Adv)",
+            "⚔️ <strong>Boss 戰專武【神盾光劍・一閃格擋】：</strong>錯項舉盾格擋回賞金，正項拔刀一閃斬擊！"
+          ];
+        } else if (type === 'vocab_adv') {
+          bTitle = "🔴 駭客潛行 [ADVANCED HACK]";
+          lines = [
+            "📌 <strong>語境填充 (Contextual Filling)：</strong>閱讀英文例句，填入最貼切嘅目標生字",
+            "📌 <strong>字根提取 (Root Extraction)：</strong>辨識高階詞彙嘅核心字根意義",
+            "📌 <strong>固定搭配 (Collocation Tracking)：</strong>根據目標詞義完成常考片語搭配",
+            "⚡ <strong>Boss 戰專武【神經迴路・駭客接線】：</strong>旋轉導通電路節點並注入正確密鑰短路 Boss！"
+          ];
+        } else if (type === 'grammar') {
+          bTitle = "🏛️ 戰術學院 [GRAMMAR BLUEPRINT]";
+          lines = [
+            "📌 <strong>代碼除錯 (Bug Hunter)：</strong>直接點擊句子中語法錯誤嘅單字碎片",
+            "📌 <strong>底線修正 (Error Correction)：</strong>針對紅線標記嘅錯誤字詞進行時態／詞形修正",
+            "📌 <strong>語序重構 (Unscramble)：</strong>按正確英文語法結構排列單字晶片",
+            "🔮 <strong>Boss 戰專武【四色符文・策略連攜矩陣】：</strong>消除同色陣營符文觸發排錯與充能！"
+          ];
+        } else if (type === 'listening') {
+          bTitle = "💾 記憶終端 [AUDIO LOGS]";
+          lines = [
+            "📌 <strong>特務通訊截聽 (Audio Logs)：</strong>支援常速/慢速及單句重播（成功播音後先開始計時）",
+            "📌 <strong>真偽核實 (TFNG Stamps)：</strong>判斷情報屬於 True / False / Not Given",
+            "🎯 <strong>Boss 戰專武【全息戰機・準星鎖定狙擊】：</strong>於移動浮游砲中鎖定唯一真相開火！"
+          ];
+        } else if (type === 'time_rush') {
+          bTitle = "⏱️ 極限衝刺 [90s TIME RUSH]";
+          lines = [
+            "📌 <strong>全題庫隨機抽選：</strong>不限進度，從所有新舊題目中無差別抽選",
+            "📌 <strong>90 秒極限倒數：</strong>答啱獎勵 +2 秒，答錯扣減 -3 秒，測試瞬間反應！"
+          ];
+        } else if (type === 'mixed_chaos') {
+          bTitle = "🌀 混沌裂縫 [CHAOS RIFT]";
+          lines = [
+            "📌 <strong>三合一綜合實戰：</strong>同時混合【生字 + 文法 + 聆聽】三大題庫",
+            "📌 <strong>高倍結算獎勵：</strong>完成挑戰可獲額外綜合加成！"
+          ];
+        }
         document.getElementById('briefingTitle').innerText = bTitle;
-        document.getElementById('briefingDesc').innerText = bDesc;
+        var listHtml = lines.map(function(l) {
+          return '<div style="padding:5px 0; border-bottom:1px dashed rgba(255,255,255,0.1);">' + l + '</div>';
+        }).join("");
+        document.getElementById('briefingDesc').innerHTML = listHtml + renderStanceSelectorHTML();
         navTo('preMissionScreen'); 
       }
 
-      function startBountyOperation() {
-        showBriefing('mixed_chaos');
-      }
+      function startBountyOperation() { showBriefing('mixed_chaos'); }
 
       function executeMission() {
         playSFX('click');
@@ -2964,7 +3429,7 @@
               missionType: mType,
               pool: poolName,
               count: count,
-              ignoreSRS: isTimeRushMode // 極限衝刺強制忽略 SRS，抽晒全部新舊題目
+              ignoreSRS: isTimeRushMode
             })
           }).then(function(r){ return r.json(); });
         }
@@ -2993,12 +3458,10 @@
         currentCombo = 0; wrongQuestionsList = []; activeShieldCount = 0;
         missionAborted = false; scribeForgiveUsed = false; guildBossCritUsed = false; scribeMarked = false;
         abyssalReserveQuestion = null; isPlayingAbyssalBonus = false; bossFinisherTriggered = false;
-        guardUsesLeft = 2; currentStance = "normal";
-        document.getElementById('guardLeftCount').innerText = guardUsesLeft;
+        guardUsesLeft = 2;
         skillState = { calibrate: 0, decoy: false, bypass: false, harvest: false, freeze: 0, paradox: false, timerPause: 0, started: 0, bossHeavy: 0, jammed: -1, bonusCoins: 0, rogueMult: 0, abyssMult: 1 };
         updateComboUI();
 
-        // 1. 先建構出戰小隊，再套用 URC 開局 SP 與護盾（修復覆蓋問題）
         buildActiveBattleSquad();
         var resonance = resonanceState();
         if (resonance.urc >= 2) {
@@ -3042,7 +3505,7 @@
             if (timeRushRemaining <= 0) {
               clearInterval(timerInterval);
               showSysMsg("⏱️ 90 秒極限衝刺時間到！正在結算戰果...", false);
-              finishMission();
+              finishMission(true);
             }
           }, 1000);
         } else {
@@ -3070,7 +3533,7 @@
         if (confirm("🏳️ 確定要提前撤退嗎？\n（目前已完成的 " + missionResults.length + " 題將會正常結算經驗與信用點）")) {
           missionAborted = true;
           clearEnemyAtbTimer();
-          finishMission();
+          finishMission(true);
         }
       }
 
@@ -3125,7 +3588,7 @@
             enemySpriteEl.classList.add('boss-slam-active');
             setTimeout(function() { hazardBanner.style.display = "none"; }, 1300);
             triggerSquadBanter('boss');
-            preloadAbyssalQuestion(); // 進入 Boss 戰時於背景預先拉定 1 題極限深潛題
+            preloadAbyssalQuestion();
           }
 
           var bossPad = String(activeLockedBossIndex).padStart(2, '0');
@@ -3140,18 +3603,11 @@
         if (!isBossPhase) return;
         skillState.jammed = -1;
         var roll = Math.random();
-        if (roll < 0.4 && battleSquad.length) {
+        if (roll < 0.38 && battleSquad.length) {
           skillState.jammed = Math.floor(Math.random() * battleSquad.length);
           showSkillHint("⚠️ Boss 干擾：封鎖 " + (battleSquad[skillState.jammed].nameZh || "幹員") + " 本回合技能");
-        } else if (roll < 0.72) {
-          var wrong = Array.from(document.querySelectorAll('.option-btn')).filter(function(b){
-            var v = b.getAttribute("data-opt-val") || b.innerText.trim();
-            return v.toLowerCase() !== String(targetCurrentAnswer||'').toLowerCase();
-          });
-          if (wrong[0]) { wrong[0].style.boxShadow = 'inset 0 0 12px #ff3366'; }
-          showSkillHint("⚠️ Boss 干擾：戰場混入假目標訊號，請小心判別！");
         } else {
-          showSkillHint("⚠️ Boss 蓄力：下次答錯將造成 2 點重擊（剩餘重擊：" + (skillState.bossHeavy || 0) + "）");
+          showSkillHint("🚨 守門領主戰：請使用下方【專屬 Boss 戰破防系統】擊穿裝甲！");
         }
       }
 
@@ -3166,35 +3622,336 @@
       }
 
       // ==========================================
-      // 🎯 8. 題目渲染（支援特務通訊窗、TFNG 印章、拆彈電線）
+      // 🎮 8. 四大副本 Boss 戰專屬互動引擎 (Schemes E, G, B, F)
+      // ==========================================
+      function buildBossOptionsSet(q, effectiveMode) {
+        var dArr = [];
+        var rawDist = String(q.Distractors || q.distractors || "");
+        if (rawDist.trim().length > 0) {
+          if (rawDist.indexOf('|') !== -1) dArr = rawDist.split("|").map(function(s){ return s.trim(); });
+          else if (rawDist.indexOf('/') !== -1) dArr = rawDist.split("/").map(function(s){ return s.trim(); });
+          else dArr = rawDist.split(",").map(function(s){ return s.trim(); });
+        }
+        if (currentBadge === 'TFNG' || currentBadge === 'T/F/NG') {
+          dArr = ["True", "False", "Not Given"];
+        } else if (currentBadge === 'SUFFIX ANALYSIS') {
+          dArr = ["Noun", "Verb", "Adjective", "Adverb"];
+        } else if (dArr.length < 3) {
+          var poolExtras = missionQueue.map(function(m) {
+            if (!m) return "";
+            if (currentBadge === 'SEMANTIC') return String(m.Meaning || "").trim();
+            return String(m.Vocabulary || m.Answer || m.answer || "").trim();
+          }).filter(function(val) {
+            return val && val.toLowerCase() !== targetCurrentAnswer.toLowerCase();
+          });
+          dArr = dArr.concat(poolExtras);
+          if (dArr.length < 3) dArr = dArr.concat(["干扰密鑰 Alpha", "干扰密鑰 Beta", "干扰密鑰 Gamma"]);
+        }
+        var unique = [];
+        dArr.concat([targetCurrentAnswer]).forEach(function(item) {
+          var clean = String(item || "").trim();
+          if (clean && !unique.some(function(u){ return u.toLowerCase() === clean.toLowerCase(); })) {
+            unique.push(clean);
+          }
+        });
+        while (unique.length > 4) {
+          var removeIdx = unique.findIndex(function(u){ return u.toLowerCase() !== targetCurrentAnswer.toLowerCase(); });
+          if (removeIdx !== -1) unique.splice(removeIdx, 1);
+          else break;
+        }
+        return unique.sort(function() { return 0.5 - Math.random(); });
+      }
+
+      function renderSpecializedBossArena(effectiveMode, q, ansArea) {
+        var opts = buildBossOptionsSet(q, effectiveMode);
+        document.getElementById('submitBtn').style.display = "none";
+
+        // 1. 偵察任務 (vocab_basic) Boss ➔ 方案 E【神盾光劍・一閃格擋】
+        if (effectiveMode === 'vocab_basic') {
+          var boxE = document.createElement('div');
+          boxE.className = "boss-mechanic-box";
+          var curIdxE = 0;
+          boxE.innerHTML =
+            '<div class="boss-mech-header"><span>⚔️ BOSS PROTOCOL // 神盾光劍・一閃格擋</span><span id="parryCycleTag">劍氣 1/' + opts.length + '</span></div>' +
+            '<div style="font-size:11px; color:#cbd5e1; margin-bottom:6px; text-align:left;">👉 敵方揮出詞彙劍氣！若為<strong>錯誤干擾項</strong>請按【🛡️舉盾格擋】彈開；若為<strong>正確答案</strong>請按【⚔️破綻一閃】斬擊！</div>' +
+            '<div class="parry-arena">' +
+              '<div id="parryRingEl" class="parry-ring"></div>' +
+              '<div id="parryWordCore" class="parry-word-core">' + opts[0] + '</div>' +
+            '</div>' +
+            '<div class="parry-pedals-row">' +
+              '<button type="button" class="parry-btn-deflect" id="btnBossDeflect">🛡️ 舉盾格擋<br><span style="font-size:10px; font-weight:normal;">(彈開錯項 +3幣)</span></button>' +
+              '<button type="button" class="parry-btn-slash" id="btnBossSlash">⚔️ 破綻一閃<br><span style="font-size:10px; font-weight:normal;">(斬擊正解破防)</span></button>' +
+            '</div>';
+          ansArea.appendChild(boxE);
+
+          var ringScale = 1.45;
+          function updateParryDisplay() {
+            var wCore = document.getElementById('parryWordCore');
+            var cTag = document.getElementById('parryCycleTag');
+            if (wCore && opts.length > 0) wCore.innerText = opts[curIdxE % opts.length];
+            if (cTag) cTag.innerText = "劍氣 " + ((curIdxE % opts.length) + 1) + "/" + opts.length;
+            ringScale = 1.45;
+          }
+
+          bossMechanicInterval = setInterval(function() {
+            if (isQuestionLocked) return;
+            ringScale -= 0.08;
+            var rEl = document.getElementById('parryRingEl');
+            if (rEl) rEl.style.transform = "scale(" + Math.max(0.55, ringScale) + ")";
+            if (ringScale <= 0.55) {
+              curIdxE = (curIdxE + 1) % Math.max(1, opts.length);
+              updateParryDisplay();
+            }
+          }, 220);
+
+          document.getElementById('btnBossDeflect').onclick = function() {
+            if (isQuestionLocked || !opts.length) return;
+            var currentWord = opts[curIdxE % opts.length];
+            var isTarget = (currentWord.toLowerCase() === targetCurrentAnswer.toLowerCase() || (alternateValidAnswer && currentWord.toLowerCase() === alternateValidAnswer.toLowerCase()));
+            if (!isTarget) {
+              playSFX('parry_clang');
+              skillState.bonusCoins = (skillState.bonusCoins || 0) + 3;
+              spawnFloatingText("🛡️ 完美格擋錯項！(+3 信用點)", true, document.getElementById('parryWordCore'));
+              opts.splice(curIdxE % opts.length, 1);
+              if (opts.length === 1) {
+                clearInterval(bossMechanicInterval);
+                checkAnswer(targetCurrentAnswer);
+              } else {
+                curIdxE = curIdxE % opts.length;
+                updateParryDisplay();
+              }
+            } else {
+              spawnFloatingText("⚠️ 誤擋正解！時機流失！", false, document.getElementById('parryWordCore'));
+              curIdxE = (curIdxE + 1) % opts.length;
+              updateParryDisplay();
+            }
+          };
+
+          document.getElementById('btnBossSlash').onclick = function() {
+            if (isQuestionLocked || !opts.length) return;
+            var currentWord = opts[curIdxE % opts.length];
+            var isTarget = (currentWord.toLowerCase() === targetCurrentAnswer.toLowerCase() || (alternateValidAnswer && currentWord.toLowerCase() === alternateValidAnswer.toLowerCase()));
+            clearInterval(bossMechanicInterval);
+            if (isTarget) {
+              playSFX('counter_slash');
+              spawnFloatingText("⚔️ 破綻一閃・斬擊命中！", true, document.getElementById('parryWordCore'));
+              checkAnswer(targetCurrentAnswer);
+            } else {
+              checkAnswer(currentWord);
+            }
+          };
+          return;
+        }
+
+        // 2. 駭客潛行 (vocab_adv) Boss ➔ 方案 G【神經迴路・駭客接線】
+        if (effectiveMode === 'vocab_adv') {
+          var boxG = document.createElement('div');
+          boxG.className = "boss-mechanic-box";
+          var nodeAngles = [90, 180, 90];
+          boxG.innerHTML =
+            '<div class="boss-mech-header"><span>⚡ BOSS PROTOCOL // 神經迴路・駭客接線</span><span id="circuitStatusText" style="color:var(--noah-cyan);">請先導通至少 2 個節點</span></div>' +
+            '<div style="font-size:11px; color:#cbd5e1; margin-bottom:6px; text-align:left;">👉 Step 1：點擊下方 3 個迴路節點將其旋轉至綠色水平導通（━）；Step 2：點擊正確密鑰插槽釋放高壓電擊穿 Boss！</div>' +
+            '<div class="circuit-board-wrap">' +
+              '<div class="circuit-nodes-row">' +
+                '<span style="font-size:11px; font-family:monospace; color:var(--accent-gold);">⚡SOURCE</span>' +
+                '<button type="button" class="pipe-node-btn" id="pipeNode0">┃</button>' +
+                '<button type="button" class="pipe-node-btn" id="pipeNode1">╋</button>' +
+                '<button type="button" class="pipe-node-btn" id="pipeNode2">┃</button>' +
+                '<span style="font-size:11px; font-family:monospace; color:var(--accent-red);">🎯CORE</span>' +
+              '</div>' +
+              '<div class="circuit-sockets-grid" id="circuitSocketsGrid"></div>' +
+            '</div>';
+          ansArea.appendChild(boxG);
+
+          var alignedStates = [false, true, false];
+          function refreshCircuitNodes() {
+            var alignedCount = alignedStates.filter(Boolean).length;
+            for (var i = 0; i < 3; i++) {
+              var nBtn = document.getElementById('pipeNode' + i);
+              if (!nBtn) continue;
+              nBtn.innerText = alignedStates[i] ? "━" : "┃";
+              nBtn.classList.toggle('aligned', alignedStates[i]);
+            }
+            var stTxt = document.getElementById('circuitStatusText');
+            var sBtns = document.querySelectorAll('#circuitSocketsGrid .circuit-socket-btn');
+            if (alignedCount >= 2) {
+              if (stTxt) { stTxt.innerText = "⚡ 電流已就緒！請點擊正確密鑰插槽！"; stTxt.style.color = "var(--accent-green)"; }
+              sBtns.forEach(function(b) { b.classList.add('powered'); });
+            } else {
+              if (stTxt) { stTxt.innerText = "🔄 迴路未導通 (" + alignedCount + "/2)"; stTxt.style.color = "var(--accent-gold)"; }
+              sBtns.forEach(function(b) { b.classList.remove('powered'); });
+            }
+          }
+
+          [0, 1, 2].forEach(function(idx) {
+            var nBtn = document.getElementById('pipeNode' + idx);
+            nBtn.onclick = function() {
+              if (isQuestionLocked) return;
+              playSFX('node_rotate');
+              alignedStates[idx] = !alignedStates[idx];
+              refreshCircuitNodes();
+            };
+          });
+
+          var sGrid = document.getElementById('circuitSocketsGrid');
+          opts.forEach(function(o) {
+            var sb = document.createElement('button');
+            sb.type = "button";
+            sb.className = "circuit-socket-btn option-btn";
+            sb.setAttribute("data-opt-val", o);
+            sb.innerHTML = '🔌 ' + o;
+            sb.onclick = function() {
+              if (isQuestionLocked) return;
+              if (alignedStates.filter(Boolean).length < 2) {
+                playSFX('node_rotate');
+                alignedStates = [true, true, true];
+                refreshCircuitNodes();
+                spawnFloatingText("⚡ 自動導通迴路！", true, sb);
+              }
+              playSFX('circuit_surge');
+              handleOptionTap(o, sb);
+            };
+            sGrid.appendChild(sb);
+          });
+          refreshCircuitNodes();
+          return;
+        }
+
+        // 3. 戰術學院 (grammar) Boss ➔ 方案 B【四色符文・策略連攜矩陣】
+        if (effectiveMode === 'grammar') {
+          var boxB = document.createElement('div');
+          boxB.className = "boss-mechanic-box";
+          boxB.innerHTML =
+            '<div class="boss-mech-header"><span>🔮 BOSS PROTOCOL // 四色符文・策略連攜矩陣</span><span id="runeComboStatus">點擊 2 個同色符文觸發增益</span></div>' +
+            '<div class="rune-matrix-grid" id="runeMatrixGrid"></div>' +
+            '<div class="options-grid" id="bossGrammarOptsGrid"></div>';
+          ansArea.appendChild(boxB);
+
+          var runeTypes = [
+            { k: "urc", icon: "🔵", cls: "rune-urc", fx: "復興符文：信用點 +5" },
+            { k: "scribes", icon: "🟣", cls: "rune-scribes", fx: "司書符文：自動排除 1 個錯誤語法項" },
+            { k: "guild", icon: "🟡", cls: "rune-guild", fx: "傭兵符文：連擊 Combo +1" },
+            { k: "prometheus", icon: "🔴", cls: "rune-prometheus", fx: "重工符文：小隊充能 +1 SP" }
+          ];
+          var boardRunes = [runeTypes[0], runeTypes[0], runeTypes[1], runeTypes[1], runeTypes[2], runeTypes[2], runeTypes[3], runeTypes[3]].sort(function(){ return 0.5 - Math.random(); });
+          var rGrid = document.getElementById('runeMatrixGrid');
+          var firstSelectedRune = null;
+
+          boardRunes.forEach(function(rt) {
+            var cell = document.createElement('div');
+            cell.className = "rune-cell " + rt.cls;
+            cell.innerText = rt.icon;
+            cell.onclick = function() {
+              if (isQuestionLocked || cell.classList.contains('matched')) return;
+              playSFX('rune_swap');
+              if (!firstSelectedRune) {
+                firstSelectedRune = { el: cell, type: rt };
+                cell.classList.add('selected');
+              } else if (firstSelectedRune.el === cell) {
+                cell.classList.remove('selected');
+                firstSelectedRune = null;
+              } else if (firstSelectedRune.type.k === rt.k) {
+                playSFX('rune_match');
+                cell.classList.add('matched');
+                firstSelectedRune.el.classList.remove('selected');
+                firstSelectedRune.el.classList.add('matched');
+                document.getElementById('runeComboStatus').innerText = "✨ " + rt.fx;
+                spawnFloatingText("✨ " + rt.fx, true, cell);
+                if (rt.k === "urc") skillState.bonusCoins = (skillState.bonusCoins || 0) + 5;
+                else if (rt.k === "scribes") excludeWrong(1);
+                else if (rt.k === "guild") { currentCombo++; updateComboUI(); }
+                else if (rt.k === "prometheus") chargeSquadSP(1);
+                firstSelectedRune = null;
+              } else {
+                firstSelectedRune.el.classList.remove('selected');
+                firstSelectedRune = { el: cell, type: rt };
+                cell.classList.add('selected');
+              }
+            };
+            rGrid.appendChild(cell);
+          });
+
+          var gGrid = document.getElementById('bossGrammarOptsGrid');
+          opts.forEach(function(o) {
+            var b = document.createElement('button');
+            b.type = "button";
+            b.className = "option-btn";
+            b.setAttribute("data-opt-val", o);
+            b.innerText = o;
+            b.onclick = function() { handleOptionTap(o, b); };
+            gGrid.appendChild(b);
+          });
+          return;
+        }
+
+        // 4. 記憶終端 (listening) Boss ➔ 方案 F【全息戰機・準星鎖定狙擊】
+        var boxF = document.createElement('div');
+        boxF.className = "boss-mechanic-box";
+        boxF.innerHTML =
+          '<div class="boss-mech-header"><span>🎯 BOSS PROTOCOL // 全息戰機・準星鎖定狙擊</span><span>點擊正確情報浮游砲開火</span></div>' +
+          '<div class="sniper-radar-stage" id="sniperRadarStage"></div>';
+        ansArea.appendChild(boxF);
+
+        var radar = document.getElementById('sniperRadarStage');
+        var droneEls = [];
+        var baseTops = [12, 52, 92, 134];
+        opts.forEach(function(o, idx) {
+          var drone = document.createElement('button');
+          drone.type = "button";
+          drone.className = "sniper-drone-target option-btn";
+          drone.setAttribute("data-opt-val", o);
+          drone.style.top = (baseTops[idx % baseTops.length]) + "px";
+          drone.style.left = (10 + (idx % 2) * 35) + "%";
+          drone.innerHTML = '🎯 ' + o;
+          drone.onclick = function() {
+            if (isQuestionLocked) return;
+            playSFX('reticle_lock');
+            drone.classList.add('locking');
+            setTimeout(function() {
+              playSFX('railgun_fire');
+              handleOptionTap(o, drone);
+            }, 260);
+          };
+          radar.appendChild(drone);
+          droneEls.push(drone);
+        });
+
+        bossMechanicInterval = setInterval(function() {
+          if (isQuestionLocked) return;
+          droneEls.forEach(function(d, idx) {
+            if (d.style.pointerEvents === "none") return;
+            var randLeft = Math.floor(6 + Math.random() * 42);
+            var randTop = baseTops[idx % baseTops.length] + Math.floor(Math.random() * 14 - 7);
+            d.style.left = randLeft + "%";
+            d.style.top = Math.max(6, Math.min(142, randTop)) + "px";
+          });
+        }, 1350);
+      }
+
+      // ==========================================
+      // 🎯 9. 題目渲染引擎（修正全部 5 個題型與指示不一致問題）
       // ==========================================
       function renderQuestion() {
         if (currentIdx >= missionQueue.length) return finishMission();
         var q = missionQueue[currentIdx];
         if (!q || (!q.Vocabulary && !q.Question && !q.question && !q.Answer && !q.answer)) { currentIdx++; return renderQuestion(); } 
-        wrongAttempts = 0; isQuestionLocked = false; sysMsgBox.style.display = "none";
+        wrongAttempts = 0; isQuestionLocked = false; alternateValidAnswer = ""; sysMsgBox.style.display = "none";
         
         var oldHint = document.getElementById("skillHintBar");
         if (oldHint) oldHint.remove();
 
-        // 若為混沌裂縫，動態根據該題型切換 activeSubMode
         var effectiveMode = q._subMode || (currentMissionType === 'time_rush' ? 'vocab_basic' : (currentMissionType === 'error_drill' ? (q._savedMode || 'vocab_basic') : currentMissionType));
         currentEnemyMode = effectiveMode.startsWith('vocab') ? 'vocab' : (effectiveMode === 'grammar' ? 'grammar' : 'listening');
+        atbWaitingForAudio = (currentEnemyMode === 'listening');
 
         document.getElementById('missionProgress').innerText = (isPlayingAbyssalBonus ? "🔥 OVERCLOCK" : ("SYNC: " + (currentIdx+1) + "/" + missionQueue.length));
         var trackFill = document.getElementById('missionTrackFill');
         if (trackFill) trackFill.style.width = Math.min(100, Math.round(((currentIdx + 1) / Math.max(1, missionQueue.length)) * 100)) + "%";
 
-        // 切換下一題時若上一題開咗強襲或穩守，自動重置為 normal（保留拆彈習慣或重置皆可）
-        if (currentStance === 'overcharge' || currentStance === 'guard') {
-          currentStance = 'normal';
-          document.getElementById('stanceBtnOvercharge').classList.remove('active-overcharge');
-          document.getElementById('stanceBtnGuard').classList.remove('active-guard');
-        }
         updateActiveBuffsUI();
         updateBattleEnemy();
         renderTacticalDock();
-        preloadUpcomingQuestionAssets(); // 靜默預載後兩題圖片
+        preloadUpcomingQuestionAssets();
 
         var imgEl = document.getElementById('qImage');
         imgEl.classList.remove('loaded'); 
@@ -3206,10 +3963,12 @@
         document.getElementById('submitBtn').style.display = "none";
         
         var displayQ = "", instructionText = "", renderMode = "INPUT"; 
+        var isUnderlineCorrection = false, underlinedWrongToken = "";
         currentBadge = "INTEL";
         
         if (effectiveMode.startsWith('vocab')) {
-          targetCurrentAnswer = String(q.Vocabulary || q.Answer || "").trim();
+          var baseVocab = String(q.Vocabulary || q.Answer || "").trim();
+          targetCurrentAnswer = baseVocab;
           var exEn = ""; try { if(q.Example) exEn = JSON.parse(q.Example).en; } catch(e){}
           var colloc = q.Collocation || "";
           var derivList = [];
@@ -3233,36 +3992,53 @@
             r = advTypes[Math.floor(Math.random() * advTypes.length)];
           }
 
+          // 修復 Bug 1：防止例句中嘅 [...] 把 targetCurrentAnswer 洗成 "..."
           if (r===0) { 
-            currentBadge="CONTEXT"; instructionText="Type the appropriate word."; 
+            currentBadge="CONTEXT"; instructionText="Fill in the blank with the appropriate word (Meaning: " + (q.Meaning || "") + "):"; 
             var match = exEn.match(/\[(.*?)\]/);
-            if (match) { targetCurrentAnswer = String(match[1]).trim(); displayQ = exEn; } else { displayQ = exEn.replace(new RegExp(targetCurrentAnswer, 'ig'), '[...]'); }
+            if (match) {
+              var inside = String(match[1]).trim();
+              if (/[a-zA-Z]/.test(inside)) {
+                targetCurrentAnswer = inside;
+                alternateValidAnswer = baseVocab; // 同時接受原形與詞形變化
+              } else {
+                targetCurrentAnswer = baseVocab;
+              }
+              displayQ = exEn.replace(/\[.*?\]/g, '[...]');
+            } else {
+              displayQ = exEn.replace(new RegExp(baseVocab, 'ig'), '[...]');
+            }
           }
           else if (r===1) { 
-            currentBadge="AUDIO"; instructionText="Listen and spell."; 
-            displayQ="Hint: " + getRandomMaskedWord(targetCurrentAnswer) + " ("+(q.Part_of_Speech || q.POS)+")"; 
+            currentBadge="AUDIO"; instructionText="Listen and spell the target word:"; 
+            displayQ="Meaning: " + (q.Meaning || "") + "\nHint: " + getRandomMaskedWord(targetCurrentAnswer) + " ("+(q.Part_of_Speech || q.POS)+")"; 
             audioCont.style.display="block"; 
             audioCont.innerHTML = '<div class="audio-matrix-2x2"><button class="voice-btn" onclick="playAudioLogic(\''+targetCurrentAnswer.replace(/'/g,"\\'")+'\', false)">🔊 Normal</button><button class="voice-btn" onclick="playAudioLogic(\''+targetCurrentAnswer.replace(/'/g,"\\'")+'\', true)">🐢 Slow</button></div>';
             playAudioLogic(targetCurrentAnswer, false); 
           }
-          else if (r===2) { currentBadge="SEMANTIC"; instructionText="Choose the correct meaning."; displayQ="What is the meaning of: "+targetCurrentAnswer+"?"; targetCurrentAnswer=String(q.Meaning).trim(); renderMode="MCQ"; }
+          else if (r===2) { currentBadge="SEMANTIC"; instructionText="Choose the correct meaning:"; displayQ="What is the meaning of「 " + targetCurrentAnswer + " 」?"; targetCurrentAnswer=String(q.Meaning).trim(); renderMode="MCQ"; }
           else if (r===3) { 
-            currentBadge="ROOT"; instructionText="Identify the root meaning."; 
+            currentBadge="ROOT"; instructionText="Identify the core root meaning:"; 
             displayQ="What is the core meaning of the root in「 " + targetCurrentAnswer + " 」?"; 
             targetCurrentAnswer = q.Root ? (q.Root.match(/\(([^)]+)\)/)?q.Root.match(/\(([^)]+)\)/)[1]:q.Root) : ""; 
             renderMode="MCQ"; 
           }
-          else if (r===4) { currentBadge="COLLOCATION"; instructionText="Complete the pairing."; displayQ="Collocation:\n"+String(colloc).replace(new RegExp(targetCurrentAnswer, 'ig'), '[...]'); }
-          else if (r===5) { currentBadge="SPELLING"; instructionText="Translate into English."; displayQ="Meaning: "+q.Meaning + "\nHint: " + getRandomMaskedWord(targetCurrentAnswer); }
+          // 修復 Bug 4：固定搭配題一併顯示中文詞義，目標清晰
+          else if (r===4) {
+            currentBadge="COLLOCATION";
+            instructionText="Complete the collocation based on the target meaning:";
+            displayQ="Target Meaning: " + (q.Meaning || "") + "\nCollocation: " + String(colloc).replace(new RegExp(targetCurrentAnswer, 'ig'), '[...]');
+          }
+          else if (r===5) { currentBadge="SPELLING"; instructionText="Translate and spell the English word:"; displayQ="Meaning: "+q.Meaning + "\nHint: " + getRandomMaskedWord(targetCurrentAnswer); }
           else if (r===6) { 
-            currentBadge="VOICE UPLINK"; instructionText="Tap 🎤 on your keyboard and read the word."; 
+            currentBadge="VOICE UPLINK"; instructionText="Listen to the pronunciation and type (or use 🎤) the word:"; 
             displayQ="Target: 『 CLASSIFIED 』\nMeaning: "+q.Meaning; 
             audioCont.style.display="block"; 
             audioCont.innerHTML = '<div class="audio-matrix-2x2"><button class="voice-btn" onclick="playAudioLogic(\''+targetCurrentAnswer.replace(/'/g,"\\'")+'\', false)">🔊 Normal</button><button class="voice-btn" onclick="playAudioLogic(\''+targetCurrentAnswer.replace(/'/g,"\\'")+'\', true)">🐢 Slow</button></div>';
             playAudioLogic(targetCurrentAnswer, false); 
           } 
           else if (r===7) { 
-            currentBadge="SUFFIX ANALYSIS"; instructionText="Analyze the suffix to identify the part of speech."; 
+            currentBadge="SUFFIX ANALYSIS"; instructionText="Analyze the suffix to identify the part of speech:"; 
             var chosenD = derivList[Math.floor(Math.random() * derivList.length)];
             var rawPos = String(chosenD.pos || "").trim().toLowerCase();
             var stdPos = POS_STANDARDIZED[rawPos] || (rawPos.charAt(0).toUpperCase() + rawPos.slice(1));
@@ -3273,15 +4049,51 @@
         }
         else if (effectiveMode === 'grammar') {
           var rawType = String(q.Type || q.type || "MCQ").trim().toUpperCase();
-          currentBadge = rawType; displayQ = String(q.Question || q.question || "").trim(); targetCurrentAnswer = String(q.Answer || q.answer || "").trim();
-          if (rawType === 'BUG_HUNTER') { instructionText = "Tap on the corrupted grammar fragment to fix:"; renderMode = "BUG_HUNTER"; }
-          else if (rawType === 'UNSCRAMBLE') { instructionText = "Rearrange the fragments."; renderMode = "UNSCRAMBLE"; } 
-          else if (rawType === 'MATCH' || rawType === 'IDENTIFY') { instructionText = "Choose correctly."; renderMode = "MCQ"; } 
-          else { 
-            instructionText = "Complete the sentence."; 
-            if (String(q.Distractors || q.distractors || "").trim().length > 0) renderMode = "MCQ"; 
-            else if (displayQ.indexOf('...') !== -1 || displayQ.indexOf('___') !== -1 || displayQ.indexOf('[') !== -1) renderMode = "INPUT"; 
-            else renderMode = "MCQ"; 
+          currentBadge = rawType;
+          displayQ = String(q.Question || q.question || "").trim();
+          targetCurrentAnswer = String(q.Answer || q.answer || "").trim();
+          var hasDistractors = String(q.Distractors || q.distractors || "").trim().length > 0;
+
+          // 修復 Bug 5：若題幹開頭已自帶英文指示（如 "Correct the underlined word: ..."），自動分離上移至 Instruction
+          var colonIdxG = displayQ.indexOf(":");
+          var extractedInst = "";
+          if (colonIdxG > 0 && colonIdxG < 48 && /correct|rewrite|combine|choose|complete|fill|identify|find|change|replace/i.test(displayQ.slice(0, colonIdxG))) {
+            extractedInst = displayQ.slice(0, colonIdxG + 1).trim();
+            displayQ = displayQ.slice(colonIdxG + 1).trim();
+          }
+
+          // 修復第 6 點：辨識 [wrong_word] 底線改錯題，渲染為紅色波浪底線而非挖空
+          var bMatch = displayQ.match(/\[(.*?)\]/);
+          if (bMatch) {
+            var tokenInside = bMatch[1].trim();
+            if (/[a-zA-Z]/.test(tokenInside) && tokenInside.toLowerCase() !== targetCurrentAnswer.toLowerCase()) {
+              isUnderlineCorrection = true;
+              underlinedWrongToken = tokenInside;
+            }
+          }
+
+          if (rawType === 'BUG_HUNTER' && !isBossPhase) {
+            instructionText = extractedInst || "Tap on the corrupted grammar fragment in the sentence:";
+            renderMode = "BUG_HUNTER";
+          } else if (rawType === 'UNSCRAMBLE' && !isBossPhase) {
+            instructionText = extractedInst || "Rearrange the fragments into a grammatically correct sentence:";
+            renderMode = "UNSCRAMBLE";
+          } else if (isUnderlineCorrection) {
+            instructionText = extractedInst || "Correct the underlined word or phrase:";
+            renderMode = hasDistractors ? "MCQ" : "INPUT";
+          } else if (hasDistractors) {
+            instructionText = extractedInst || "Select the best grammar option to complete the sentence:";
+            renderMode = "MCQ";
+          } else {
+            // 修復 Bug 2：當無 Distractors 時，絕不進入只有 1 個掣嘅假 MCQ！
+            var ansWordCount = targetCurrentAnswer.split(/\s+/).filter(Boolean).length;
+            if (ansWordCount >= 4 && !isBossPhase) {
+              instructionText = extractedInst || "Construct the target sentence in the correct order:";
+              renderMode = "UNSCRAMBLE";
+            } else {
+              instructionText = extractedInst || "Type the correct grammatical form to complete the sentence:";
+              renderMode = "INPUT";
+            }
           }
         } 
         else if (effectiveMode === 'listening') {
@@ -3291,7 +4103,6 @@
           currentListeningScript = "";
           for(var k in q){ if(typeof q[k]==='string' && q[k].indexOf('"role"')>-1){ currentListeningScript=q[k]; break; } }
           
-          // 📲 變革 4：特務加密通訊對話群組 UI (點擊氣泡即可單獨重聽該句)
           var commsHtml = "";
           try {
             var parsedLines = JSON.parse(currentListeningScript || "[]");
@@ -3299,7 +4110,7 @@
               commsHtml = '<div class="comms-chat-box">' + parsedLines.map(function(line, lIdx) {
                 var wordsLen = String(line.text_en || line.text || "").split(/\s+/).length;
                 var maskBar = "▮".repeat(Math.min(18, Math.max(5, wordsLen * 2)));
-                return '<div class="comms-bubble" onclick="playSingleDialogueLine(' + lIdx + ')"><span style="color:var(--accent-gold); font-weight:900; font-family:monospace;">📻 #' + (lIdx + 1) + ' [' + (line.role || "Agent") + ']</span><span style="color:var(--noah-cyan); font-family:monospace; letter-spacing:1px; flex:1;">' + maskBar + ' (點擊重聽)</span></div>';
+                return '<div class="comms-bubble" onclick="playSingleDialogueLine(' + lIdx + ')"><span style="color:var(--accent-gold); font-weight:900; font-family:monospace;">📻 #' + (lIdx + 1) + ' [' + (line.role || "Agent") + ']</span><span style="color:var(--noah-cyan); font-family:monospace; letter-spacing:1px; flex:1;">' + maskBar + ' (點擊播音)</span></div>';
               }).join("") + '</div>';
             }
           } catch(e) {}
@@ -3313,28 +4124,44 @@
             '</div>';
 
           if (currentBadge === 'TFNG' || currentBadge === 'T/F/NG') {
-            instructionText = "Verify intelligence authenticity (True / False / Not Given):";
+            instructionText = "Listen to the audio log and verify (True / False / Not Given):";
             renderMode = "TFNG_STAMP";
-          } else if (currentBadge === 'SEQUENCE') {
-            instructionText = "Tap the events in chronological order:";
+          } else if (currentBadge === 'SEQUENCE' && !isBossPhase) {
+            instructionText = "Listen and tap the events in chronological order:";
             renderMode = "UNSCRAMBLE";
           } else {
-            instructionText = "Listen and solve.";
-            if (String(q.Distractors || q.distractors || "").length > 0) renderMode = "MCQ";
+            instructionText = "Listen to the audio log and answer the question:";
+            if (String(q.Distractors || q.distractors || "").trim().length > 0) renderMode = "MCQ";
+            else renderMode = "INPUT";
           }
         }
 
         document.getElementById('qTypeBadge').innerText = currentBadge;
         document.getElementById('qInstruction').innerText = instructionText;
-        
+
+        // 處理題幹文字（底線改錯 vs 挖空）
+        var qTextEl = document.getElementById('qText');
+        if (isUnderlineCorrection) {
+          var htmlWithUnderline = displayQ.replace(/\[(.*?)\]/g, '<span class="error-underline">$1</span>');
+          qTextEl.innerHTML = htmlWithUnderline;
+        } else {
+          displayQ = displayQ.replace(/\[.*?\]/g, '...');
+          qTextEl.innerText = displayQ;
+        }
+
+        // 🎮 若處於守門 Boss 階段（且非極限衝刺），啟動四大副本專屬 Boss 戰互動引擎！
+        if (isBossPhase && !isTimeRushMode) {
+          renderSpecializedBossArena(effectiveMode, q, ansArea);
+          applyBossPressure();
+          applyQuestionAuras(q);
+          startEnemyAtbTimer();
+          return;
+        }
+
+        // 常規小怪階段渲染
         if (renderMode === "BUG_HUNTER") {
           var cleanQ = displayQ.replace(/[\[\]]/g, "");
-          var colonIdx = cleanQ.indexOf(":");
-          if (colonIdx > 0 && colonIdx < 38) {
-            document.getElementById('qInstruction').innerText = cleanQ.slice(0, colonIdx + 1);
-            cleanQ = cleanQ.slice(colonIdx + 1).trim();
-          }
-          document.getElementById('qText').innerText = cleanQ;
+          qTextEl.innerText = cleanQ;
           var tokens = cleanQ.split(/\s+/);
           var tokensBox = document.createElement('div');
           tokensBox.className = "bug-tokens-container";
@@ -3351,7 +4178,6 @@
           ansArea.appendChild(tokensBox);
         }
         else if (renderMode === "TFNG_STAMP") {
-          document.getElementById('qText').innerText = displayQ.replace(/\[.*?\]/g, '...');
           var stampGrid = document.createElement('div');
           stampGrid.className = "tfng-stamp-grid";
           var stamps = [
@@ -3369,96 +4195,64 @@
           });
           ansArea.appendChild(stampGrid);
         }
-        else {
+        else if (renderMode === "INPUT") {
+          // 修復 Bug 3：若答案超過 12 字元或包含空格（多字片語），一律使用下方全寬度大輸入框，避免句中細格遮字
+          var isLongPhrase = (targetCurrentAnswer.length > 12 || targetCurrentAnswer.indexOf(" ") !== -1);
           var hasInlineBlank = false;
-          displayQ = displayQ.replace(/\[.*?\]/g, '...');
-          if (renderMode === "INPUT") {
-            if (displayQ.indexOf('...') !== -1 || displayQ.indexOf('___') !== -1) {
-              displayQ = displayQ.replace(/\.\.\.+|_{3,}/g, '<input type="text" id="userIn" class="inline-input" autocomplete="off">');
-              hasInlineBlank = true;
-            }
+          if (!isUnderlineCorrection && !isLongPhrase && (displayQ.indexOf('...') !== -1 || displayQ.indexOf('___') !== -1)) {
+            qTextEl.innerHTML = displayQ.replace(/\.\.\.+|_{3,}/g, '<input type="text" id="userIn" class="inline-input" autocomplete="off">');
+            hasInlineBlank = true;
+          } else if (!isUnderlineCorrection && (displayQ.indexOf('...') !== -1 || displayQ.indexOf('___') !== -1)) {
+            qTextEl.innerHTML = displayQ.replace(/\.\.\.+|_{3,}/g, '<span style="color:var(--accent-gold); font-family:monospace;">[ ______ ]</span>');
           }
-          var qTextEl = document.getElementById('qText');
-          if (hasInlineBlank) { qTextEl.innerHTML = displayQ; ansArea.innerHTML = ""; document.getElementById('submitBtn').style.display = "block"; }
-          else { qTextEl.innerText = displayQ; }
-
-          if (renderMode === "INPUT" && !hasInlineBlank) {
-            ansArea.innerHTML = '<input type="text" id="userIn" class="input-field" placeholder="'+(currentBadge==="VOICE UPLINK"?"Tap 🎤 or type...":"Enter data...")+'" autocomplete="off">';
-            document.getElementById('submitBtn').style.display = "block";
+          if (!hasInlineBlank) {
+            ansArea.innerHTML = '<input type="text" id="userIn" class="input-field" placeholder="'+(currentBadge==="VOICE UPLINK"?"Tap 🎤 or type answer...":"Type your answer here...")+'" autocomplete="off">';
           }
-          if (renderMode === "INPUT") {
-            setTimeout(function() {
-              var uIn = document.getElementById('userIn');
-              if (uIn) { uIn.focus(); uIn.addEventListener("keypress", function(e) { if (e.key === "Enter") checkAnswer(); }); }
-            }, 80);
-          }
-          
-          if (renderMode === "UNSCRAMBLE") {
-            var sl = document.createElement('div'); sl.className="answer-slots"; sl.id="uSlots";
-            var po = document.createElement('div'); po.className="word-chips-container";
-            var delimiter = (targetCurrentAnswer.indexOf("|") !== -1) ? "|" : " ";
-            targetCurrentAnswer.split(delimiter).map(function(s){ return s.trim(); }).filter(Boolean).sort(function(){return 0.5-Math.random();}).forEach(function(w){
-              var c = document.createElement('div'); c.className="chip"; c.innerText=w;
-              c.onclick = function(){
-                if(c.classList.contains('used')||isQuestionLocked) return;
-                c.classList.add('used'); playSFX('click');
-                var s = document.createElement('div'); s.className="chip"; s.innerText=w;
-                s.onclick = function(){ if(isQuestionLocked) return; c.classList.remove('used'); s.remove(); playSFX('click'); };
-                sl.appendChild(s);
-              };
-              po.appendChild(c);
-            });
-            ansArea.appendChild(sl); ansArea.appendChild(po); document.getElementById('submitBtn').style.display = "block";
-          }
-          else if (renderMode === "MCQ") {
-            var grid = document.createElement('div'); grid.className = "options-grid"; var dArr = [];
-            if(effectiveMode.startsWith('vocab') && currentBadge==='SEMANTIC') {
-              dArr = missionQueue.filter(function(m){return m && String(m.Meaning).trim()!==targetCurrentAnswer && String(m.Meaning).trim()!=="";}).map(function(m){return String(m.Meaning).trim();}).slice(0,3);
-              if(dArr.length < 3) dArr = dArr.concat(["選項 A", "選項 B", "選項 C"]).slice(0,3);
-            }
-            else if(effectiveMode.startsWith('vocab') && currentBadge==='ROOT') {
-              dArr = missionQueue.filter(function(m){return m && m.Root && String(m.Root).indexOf(targetCurrentAnswer)===-1;}).map(function(m){return m.Root.match(/\(([^)]+)\)/)?m.Root.match(/\(([^)]+)\)/)[1]:String(m.Root);}).slice(0,3);
-              if(dArr.length < 3) dArr = dArr.concat(["To appear (顯現)", "To build (建造)", "To sound (聲音)"]).slice(0,3);
-            }
-            else if(currentBadge === 'SUFFIX ANALYSIS') { 
-              var allPOS = ["Noun", "Verb", "Adjective", "Adverb"]; 
-              dArr = allPOS.filter(function(p) { return p.toLowerCase() !== targetCurrentAnswer.toLowerCase(); }); 
-            }
-            else {
-              var rawDist = String(q.Distractors || q.distractors || "");
-              if (rawDist.indexOf('|') !== -1) dArr = rawDist.split("|").map(function(s){ return s.trim(); });
-              else if (rawDist.indexOf('/') !== -1) dArr = rawDist.split("/").map(function(s){ return s.trim(); });
-              else dArr = rawDist.split(",").map(function(s){ return s.trim(); });
-              dArr = dArr.filter(function(d){ return d !== ""; });
-            }
-            var opts = dArr.concat([targetCurrentAnswer]).filter(function(v, i, a) {
-              if (!v) return false;
-              var firstIdx = a.findIndex(function(e) { return String(e).toUpperCase() === String(v).toUpperCase(); });
-              return firstIdx === i;
-            }).sort(function(){return 0.5-Math.random();});
-
-            opts.forEach(function(o){
-              var b = document.createElement('button');
-              b.className = 'option-btn' + (currentStance === 'wirecut' ? ' wirecut-mode' : '');
-              b.setAttribute("data-opt-val", o);
-              b.innerText = o;
-              b.onclick = function() { handleOptionTap(o, b); };
-              grid.appendChild(b);
-            });
-            ansArea.appendChild(grid);
-          }
+          document.getElementById('submitBtn').style.display = "block";
+          setTimeout(function() {
+            var uIn = document.getElementById('userIn');
+            if (uIn) { uIn.focus(); uIn.addEventListener("keypress", function(e) { if (e.key === "Enter") checkAnswer(); }); }
+          }, 80);
+        }
+        else if (renderMode === "UNSCRAMBLE") {
+          var sl = document.createElement('div'); sl.className="answer-slots"; sl.id="uSlots";
+          var po = document.createElement('div'); po.className="word-chips-container";
+          var delimiter = (targetCurrentAnswer.indexOf("|") !== -1) ? "|" : " ";
+          targetCurrentAnswer.split(delimiter).map(function(s){ return s.trim(); }).filter(Boolean).sort(function(){return 0.5-Math.random();}).forEach(function(w){
+            var c = document.createElement('div'); c.className="chip"; c.innerText=w;
+            c.onclick = function(){
+              if(c.classList.contains('used')||isQuestionLocked) return;
+              c.classList.add('used'); playSFX('click');
+              var s = document.createElement('div'); s.className="chip"; s.innerText=w;
+              s.onclick = function(){ if(isQuestionLocked) return; c.classList.remove('used'); s.remove(); playSFX('click'); };
+              sl.appendChild(s);
+            };
+            po.appendChild(c);
+          });
+          ansArea.appendChild(sl); ansArea.appendChild(po); document.getElementById('submitBtn').style.display = "block";
+        }
+        else if (renderMode === "MCQ") {
+          var grid = document.createElement('div'); grid.className = "options-grid";
+          var opts = buildBossOptionsSet(q, effectiveMode);
+          opts.forEach(function(o){
+            var b = document.createElement('button');
+            b.className = 'option-btn' + (currentStance === 'wirecut' ? ' wirecut-mode' : '');
+            b.setAttribute("data-opt-val", o);
+            b.innerText = o;
+            b.onclick = function() { handleOptionTap(o, b); };
+            grid.appendChild(b);
+          });
+          ansArea.appendChild(grid);
         }
 
         if (currentIdx === 0 && resonanceState().leaderScribes && !scribeMarked) {
           scribeMarked = true;
           setTimeout(function() { excludeWrong(1); }, 300);
         }
-        if (isBossPhase) applyBossPressure();
         applyQuestionAuras(q);
         startEnemyAtbTimer();
       }
 
-      // 變革 5：支援「💣 拆彈剪線模式 (Wire-Cutting)」或正常作答
       function handleOptionTap(val, btn) {
         if (isQuestionLocked) return;
         if (btn && btn.classList.contains('snow-jammed')) {
@@ -3470,7 +4264,6 @@
         if (currentStance === 'wirecut') {
           var isTarget = (String(val).trim().toLowerCase() === String(targetCurrentAnswer).trim().toLowerCase());
           if (!isTarget) {
-            // 成功剪斷一條錯誤干擾電線！
             playSFX('hit_normal');
             btn.style.opacity = "0.18";
             btn.style.pointerEvents = "none";
@@ -3480,14 +4273,15 @@
             var remaining = Array.from(document.querySelectorAll('.option-btn')).filter(function(b) { return b.style.pointerEvents !== "none"; });
             if (remaining.length === 1) {
               currentStance = "normal";
-              document.getElementById('stanceBtnWirecut').classList.remove('active-wirecut');
+              var wBtn = document.getElementById('stanceBtnWirecut');
+              if (wBtn) wBtn.classList.remove('active-wirecut');
               checkAnswer(targetCurrentAnswer, remaining[0]);
             }
             return;
           } else {
-            // 誤剪正確主電線！觸發答錯
             currentStance = "normal";
-            document.getElementById('stanceBtnWirecut').classList.remove('active-wirecut');
+            var wBtn2 = document.getElementById('stanceBtnWirecut');
+            if (wBtn2) wBtn2.classList.remove('active-wirecut');
             checkAnswer("__WIRECUT_FAIL__", btn);
             return;
           }
@@ -3496,7 +4290,7 @@
       }
 
       // ==========================================
-      // ⚔️ 9. 答案檢驗、極限破盾、總攻擊處決 (變革7) & 極限深潛 (變革9)
+      // ⚔️ 10. 答案檢驗、姿態結算與下一題姿態面板
       // ==========================================
       function checkAnswer(sel, btn) {
         if (isQuestionLocked) return;
@@ -3512,19 +4306,20 @@
         }
         
         function cleanStr(str) { return String(str).trim().toLowerCase().replace(/\s+/g, " "); }
-        var cUser = cleanStr(userAns), cTarget = cleanStr(targetCurrentAnswer);
-        var correct = (cUser === cTarget && cUser !== "__wirecut_fail__");
-        if (!correct && cUser !== "__wirecut_fail__") {
+        var cUser = cleanStr(userAns), cTarget = cleanStr(targetCurrentAnswer), cAlt = cleanStr(alternateValidAnswer);
+        var isTimeoutOrWireFail = (cUser === "__wirecut_fail__" || cUser === "__timeout_fail__");
+        var correct = !isTimeoutOrWireFail && (cUser === cTarget || (cAlt !== "" && cUser === cAlt));
+        if (!correct && !isTimeoutOrWireFail) {
           var rawUser = cUser.replace(/[^a-z0-9\u4e00-\u9fa5]/ig, "");
           var rawTarget = cTarget.replace(/[^a-z0-9\u4e00-\u9fa5]/ig, "");
-          if (rawUser === rawTarget && rawTarget !== "") correct = true;
+          var rawAlt = cAlt.replace(/[^a-z0-9\u4e00-\u9fa5]/ig, "");
+          if ((rawUser === rawTarget && rawTarget !== "") || (rawAlt !== "" && rawUser === rawAlt)) correct = true;
         }
-        if (!correct && hasPassive("精準調頻") && currentEnemyMode === "listening" && letterGap(cUser, cTarget) === 1) correct = true;
+        if (!correct && !isTimeoutOrWireFail && hasPassive("精準調頻") && currentEnemyMode === "listening" && letterGap(cUser, cTarget) === 1) correct = true;
 
         var appCont = document.getElementById('app-container');
         var enemySpriteEl = document.getElementById('enemySprite');
 
-        // 處理極限深潛加賽題結果
         if (isPlayingAbyssalBonus) {
           isQuestionLocked = true;
           if (correct) {
@@ -3540,14 +4335,11 @@
           return;
         }
 
-        // 穩守姿態免傷
         if (!correct && currentStance === 'guard' && guardUsesLeft > 0) {
           guardUsesLeft--;
-          document.getElementById('guardLeftCount').innerText = guardUsesLeft;
           currentStance = 'normal';
-          document.getElementById('stanceBtnGuard').classList.remove('active-guard');
           playSFX('shield_block');
-          spawnFloatingText("🛡️ 穩守姿態抵消傷害！", true);
+          spawnFloatingText("🛡️ 穩守姿態抵消傷害！(剩餘:" + guardUsesLeft + ")", true);
           updateActiveBuffsUI();
           return;
         }
@@ -3598,21 +4390,26 @@
             if(btn) btn.classList.remove('wrong'); 
             nextBtn.innerText = "NEXT ➡️"; 
             nextBtn.onclick = nextQuestion; 
-            startEnemyAtbTimer();
+            startEnemyAtbTimer(true);
           };
           return;
         }
 
         isQuestionLocked = true; 
+        var stanceUsedThisTurn = currentStance;
+
         if (correct) { 
           var slashVfx = document.getElementById('attackSlashVfx');
           slashVfx.classList.remove('slash-active'); void slashVfx.offsetWidth; slashVfx.classList.add('slash-active');
 
           if (isTimeRushMode) timeRushRemaining += 2;
-          var isOvercharge = (currentStance === 'overcharge');
+          var isOvercharge = (stanceUsedThisTurn === 'overcharge');
           if (isOvercharge) {
             skillState.bonusCoins = (skillState.bonusCoins || 0) + 12;
-            spawnFloatingText("⚡ 強襲暴擊！(+12 信用點)", true);
+            spawnFloatingText("💥 強襲暴擊！(+12 信用點)", true);
+          } else if (stanceUsedThisTurn === 'hack') {
+            chargeSquadSP(1); // 配合下方 checkAndTriggerExecution 合共獲得 +2 SP 雙倍充能！
+            spawnFloatingText("⚡ 駭入成功！雙倍充能 (+2 SP)！", true);
           } else if (isCounterWindow) {
             skillState.bonusCoins = (skillState.bonusCoins || 0) + 4;
             spawnFloatingText("⚡ COUNTER BREAK! (+4 信用點)", true);
@@ -3624,7 +4421,7 @@
             playSFX('hit_normal');
           }
           if(btn) btn.classList.add('correct'); 
-          if (currentStance !== 'guard') currentCombo++; 
+          if (stanceUsedThisTurn !== 'guard') currentCombo++; 
           if (currentCombo >= 3) triggerSquadBanter('combo');
           
           enemySpriteEl.classList.add('enemy-hit');
@@ -3651,7 +4448,6 @@
             spawnFloatingText(currentCombo >= 3 ? "🔥 COMBO x" + currentCombo + "!" : "+50 EXP ⚡", currentCombo >= 3, btn || document.getElementById('answerArea'));
           }
 
-          // 變革 6：執行協同處決判定與嚴格 1 SP 充能上限
           checkAndTriggerExecution();
 
           if (resonanceState().guild >= 2 && currentCombo > 0 && currentCombo % 4 === 0) chargeSquadSP(1);
@@ -3664,21 +4460,24 @@
           wrongQuestionsList.push({ q: q, type: currentMissionType, ans: targetCurrentAnswer });
           saveWrongQuestionToVault(q, targetCurrentAnswer);
         }
+
+        // 本題結束後將預設姿態重置為 normal，讓學生喺解釋面板底部揀選下一題姿態
+        currentStance = "normal";
+        var wBtn = document.getElementById('stanceBtnWirecut');
+        if (wBtn) wBtn.classList.remove('active-wirecut');
         updateComboUI();
         updateActiveBuffsUI();
 
         var qType = String(q.type || q.Type || "");
         var fast = correct && Date.now() - skillState.started < 3000 && hasPassive("疾速同調");
         var suffixBonus = correct && hasPassive("後綴拆解") && (qType.indexOf("SUFFIX") >= 0 || String(currentBadge).indexOf("SUFFIX") >= 0);
-        missionResults.push({ qId: q.Question_ID, isCorrect: correct, doubleScore: !!((correct && resonanceState().scribes >= 2 && (qType.indexOf("BUG") >= 0 || qType.indexOf("SUFFIX") >= 0)) || fast || suffixBonus || (correct && currentStance === 'overcharge')) });
+        missionResults.push({ qId: q.Question_ID, isCorrect: correct, doubleScore: !!((correct && resonanceState().scribes >= 2 && (qType.indexOf("BUG") >= 0 || qType.indexOf("SUFFIX") >= 0)) || fast || suffixBonus || (correct && stanceUsedThisTurn === 'overcharge')) });
 
-        // 若為極限衝刺模式，答啱直接 0.25s 閃電跳下一題，唔彈長篇面板阻慢節奏！
         if (isTimeRushMode && correct) {
           setTimeout(function() { currentIdx++; renderQuestion(); }, 260);
           return;
         }
 
-        // 若 Boss 血量剛剛歸零且未觸發過總攻擊，先啟動「變革 7：全員總攻擊處決 QTE（10s/12s/15s）」！
         if (isBossPhase && currentBossHp === 0 && !bossFinisherTriggered) {
           bossFinisherTriggered = true;
           triggerBossFinisherQte(function() { showStandardFeedbackPanel(q, correct); });
@@ -3702,8 +4501,8 @@
           var vocWord = String(q.Vocabulary || q.Answer || "").trim();
           var pos = String(q.Part_of_Speech || q.POS || "").trim();
           var meaning = String(q.Meaning || "").trim();
-          content += '<div style="color:var(--noah-cyan); font-weight:900; font-size:24px; letter-spacing:1px;">' + vocWord + (pos ? ' <span style="font-size:14px; color:#888; font-weight:normal;">('+pos+')</span>' : '') + '</div>';
-          if (meaning) content += '<div style="font-size:16px; color:#ddd; margin-bottom:10px;">' + meaning + '</div>';
+          content += '<div style="color:var(--noah-cyan); font-weight:900; font-size:22px; letter-spacing:1px;">' + vocWord + (pos ? ' <span style="font-size:13px; color:#888; font-weight:normal;">('+pos+')</span>' : '') + '</div>';
+          if (meaning) content += '<div style="font-size:15px; color:#ddd; margin-bottom:8px;">' + meaning + '</div>';
           
           var derivList = [];
           try {
@@ -3713,7 +4512,7 @@
 
           var hasRoot = q.Root && String(q.Root).trim() !== "" && q.Root !== '""';
           if (hasRoot || derivList.length > 0) {
-            content += '<div style="margin-bottom:10px;">';
+            content += '<div style="margin-bottom:8px;">';
             if (hasRoot) content += '<span class="morph-tag">🧬 ROOT: ' + q.Root + '</span>';
             derivList.forEach(function(d) {
               content += '<span class="morph-tag derivative" onclick="playAudioLogic(\'' + String(d.word || '').replace(/'/g,"\\'") + '\', false)">🔄 ' + d.pos + ': ' + d.word + ' 🔊</span>';
@@ -3722,7 +4521,7 @@
           }
 
           var exObj = {en:"", zh:""}; try { if(q.Example) exObj = JSON.parse(q.Example); } catch(e){}
-          if(exObj.en) content += '<div style="margin-bottom:15px; padding:12px; background:rgba(0,229,255,0.05); border-left:3px solid var(--noah-cyan); border-radius:0 8px 8px 0;"><div style="color:#fff; font-style:italic; line-height:1.4;">"'+exObj.en.replace(/[\[\]]/g, '')+'"</div><div style="color:#888; font-size:14px; margin-top:5px;">'+(exObj.zh||"")+'</div></div>';
+          if(exObj.en) content += '<div style="margin-bottom:10px; padding:10px; background:rgba(0,229,255,0.05); border-left:3px solid var(--noah-cyan); border-radius:0 8px 8px 0;"><div style="color:#fff; font-style:italic; line-height:1.35; font-size:14px;">"'+exObj.en.replace(/[\[\]]/g, '')+'"</div><div style="color:#888; font-size:12px; margin-top:4px;">'+(exObj.zh||"")+'</div></div>';
           
           content += '<div class="audio-matrix-2x2">' +
             '<button class="voice-btn" onclick="playAudioLogic(\''+vocWord.replace(/'/g,"\\'")+'\', false)">🔊 Word (Normal)</button>' +
@@ -3731,29 +4530,34 @@
             (exObj.en ? '<button class="voice-btn" onclick="playAudioLogic(\''+String(exObj.en).replace(/[\[\]]/g, '').replace(/'/g,"\\'")+'\', true)">🐢 Example (Slow)</button>' : '') +
             '</div>';
         } else {
-          content = '<div style="color:var(--noah-cyan); font-weight:bold; font-size:20px; margin-bottom:10px;">Target: '+targetCurrentAnswer+' <button class="voice-btn" style="padding:2px 8px; font-size:12px; margin-left:6px;" onclick="playAudioLogic(\''+targetCurrentAnswer.replace(/'/g,"\\'")+'\', false)">🔊 發音</button></div>';
-          if(currentEnemyMode !== 'listening') content += '<p>'+(q.Explanation||"")+'</p><p style="color:#888; font-style:italic;">'+(q.Translation||"")+'</p>';
+          content = '<div style="color:var(--noah-cyan); font-weight:bold; font-size:19px; margin-bottom:8px;">Target: '+targetCurrentAnswer+' <button class="voice-btn" style="padding:2px 8px; font-size:12px; margin-left:6px;" onclick="playAudioLogic(\''+targetCurrentAnswer.replace(/'/g,"\\'")+'\', false)">🔊 發音</button></div>';
+          if(currentEnemyMode !== 'listening') content += '<p style="margin:6px 0; font-size:14px;">'+(q.Explanation||"")+'</p><p style="color:#888; font-style:italic; font-size:13px; margin:4px 0;">'+(q.Translation||"")+'</p>';
           if (currentEnemyMode === 'listening') {
             var dialogueHTML = "";
             try {
               var dArr = JSON.parse(currentListeningScript || "[]");
               if (Array.isArray(dArr)) {
-                dialogueHTML = '<div style="margin-top:10px; padding:10px; background:rgba(0,0,0,0.3); border-radius:8px; font-size:14px; max-height:150px; overflow-y:auto;">';
+                dialogueHTML = '<div style="margin-top:8px; padding:8px; background:rgba(0,0,0,0.3); border-radius:8px; font-size:13px; max-height:130px; overflow-y:auto;">';
                 dArr.forEach(function(l) {
                   var tEn = String(l.text_en || l.text || ""); var tZh = String(l.text_zh || l.translation || "");
-                  if(tEn) dialogueHTML += '<div style="margin-bottom:8px;"><strong style="color:var(--noah-cyan);">' + (l.role||"Log") + ':</strong> <span style="color:#eee;">' + tEn + '</span><br><span style="color:#888;">' + tZh + '</span></div>';
+                  if(tEn) dialogueHTML += '<div style="margin-bottom:6px;"><strong style="color:var(--noah-cyan);">' + (l.role||"Log") + ':</strong> <span style="color:#eee;">' + tEn + '</span><br><span style="color:#888;">' + tZh + '</span></div>';
                 });
                 dialogueHTML += '</div>';
               }
             } catch(e) {}
-            if(!dialogueHTML) dialogueHTML = '<div style="margin-top:10px; color:#aaa; font-size:14px;">' + (q.Translation || q.Explanation || "") + '</div>';
+            if(!dialogueHTML) dialogueHTML = '<div style="margin-top:8px; color:#aaa; font-size:13px;">' + (q.Translation || q.Explanation || "") + '</div>';
             content += dialogueHTML;
           }
+        }
+
+        // 若尚有下一題，喺反饋面板底部插入「🎯 下一題戰術姿態部署」選擇器
+        if (currentIdx + 1 < missionQueue.length) {
+          content += renderStanceSelectorHTML();
         }
         document.getElementById('feedbackContent').innerHTML = content;
       }
 
-      // 💥 變革 7：Boss 破防「全員總攻擊處決」 QTE（自動套用生字 10s / 文法 12s / 聆聽 15s）
+      // 💥 變革 7：Boss 破防「全員總攻擊處決」 QTE（生字 10s / 文法 12s / 聆聽 15s）
       function triggerBossFinisherQte(onDone) {
         var modal = document.getElementById('finisherQteModal');
         var area = document.getElementById('finisherPromptArea');
@@ -3821,14 +4625,12 @@
         }, 1000);
       }
 
-      // 🚀 極速切換下一題（移除 650ms 延遲，並喺第 3 / 6 題插入肉鴿航線分支）
       function nextQuestion() { 
         document.getElementById('feedback-panel').classList.remove('active');
         playSFX('next'); elevenPlayer.pause(); elevenPlayer.currentTime = 0;
         window.speechSynthesis.cancel(); unduckBGM();
         currentIdx++;
 
-        // 變革 2：每完成 3 題小怪且尚未進入 Boss 戰時，彈出 Roguelike 航線分支抉擇
         if (!isTimeRushMode && currentIdx > 0 && currentIdx % 3 === 0 && currentIdx < bossStartIndex) {
           document.getElementById('roguelikeNodeModal').style.display = 'flex';
           return;
@@ -3856,7 +4658,6 @@
         renderQuestion();
       }
 
-      // 變革 9：完場前「安全撤離 vs 極限深潛 Overclock (×1.35)」
       function resolveAbyssalChoice(doOverclock) {
         playSFX('click');
         document.getElementById('abyssalOverclockModal').style.display = 'none';
@@ -3884,7 +4685,6 @@
         clearEnemyAtbTimer();
         document.getElementById('comboBadge').style.display = 'none';
 
-        // 若正常打贏 Boss、隊長仍有 2 粒心以上且尚未詢問過「極限深潛」，彈出抉擇框！
         if (!skipAbyssalPrompt && !missionAborted && !isTimeRushMode && currentMissionType !== 'error_drill' && playerCurrentHp >= 2 && missionResults.length >= 5) {
           document.getElementById('abyssalOverclockModal').style.display = 'flex';
           return;
@@ -3902,7 +4702,6 @@
           return;
         }
 
-        // 記錄四維能力統計與每日任務進度
         recordModeAnalytics(currentMissionType, missionResults);
 
         fetch(API_URL, {
@@ -3957,7 +4756,6 @@
               comboBanner.style.display = 'none';
             }
 
-            // 戰術回顧（附一鍵發音重聽掣）
             var debriefBtnText = document.getElementById('debriefBtnText');
             var debriefContent = document.getElementById('debriefContent');
             if (wrongQuestionsList.length > 0) {
@@ -4019,7 +4817,7 @@
       }
 
       // ==========================================
-      // 🔧 10. 記憶修復艙 (Error Vault)、四維分析 & 行動補給站 (Supply Store)
+      // 🔧 11. 記憶修復艙、四維分析 & 行動補給站 (Supply Store)
       // ==========================================
       function getErrorVaultKey() { return "noah_error_vault_" + (currentUserData ? currentUserData.studentId : "guest"); }
       function getErrorVaultList() {
@@ -4087,7 +4885,6 @@
         document.getElementById('captainAnalyticsModal').style.display = 'flex';
       }
 
-      // 🏪 行動補給站 (Operation Supply Store)
       var currentShopTab = 'real';
       function openQuartermasterModal() {
         playSFX('click');
@@ -4200,7 +4997,7 @@
       }
 
       // ==========================================
-      // 📊 11. 排行榜、招募終端 & 幹員檔案（含 P/Q/R 造型衣櫥）
+      // 📊 12. 排行榜、招募終端 & 幹員檔案（含 P/Q/R 造型衣櫥）
       // ==========================================
       function openLeaderboard(mode) {
         playSFX('click'); document.getElementById('loadingOverlay').style.display = 'flex';
@@ -4465,7 +5262,6 @@
         return book[name] || "已接入戰鬥。";
       }
 
-      // 🎨 打開幹員詳細檔案（支援標準 + 戰術差分 + P/Q/R 三欄 Skin 即時換衫）
       function openOperatorDetailModal(c) {
         playSFX('dossier_open');
         var modal = document.getElementById('operatorDetailModal');
@@ -4479,7 +5275,6 @@
         imgEl.style.cursor = "zoom-in";
         imgEl.onclick = function() { openArtworkLightbox(imgEl.src, norm.nameZh, norm.nameEn); };
 
-        // 渲染 P/Q/R 造型衣櫥按鈕
         var wardrobe = document.getElementById('detailSkinWardrobe');
         if (wardrobe) {
           wardrobe.innerHTML = "";
@@ -4506,7 +5301,6 @@
               globalOperatorPool = globalOperatorPool.map(normalizeOp);
               playerInventory = playerInventory.map(normalizeOp);
               buildActiveBattleSquad();
-              updateLobbyAdjutant();
               renderBriefingRoomSquad();
               if (document.getElementById('squadFormationModal').style.display === 'flex') renderFormationUI();
               openOperatorDetailModal(norm);
@@ -4591,7 +5385,7 @@
           var groupTitle = document.createElement('div');
           var color = (rarity==='SSR')?'var(--accent-gold)':((rarity==='SR')?'var(--accent-purple)':'var(--noah-cyan)');
           groupTitle.style.cssText = "color:var(--text-main); font-weight:900; font-size:12px; margin:12px 0 6px 0; text-align:left;";
-          groupTitle.innerHTML = '<span style="background:' + color + '; color:#000; padding:1px 6px; border-radius:4px;">' + rarity + '</span> 機率池幹員名冊 (' + ops.length + '人)';
+          groupTitle.innerHTML = '<span style="background:' + color + '; color:#000; padding:1px 6px; border-radius:4px;">' + rarity + '</span> 機率池幹員名冊 (' + ops.length + '人 · 點擊或長按檢視檔案)';
           listContainer.appendChild(groupTitle);
 
           var grid = document.createElement('div');
@@ -4603,11 +5397,11 @@
             var item = document.createElement('div');
             item.style.cssText = "background:rgba(0,0,0,0.5); border:1px solid " + (isOwned ? "rgba(241,196,15,0.45)" : "#333") + "; border-radius:8px; padding:4px; cursor:pointer; text-align:center; position:relative; opacity:" + (isOwned ? "1" : "0.62") + ";";
             var badgeHtml = isOwned
-              ? '<div style="position:absolute; top:3px; right:3px; background:rgba(0,0,0,0.8); color:var(--accent-gold); font-size:8px; font-weight:900; padding:1px 3px; border-radius:4px;">★' + stars + '</div>'
-              : '<div style="position:absolute; top:3px; right:3px; background:rgba(0,0,0,0.8); color:#888; font-size:8px; padding:1px 3px; border-radius:4px;">🔒</div>';
+              ? '<div style="position:absolute; top:3px; right:3px; background:rgba(0,0,0,0.8); color:var(--accent-gold); font-size:8px; font-weight:900; padding:1px 3px; border-radius:4px; z-index:4;">★' + stars + '</div>'
+              : '<div style="position:absolute; top:3px; right:3px; background:rgba(0,0,0,0.8); color:#888; font-size:8px; padding:1px 3px; border-radius:4px; z-index:4;">🔒</div>';
 
-            item.innerHTML = badgeHtml + '<div style="width:100%; aspect-ratio:2/3; border-radius:6px; overflow:hidden; background:#050a10; margin-bottom:4px;"><img src="' + opImg(op.imageUrl) + '" onerror="this.onerror=null;this.src=OP_PLACEHOLDER" style="width:100%; height:100%; object-fit:contain; object-position:center bottom;"></div><div style="font-size:10px; font-weight:bold; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; color:#ddd;">' + op.nameZh.replace(/【.*?】/, '') + '</div>';
-            item.onclick = function() { openOperatorDetailModal(op); };
+            item.innerHTML = '<span class="card-info-zoom-btn">🔍</span>' + badgeHtml + '<div style="width:100%; aspect-ratio:2/3; border-radius:6px; overflow:hidden; background:#050a10; margin-bottom:4px;"><img src="' + opImg(op.imageUrl) + '" onerror="this.onerror=null;this.src=OP_PLACEHOLDER" style="width:100%; height:100%; object-fit:contain; object-position:center bottom; pointer-events:none;"></div><div style="font-size:10px; font-weight:bold; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; color:#ddd;">' + op.nameZh.replace(/【.*?】/, '') + '</div>';
+            bindLongPress(item, function() { openOperatorDetailModal(op); }, function() { openOperatorDetailModal(op); });
             grid.appendChild(item);
           });
           listContainer.appendChild(grid);
@@ -4666,7 +5460,6 @@
         window.requestAnimationFrame(step);
       }
 
-      // ⌨️ iPad / 電腦鍵盤快捷鍵支援（數字鍵 1~4 揀選項，反饋面板彈出時撳 Enter/Space 即跳下一題）
       window.addEventListener("keydown", function(e) {
         if (!isMissionActive) return;
         var fb = document.getElementById('feedback-panel');
