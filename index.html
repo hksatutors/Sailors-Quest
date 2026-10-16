@@ -2205,7 +2205,7 @@
               navTo('dashboardScreen'); 
               isMissionActive = false; 
               if(isBgmPlaying) bgmPlayer.volume = 0.3;
-              maybeStartTutorial(); claimDailySupply();
+              maybeStartTutorial();
             }, 800);
           } else { 
             try { localStorage.removeItem('noah_id'); localStorage.removeItem('noah_pin'); } catch(e) {}
@@ -2505,8 +2505,18 @@
       function maybeStartTutorial() {
         if (!currentUserData) return;
         var claimed = localStorage.getItem('noah_tutorial_' + currentUserData.studentId) === '1';
-        if (claimed) return;
-        if ((Number(currentUserData.coins) || 0) > 0 || (Number(currentUserData.totalExp) || 0) > 0) return;
+        
+        // 🚀 改用 totalMissions (總完成任務數) 判斷：
+        // 只要呢部機未完成過教學，而且該學生從未完成過任何 1 次任務 (totalMissions === 0)，
+        // 就算佢已經領咗每日補給箱 (+80 Coins) 或中途 Refresh 網頁，重登時依然會繼續彈出教學！
+        var hasPlayedBefore = (Number(currentUserData.totalMissions) || 0) > 0 || (Number(currentUserData.totalExp) || 0) > 0;
+
+        if (claimed || hasPlayedBefore) {
+          // 已經完成過教學嘅舊生，登入直接檢查並彈出每日連登補給箱
+          claimDailySupply();
+          return;
+        }
+
         tutorialStep = 0;
         tutorialCalendarBound = false;
         tutorialPickedNav = false;
@@ -2514,7 +2524,6 @@
         document.getElementById('tutImgLyra').src = opImg(NAVIGATOR_POOL.lyra.img);
         document.getElementById('tutorialOverlay').style.display = 'flex';
         advanceTutorial();
-      }
 
       function checkTutorialFinalReady() {
         var btn = document.getElementById('tutorialNextBtn');
@@ -2647,13 +2656,12 @@
         showSysMsg("🎉 歡迎就任！快去招募終端進行首次十連抽吧！", false);
       }
 
-      function claimTutorialReward(keepOpen) {
-        fetch(API_URL, {
-          method: 'POST', headers: { 'Content-Type': 'text/plain' },
-          body: JSON.stringify({ action: 'claimTutorialReward', studentId: currentUserData.studentId })
-        }).then(function(r){ return r.json(); }).then(function(res) {
-          if (res && res.success) { currentUserData.coins = res.coins; updateUI(); showSysMsg("💰 已存入 1,000 信用點！", false); }
-        }).catch(function() {});
+      function finishTutorial() {
+        localStorage.setItem('noah_tutorial_' + currentUserData.studentId, '1');
+        document.getElementById('tutorialOverlay').style.display = 'none';
+        showSysMsg("🎉 歡迎就任！快去招募終端進行首次十連抽吧！", false);
+        // 🚀 新生完成晒 6 步教學關閉視窗後，先至彈出「🎁 每日作戰補給箱」，兩個視窗唔會撞埋一齊！
+        setTimeout(function() { claimDailySupply(); }, 600);
       }
 
       function claimDailySupply() {
