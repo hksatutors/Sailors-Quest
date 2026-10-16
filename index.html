@@ -2502,17 +2502,37 @@
       var tutorialStep = 0;
       var tutorialPickedNav = false;
 
+      // 🚀 一鍵強制重播新手教學（方便導師隨時測試或學生重溫）
+      function forceReplayTutorial() {
+        if (!currentUserData) return showSysMsg("⚠️ 請先登入帳號再啟動教學！", true);
+        playSFX('click');
+        localStorage.removeItem('noah_tutorial_' + currentUserData.studentId);
+        tutorialStep = 0;
+        tutorialCalendarBound = false;
+        tutorialPickedNav = false;
+        document.getElementById('tutImgKael').src = opImg(NAVIGATOR_POOL.kael.img);
+        document.getElementById('tutImgLyra').src = opImg(NAVIGATOR_POOL.lyra.img);
+        document.getElementById('tutorialOverlay').style.display = 'flex';
+        advanceTutorial();
+      }
+
       function maybeStartTutorial() {
         if (!currentUserData) return;
+
+        var isBackendResetToZero = 
+          (Number(currentUserData.coins) || 0) === 0 && 
+          (Number(currentUserData.totalExp) || 0) === 0 && 
+          (Number(currentUserData.totalMissions) || 0) === 0;
+
+        // 🚀 如果你喺後台試算表將 Coins、Total_EXP、Total_Missions 全部歸零，自動清除本機舊紀錄！
+        if (isBackendResetToZero) {
+          localStorage.removeItem('noah_tutorial_' + currentUserData.studentId);
+        }
+
         var claimed = localStorage.getItem('noah_tutorial_' + currentUserData.studentId) === '1';
-        
-        // 🚀 改用 totalMissions (總完成任務數) 判斷：
-        // 只要呢部機未完成過教學，而且該學生從未完成過任何 1 次任務 (totalMissions === 0)，
-        // 就算佢已經領咗每日補給箱 (+80 Coins) 或中途 Refresh 網頁，重登時依然會繼續彈出教學！
         var hasPlayedBefore = (Number(currentUserData.totalMissions) || 0) > 0 || (Number(currentUserData.totalExp) || 0) > 0;
 
         if (claimed || hasPlayedBefore) {
-          // 已經完成過教學嘅舊生，登入直接檢查並彈出每日連登補給箱
           claimDailySupply();
           return;
         }
@@ -2657,6 +2677,37 @@
         showSysMsg("🎉 歡迎就任！快去招募終端進行首次十連抽吧！", false);
         // 🚀 新生完成晒 6 步教學關閉視窗後，先至彈出「🎁 每日作戰補給箱」，兩個視窗唔會撞埋一齊！
         setTimeout(function() { claimDailySupply(); }, 600);
+      }
+
+      function claimTutorialReward(studentId) {
+        var safeId = String(studentId || "").trim();
+        var props = PropertiesService.getScriptProperties();
+        var key = "tutorial_claimed_" + safeId;
+
+        var sheet = SpreadsheetApp.getActiveSpreadsheet().getSheetByName("Player_Data");
+        var data = sheet.getDataRange().getValues();
+        var colMap = getColumnMap(data[0]);
+
+        var curCoins = 0, curExp = 0, curMissions = 0;
+         for (var i = 1; i < data.length; i++) {
+           if (String(data[i][colMap["Student_ID"]]).trim() === safeId) {
+             curCoins = Number(data[i][colMap["Coins"]]) || 0;
+             curExp = Number(data[i][colMap["Total_EXP"]]) || 0;
+             curMissions = Number(data[i][colMap["Total_Missions"]]) || 0;
+             break;
+           }
+         }
+        // 判斷是否為「全新帳號 / 導師手動將三大核心數據完全歸零」
+        var isCompletelyFreshAccount = (curCoins === 0 && curExp === 0 && curMissions === 0);
+
+  // 只要該帳號已經有過任何 EXP、任務紀錄，或者曾經領取過（且非完全歸零狀態），一律拒絕再次派發！
+           if (!isCompletelyFreshAccount && (props.getProperty(key) === "1" || curExp > 0 || curMissions > 0)) {
+             return { success: false, message: "新手啟動資金只限新任艦長領取一次", coins: curCoins };
+           }
+
+        var newCoins = addCoins_(safeId, 1000);
+             props.setProperty(key, "1");
+             return { success: true, coins: newCoins };
       }
 
       function claimDailySupply() {
