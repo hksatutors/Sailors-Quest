@@ -5603,7 +5603,7 @@
       });
 
       // ==========================================
-      // 🚀 V26.5 機甲座艙 UI/UX 全面革新補丁 (純標準 JS，無反引號)
+      // 🚀 V26.6 全方位除錯與機甲座艙升級補丁 (Fixes 1 - 8)
       // ==========================================
       var DAILY_INTEL_QUOTES = [
         { en: "Bite the bullet", zh: "硬著頭皮上；勇敢面對困難", ex: "I had to bite the bullet and finish the tough grammar drill." },
@@ -5616,6 +5616,603 @@
       ];
       var currentDailyIntelIdx = Math.floor(Math.random() * DAILY_INTEL_QUOTES.length);
       var banterFadeTimeout = null;
+      var voiceAudioCtx = null, voiceGainNode = null;
+
+      // 🛠️ 修復 6：Web Audio API 語音擴大器 (1.75x 音量增益) + 播音時徹底暫停 BGM 釋放硬件聲道
+      function ensureVoiceBooster() {
+        if (voiceAudioCtx) {
+          if (voiceAudioCtx.state === 'suspended') voiceAudioCtx.resume().catch(function(){});
+          return;
+        }
+        try {
+          var AudioCtx = window.AudioContext || window.webkitAudioContext;
+          if (!AudioCtx || !elevenPlayer) return;
+          elevenPlayer.crossOrigin = "anonymous";
+          voiceAudioCtx = new AudioCtx();
+          var source = voiceAudioCtx.createMediaElementSource(elevenPlayer);
+          voiceGainNode = voiceAudioCtx.createGain();
+          voiceGainNode.gain.value = 1.75; // 放大 175% 語音音量
+          source.connect(voiceGainNode);
+          voiceGainNode.connect(voiceAudioCtx.destination);
+        } catch (e) {}
+      }
+
+      duckBGM = function() {
+        elevenPlayer.volume = 1.0;
+        ensureVoiceBooster();
+        if (isBgmPlaying) {
+          bgmPlayer.volume = 0.02;
+          bgmPlayer.pause(); // 暫停 BGM 防止 iOS/iPadOS 壓縮語音音量
+        }
+      };
+
+      unduckBGM = function() {
+        if (!isBgmPlaying) return;
+        var tut = document.getElementById('tutorialOverlay');
+        var isTut = tut && tut.style.display === 'flex';
+        bgmPlayer.volume = isTut ? 0.03 : (isMissionActive ? 0.14 : 0.28);
+        bgmPlayer.play().catch(function(){});
+      };
+
+      // 🛠️ 修復 5：過濾無效差分網址，並在圖片載入失敗時自動退回標準立繪，杜絕「?」破圖
+      function cleanValidAssetUrl(u, fallbackUrl) {
+        var s = String(u || "").trim();
+        if (!s || s === "?" || s === "-" || s.toLowerCase() === "none" || s.toLowerCase() === "n/a" || s.toLowerCase() === "null") {
+          return fallbackUrl || "";
+        }
+        if (s.indexOf("http") !== 0 && s.indexOf("data:") !== 0) {
+          return fallbackUrl || "";
+        }
+        return s;
+      }
+
+      var _v266OrigNormalizeOp = normalizeOp;
+      normalizeOp = function(raw) {
+        var op = _v266OrigNormalizeOp(raw);
+        if (!op) return null;
+        op.baseImageUrl = cleanValidAssetUrl(op.baseImageUrl, "");
+        op.skillImageUrl = cleanValidAssetUrl(op.skillImageUrl, op.baseImageUrl);
+        op.skin1Url = cleanValidAssetUrl(op.skin1Url, "");
+        op.skin2Url = cleanValidAssetUrl(op.skin2Url, "");
+        op.skin3Url = cleanValidAssetUrl(op.skin3Url, "");
+        op.imageUrl = cleanValidAssetUrl(op.imageUrl, op.baseImageUrl);
+        return op;
+      };
+
+      var _v266OrigOpenOpDetail = openOperatorDetailModal;
+      openOperatorDetailModal = function(c) {
+        _v266OrigOpenOpDetail(c);
+        var norm = normalizeOp(c);
+        var imgEl = document.getElementById('detailOpImg');
+        if (imgEl) {
+          imgEl.onerror = function() {
+            this.onerror = null;
+            this.src = (norm && norm.baseImageUrl) ? norm.baseImageUrl : OP_PLACEHOLDER;
+            showSysMsg("⚠️ 該造型圖檔尚未上傳至 R2，已自動顯示標準立繪", false);
+          };
+        }
+      };
+
+      var _v266OrigCastSkill = castOperatorSkill;
+      castOperatorSkill = function(opIdx) {
+        var op = battleSquad[opIdx];
+        var charImg = document.getElementById('cutinCharImg');
+        if (charImg && op) {
+          charImg.onerror = function() {
+            this.onerror = null;
+            this.src = opImg(op.baseImageUrl || op.imageUrl);
+          };
+        }
+        _v266OrigCastSkill(opIdx);
+      };
+
+      // 🛠️ 修復 2：嚴格限制 excludeWrong 只作用於 #answerArea 內嘅選項，並修復航道分支鎖死問題
+      excludeWrong = function(n) {
+        var wrong = Array.from(document.querySelectorAll("#answerArea .option-btn, #answerArea .tfng-stamp-btn, #answerArea .circuit-socket-btn, #answerArea .sniper-drone-target")).filter(function(b) {
+          var val = b.getAttribute("data-opt-val") || b.innerText.trim();
+          var low = val.trim().toLowerCase();
+          return low !== String(targetCurrentAnswer || "").trim().toLowerCase() &&
+                 low !== String(alternateValidAnswer || "").trim().toLowerCase() &&
+                 b.style.pointerEvents !== "none";
+        });
+        wrong.slice(0, n).forEach(function(b) {
+          b.style.opacity = "0.2";
+          b.style.pointerEvents = "none";
+          b.style.textDecoration = "line-through";
+        });
+      };
+
+      function unlockRoguelikeModalButtons() {
+        var rBtns = document.querySelectorAll('#roguelikeNodeModal button');
+        rBtns.forEach(function(b) {
+          b.style.opacity = "1";
+          b.style.pointerEvents = "auto";
+          b.style.textDecoration = "none";
+          b.disabled = false;
+        });
+      }
+
+      nextQuestion = function() {
+        document.getElementById('feedback-panel').classList.remove('active');
+        playSFX('next'); elevenPlayer.pause(); elevenPlayer.currentTime = 0;
+        window.speechSynthesis.cancel(); unduckBGM();
+        currentIdx++;
+
+        if (!isTimeRushMode && currentIdx > 0 && currentIdx % 3 === 0 && currentIdx < bossStartIndex) {
+          unlockRoguelikeModalButtons();
+          document.getElementById('roguelikeNodeModal').style.display = 'flex';
+          return;
+        }
+        renderQuestion();
+      };
+
+      // 🛠️ 修復 3：極限衝刺 (Time Rush) 繞過後台每日完成鎖定，無差別從生字＋文法全題庫抽題
+      var _v266OrigExecuteMission = executeMission;
+      executeMission = function() {
+        if (currentMissionType !== 'time_rush') {
+          _v266OrigExecuteMission();
+          return;
+        }
+        playSFX('click');
+        isTimeRushMode = true;
+        currentEnemyMode = 'vocab';
+        document.getElementById('loadingOverlay').style.display = 'flex';
+
+        // 使用隨機虛擬 ID 查詢，令後台 GAS 100% 忽略已完成紀錄，抽出全題庫題目
+        var rushBypassId = (currentUserData ? currentUserData.studentId : "CAPTAIN") + "_RUSH_" + Math.floor(Math.random() * 9999);
+        Promise.all([
+          fetch(API_URL, { method: 'POST', headers: { 'Content-Type': 'text/plain' }, body: JSON.stringify({ action: 'fetchMissionData', studentId: rushBypassId, missionType: 'vocab_basic', pool: 'Vocab_Pool', count: 15, ignoreSRS: true }) }).then(function(r){ return r.json(); }).catch(function(){ return null; }),
+          fetch(API_URL, { method: 'POST', headers: { 'Content-Type': 'text/plain' }, body: JSON.stringify({ action: 'fetchMissionData', studentId: rushBypassId, missionType: 'grammar', pool: 'Grammar_Pool', count: 10, ignoreSRS: true }) }).then(function(r){ return r.json(); }).catch(function(){ return null; })
+        ]).then(function(arr) {
+          document.getElementById('loadingOverlay').style.display = 'none';
+          var combined = [];
+          if (arr[0] && arr[0].missionData) arr[0].missionData.forEach(function(item){ item._subMode = 'vocab_basic'; combined.push(item); });
+          if (arr[1] && arr[1].missionData) arr[1].missionData.forEach(function(item){ item._subMode = 'grammar'; combined.push(item); });
+          combined.sort(function(){ return 0.5 - Math.random(); });
+          if (combined.length > 0) {
+            startMissionWithQueue(combined.slice(0, 25));
+          } else {
+            showSysMsg("⚠️ 無法載入極限衝刺題庫，請檢查網絡連線", true);
+          }
+        });
+      };
+
+      // 🛠️ 修復 1：徹底重構 Grammar 與各題型渲染一致性（解決說明與實際形式不符、底線/除錯被變漏空問題）
+      renderQuestion = function() {
+        if (currentIdx >= missionQueue.length) return finishMission();
+        var q = missionQueue[currentIdx];
+        if (!q || (!q.Vocabulary && !q.Question && !q.question && !q.Answer && !q.answer)) { currentIdx++; return renderQuestion(); }
+        wrongAttempts = 0; isQuestionLocked = false; alternateValidAnswer = ""; sysMsgBox.style.display = "none";
+
+        var oldHint = document.getElementById("skillHintBar");
+        if (oldHint) oldHint.remove();
+
+        var effectiveMode = q._subMode || (currentMissionType === 'time_rush' ? 'vocab_basic' : (currentMissionType === 'error_drill' ? (q._savedMode || 'vocab_basic') : currentMissionType));
+        currentEnemyMode = effectiveMode.startsWith('vocab') ? 'vocab' : (effectiveMode === 'grammar' ? 'grammar' : 'listening');
+        atbWaitingForAudio = (currentEnemyMode === 'listening');
+
+        document.getElementById('missionProgress').innerText = (isPlayingAbyssalBonus ? "🔥 OVERCLOCK" : ("SYNC: " + (currentIdx+1) + "/" + missionQueue.length));
+        var trackFill = document.getElementById('missionTrackFill');
+        if (trackFill) trackFill.style.width = Math.min(100, Math.round(((currentIdx + 1) / Math.max(1, missionQueue.length)) * 100)) + "%";
+
+        updateActiveBuffsUI();
+        updateBattleEnemy();
+        renderTacticalDock();
+        preloadUpcomingQuestionAssets();
+
+        var imgEl = document.getElementById('qImage');
+        imgEl.classList.remove('loaded');
+        imgEl.src = q.ImageUrl || "";
+        imgEl.onload = function() { imgEl.classList.add('loaded'); };
+
+        var ansArea = document.getElementById('answerArea'); ansArea.innerHTML = "";
+        var audioCont = document.getElementById('qAudioContainer'); audioCont.innerHTML = ""; audioCont.style.display = "none";
+        document.getElementById('submitBtn').style.display = "none";
+
+        var displayQ = "", instructionText = "", renderMode = "INPUT";
+        var isUnderlineCorrection = false;
+        currentBadge = "INTEL";
+
+        if (effectiveMode.startsWith('vocab')) {
+          var baseVocab = String(q.Vocabulary || q.Answer || "").trim();
+          targetCurrentAnswer = baseVocab;
+          var exEn = ""; try { if(q.Example) exEn = JSON.parse(q.Example).en; } catch(e){}
+          var colloc = q.Collocation || "";
+          var derivList = [];
+          try {
+            var parsedD = JSON.parse(q.Derivative || "[]");
+            derivList = Array.isArray(parsedD) ? parsedD : (parsedD && parsedD.word ? [parsedD] : []);
+          } catch(e) {}
+          var hasRoot = q.Root && String(q.Root).trim() !== "" && q.Root !== '""';
+          var r = 0;
+
+          if (effectiveMode === 'vocab_basic') {
+            var basicTypes = [1, 2, 5];
+            if (derivList.length > 0) basicTypes.push(7);
+            r = basicTypes[Math.floor(Math.random() * basicTypes.length)];
+          } else {
+            var advTypes = [];
+            if (exEn) advTypes.push(0);
+            if (hasRoot) advTypes.push(3);
+            if (colloc) advTypes.push(4);
+            advTypes.push(6);
+            r = advTypes[Math.floor(Math.random() * advTypes.length)];
+          }
+
+          if (r===0) {
+            currentBadge="CONTEXT"; instructionText="Fill in the blank with the appropriate word (Meaning: " + (q.Meaning || "") + "):";
+            var match = exEn.match(/\[(.*?)\]/);
+            if (match) {
+              var inside = String(match[1]).trim();
+              if (/[a-zA-Z]/.test(inside)) { targetCurrentAnswer = inside; alternateValidAnswer = baseVocab; }
+              else { targetCurrentAnswer = baseVocab; }
+              displayQ = exEn.replace(/\[.*?\]/g, '___');
+            } else {
+              displayQ = exEn.replace(new RegExp(baseVocab, 'ig'), '___');
+            }
+          }
+          else if (r===1) {
+            currentBadge="AUDIO"; instructionText="Listen and spell the target word:";
+            displayQ="Meaning: " + (q.Meaning || "") + "\nHint: " + getRandomMaskedWord(targetCurrentAnswer) + " ("+(q.Part_of_Speech || q.POS)+")";
+            audioCont.style.display="block";
+            audioCont.innerHTML = '<div class="audio-matrix-2x2"><button class="voice-btn" onclick="playAudioLogic(\''+targetCurrentAnswer.replace(/'/g,"\\'")+'\', false)">🔊 Normal</button><button class="voice-btn" onclick="playAudioLogic(\''+targetCurrentAnswer.replace(/'/g,"\\'")+'\', true)">🐢 Slow</button></div>';
+            playAudioLogic(targetCurrentAnswer, false);
+          }
+          else if (r===2) { currentBadge="SEMANTIC"; instructionText="Choose the correct meaning:"; displayQ="What is the meaning of「 " + targetCurrentAnswer + " 」?"; targetCurrentAnswer=String(q.Meaning).trim(); renderMode="MCQ"; }
+          else if (r===3) {
+            currentBadge="ROOT"; instructionText="Identify the core root meaning:";
+            displayQ="What is the core meaning of the root in「 " + targetCurrentAnswer + " 」?";
+            targetCurrentAnswer = q.Root ? (q.Root.match(/\(([^)]+)\)/)?q.Root.match(/\(([^)]+)\)/)[1]:q.Root) : "";
+            renderMode="MCQ";
+          }
+          else if (r===4) {
+            currentBadge="COLLOCATION";
+            instructionText="Complete the collocation based on the target meaning:";
+            displayQ="Target Meaning: " + (q.Meaning || "") + "\nCollocation: " + String(colloc).replace(new RegExp(targetCurrentAnswer, 'ig'), '___');
+          }
+          else if (r===5) { currentBadge="SPELLING"; instructionText="Translate and spell the English word:"; displayQ="Meaning: "+q.Meaning + "\nHint: " + getRandomMaskedWord(targetCurrentAnswer); }
+          else if (r===6) {
+            currentBadge="VOICE UPLINK"; instructionText="Listen to the pronunciation and type the word:";
+            displayQ="Target: 『 CLASSIFIED 』\nMeaning: "+q.Meaning;
+            audioCont.style.display="block";
+            audioCont.innerHTML = '<div class="audio-matrix-2x2"><button class="voice-btn" onclick="playAudioLogic(\''+targetCurrentAnswer.replace(/'/g,"\\'")+'\', false)">🔊 Normal</button><button class="voice-btn" onclick="playAudioLogic(\''+targetCurrentAnswer.replace(/'/g,"\\'")+'\', true)">🐢 Slow</button></div>';
+            playAudioLogic(targetCurrentAnswer, false);
+          }
+          else if (r===7) {
+            currentBadge="SUFFIX ANALYSIS"; instructionText="Analyze the suffix to identify the part of speech:";
+            var chosenD = derivList[Math.floor(Math.random() * derivList.length)];
+            var rawPos = String(chosenD.pos || "").trim().toLowerCase();
+            var stdPos = POS_STANDARDIZED[rawPos] || (rawPos.charAt(0).toUpperCase() + rawPos.slice(1));
+            targetCurrentAnswer = stdPos;
+            displayQ = "Analyze the suffix to find the part of speech for:\n「 " + chosenD.word + " 」";
+            renderMode = "MCQ";
+          }
+        }
+        else if (effectiveMode === 'grammar') {
+          var rawType = String(q.Type || q.type || "MCQ").trim().toUpperCase();
+          currentBadge = rawType;
+          var rawQuestionStr = String(q.Question || q.question || "").trim();
+          targetCurrentAnswer = String(q.Answer || q.answer || "").trim();
+          var hasDistractors = String(q.Distractors || q.distractors || "").trim().length > 0;
+
+          // 分離題幹自帶嘅英文指示前綴（例如 "Correct the underlined word: ..."）
+          var colonIdxG = rawQuestionStr.indexOf(":");
+          var extractedInst = "";
+          if (colonIdxG > 0 && colonIdxG < 52 && /correct|rewrite|combine|choose|complete|fill|identify|find|change|replace|rearrange|unscramble/i.test(rawQuestionStr.slice(0, colonIdxG))) {
+            extractedInst = rawQuestionStr.slice(0, colonIdxG + 1).trim();
+            displayQ = rawQuestionStr.slice(colonIdxG + 1).trim();
+          } else {
+            displayQ = rawQuestionStr;
+          }
+
+          var bMatch = displayQ.match(/\[(.*?)\]/);
+          var bracketContent = bMatch ? bMatch[1].trim() : "";
+
+          if (rawType === 'BUG_HUNTER' && !isBossPhase) {
+            // 除錯題：保留括號內嘅錯字供點擊，絕不替換成 "..."
+            displayQ = displayQ.replace(/\[(.*?)\]/g, "$1");
+            instructionText = "🐞 點擊句子中語法錯誤的字詞 (Tap on the incorrect word in the sentence):";
+            renderMode = "BUG_HUNTER";
+          }
+          else if (rawType === 'UNSCRAMBLE') {
+            displayQ = displayQ.replace(/\[(.*?)\]/g, "$1");
+            instructionText = "🧩 按正確語法順序點擊單字重組句子 (Rearrange the fragments in order):";
+            renderMode = "UNSCRAMBLE";
+          }
+          else if (bMatch && /[a-zA-Z]/.test(bracketContent) && bracketContent.toLowerCase() !== targetCurrentAnswer.toLowerCase()) {
+            // 括號內係「待修正嘅錯字或原形動詞」（如 He [go] to school）-> 渲染為紅色底線字！
+            isUnderlineCorrection = true;
+            if (hasDistractors || isBossPhase) {
+              instructionText = extractedInst || "🔍 選出正確的語法形式替換紅線字詞 (Select the correct replacement for the underlined word):";
+              renderMode = "MCQ";
+            } else {
+              instructionText = extractedInst || "✏️ 輸入正確的語法形式替換紅線字詞 (Type the correct form for the underlined word):";
+              renderMode = "INPUT";
+            }
+          }
+          else {
+            // 標準填空題或選擇題：將 [answer] 或 [...] 統一轉為 ___
+            displayQ = displayQ.replace(/\[.*?\]/g, "___");
+            if (hasDistractors || isBossPhase) {
+              instructionText = extractedInst || "📐 選擇最佳語法選項完成句子 (Select the best option to complete the sentence):";
+              renderMode = "MCQ";
+            } else {
+              instructionText = extractedInst || "✏️ 在輸入框填入正確的語法詞形 (Type the correct grammatical form):";
+              renderMode = "INPUT";
+            }
+          }
+        }
+        else if (effectiveMode === 'listening') {
+          currentBadge = String(q.Type || q.type || "AUDIO LOG").trim().toUpperCase();
+          displayQ = String(q.Question || q.question || "").replace(/\[.*?\]/g, "___");
+          targetCurrentAnswer = String(q.Answer || q.answer || "").trim();
+          currentListeningScript = "";
+          for(var k in q){ if(typeof q[k]==='string' && q[k].indexOf('"role"')>-1){ currentListeningScript=q[k]; break; } }
+
+          var commsHtml = "";
+          try {
+            var parsedLines = JSON.parse(currentListeningScript || "[]");
+            if (Array.isArray(parsedLines) && parsedLines.length > 0) {
+              commsHtml = '<div class="comms-chat-box">' + parsedLines.map(function(line, lIdx) {
+                var wordsLen = String(line.text_en || line.text || "").split(/\s+/).length;
+                var maskBar = "▮".repeat(Math.min(18, Math.max(5, wordsLen * 2)));
+                return '<div class="comms-bubble" onclick="playSingleDialogueLine(' + lIdx + ')"><span style="color:var(--accent-gold); font-weight:900; font-family:monospace;">📻 #' + (lIdx + 1) + ' [' + (line.role || "Agent") + ']</span><span style="color:var(--noah-cyan); font-family:monospace; letter-spacing:1px; flex:1;">' + maskBar + ' (點擊播音)</span></div>';
+              }).join("") + '</div>';
+            }
+          } catch(e) {}
+
+          audioCont.style.display="block";
+          audioCont.innerHTML = commsHtml +
+            '<div class="audio-matrix-3col">' +
+            '<button class="voice-btn" onclick="playListeningAudio(1.0)">🔊 Normal</button>' +
+            '<button class="voice-btn" onclick="playListeningAudio(0.85)">🚶 Slow</button>' +
+            '<button class="voice-btn" onclick="playListeningAudio(0.7)">🐢 Slower</button>' +
+            '</div>';
+
+          if (currentBadge === 'TFNG' || currentBadge === 'T/F/NG') {
+            instructionText = "🎧 聆聽錄音並核實情報真偽 (True / False / Not Given):";
+            renderMode = "TFNG_STAMP";
+          } else if (currentBadge === 'SEQUENCE' && !isBossPhase) {
+            instructionText = "🎧 聆聽錄音並按發生順序排列事件 (Tap events in chronological order):";
+            renderMode = "UNSCRAMBLE";
+          } else {
+            var hasDistL = String(q.Distractors || q.distractors || "").trim().length > 0;
+            instructionText = hasDistL ? "🎧 聆聽錄音並選出正確答案 (Listen and select the correct answer):" : "🎧 聆聽錄音並填入關鍵答案 (Listen and type the answer):";
+            renderMode = (hasDistL || isBossPhase) ? "MCQ" : "INPUT";
+          }
+        }
+
+        document.getElementById('qTypeBadge').innerText = currentBadge;
+        document.getElementById('qInstruction').innerText = instructionText;
+
+        var qTextEl = document.getElementById('qText');
+        if (isUnderlineCorrection) {
+          qTextEl.innerHTML = displayQ.replace(/\[(.*?)\]/g, '<span class="error-underline">$1</span>');
+        } else {
+          displayQ = displayQ.replace(/\[.*?\]/g, '___');
+          qTextEl.innerText = displayQ;
+        }
+
+        // 若處於守門 Boss 階段（且非 UNSCRAMBLE 句子重組題），啟動專屬 Boss 破防介面並同步指示語
+        if (isBossPhase && !isTimeRushMode && renderMode !== "UNSCRAMBLE") {
+          renderSpecializedBossArena(effectiveMode, q, ansArea);
+          applyBossPressure();
+          applyQuestionAuras(q);
+          startEnemyAtbTimer();
+          return;
+        }
+
+        if (renderMode === "BUG_HUNTER") {
+          var cleanQ = displayQ.replace(/[\[\]]/g, "");
+          qTextEl.innerText = cleanQ;
+          var tokens = cleanQ.split(/\s+/);
+          var tokensBox = document.createElement('div');
+          tokensBox.className = "bug-tokens-container";
+          tokens.forEach(function(w) {
+            var btn = document.createElement('span');
+            btn.className = "token-chip bug-chip";
+            btn.innerText = w;
+            btn.onclick = function(e) {
+              var cleanedWord = w.replace(/^[^a-zA-Z0-9']+|[^a-zA-Z0-9']+$/g, "");
+              checkAnswer(cleanedWord, e.target);
+            };
+            tokensBox.appendChild(btn);
+          });
+          ansArea.appendChild(tokensBox);
+        }
+        else if (renderMode === "TFNG_STAMP") {
+          var stampGrid = document.createElement('div');
+          stampGrid.className = "tfng-stamp-grid";
+          var stamps = [
+            { val: "True", label: "🟢 [ CONFIRMED // TRUE ]", sub: "情報屬實", cls: "stamp-true" },
+            { val: "False", label: "🔴 [ COMPROMISED // FALSE ]", sub: "情報造假", cls: "stamp-false" },
+            { val: "Not Given", label: "⚪ [ UNVERIFIED // NOT GIVEN ]", sub: "無從考證", cls: "stamp-ng" }
+          ];
+          stamps.forEach(function(st) {
+            var b = document.createElement('button');
+            b.className = "option-btn tfng-stamp-btn " + st.cls;
+            b.setAttribute("data-opt-val", st.val);
+            b.innerHTML = '<span>' + st.label + '</span><span style="font-size:11px; opacity:0.8;">' + st.sub + '</span>';
+            b.onclick = function() { handleOptionTap(st.val, b); };
+            stampGrid.appendChild(b);
+          });
+          ansArea.appendChild(stampGrid);
+        }
+        else if (renderMode === "INPUT") {
+          var isLongPhrase = (targetCurrentAnswer.length > 12 || targetCurrentAnswer.indexOf(" ") !== -1);
+          var hasInlineBlank = false;
+          if (!isUnderlineCorrection && !isLongPhrase && (displayQ.indexOf('...') !== -1 || displayQ.indexOf('___') !== -1)) {
+            qTextEl.innerHTML = displayQ.replace(/\.\.\.+|_{3,}/g, '<input type="text" id="userIn" class="inline-input" autocomplete="off">');
+            hasInlineBlank = true;
+          } else if (!isUnderlineCorrection && (displayQ.indexOf('...') !== -1 || displayQ.indexOf('___') !== -1)) {
+            qTextEl.innerHTML = displayQ.replace(/\.\.\.+|_{3,}/g, '<span style="color:var(--accent-gold); font-family:monospace;">[ ______ ]</span>');
+          }
+          if (!hasInlineBlank) {
+            ansArea.innerHTML = '<input type="text" id="userIn" class="input-field" placeholder="請在此輸入答案 (Type your answer)..." autocomplete="off">';
+          }
+          document.getElementById('submitBtn').style.display = "block";
+          setTimeout(function() {
+            var uIn = document.getElementById('userIn');
+            if (uIn) { uIn.focus(); uIn.addEventListener("keypress", function(e) { if (e.key === "Enter") checkAnswer(); }); }
+          }, 80);
+        }
+        else if (renderMode === "UNSCRAMBLE") {
+          var sl = document.createElement('div'); sl.className="answer-slots"; sl.id="uSlots";
+          var po = document.createElement('div'); po.className="word-chips-container";
+          var delimiter = (targetCurrentAnswer.indexOf("|") !== -1) ? "|" : " ";
+          targetCurrentAnswer.split(delimiter).map(function(s){ return s.trim(); }).filter(Boolean).sort(function(){return 0.5-Math.random();}).forEach(function(w){
+            var c = document.createElement('div'); c.className="chip"; c.innerText=w;
+            c.onclick = function(){
+              if(c.classList.contains('used')||isQuestionLocked) return;
+              c.classList.add('used'); playSFX('click');
+              var s = document.createElement('div'); s.className="chip"; s.innerText=w;
+              s.onclick = function(){ if(isQuestionLocked) return; c.classList.remove('used'); s.remove(); playSFX('click'); };
+              sl.appendChild(s);
+            };
+            po.appendChild(c);
+          });
+          ansArea.appendChild(sl); ansArea.appendChild(po); document.getElementById('submitBtn').style.display = "block";
+        }
+        else if (renderMode === "MCQ") {
+          var grid = document.createElement('div'); grid.className = "options-grid";
+          var opts = buildBossOptionsSet(q, effectiveMode);
+          var keys = ["A", "B", "C", "D", "E"];
+          opts.forEach(function(o, idx){
+            var b = document.createElement('button');
+            b.className = 'option-btn has-key-badge' + (currentStance === 'wirecut' ? ' wirecut-mode' : '');
+            b.setAttribute("data-opt-val", o);
+            b.innerHTML = '<span class="opt-key-badge">' + (keys[idx] || (idx + 1)) + '</span><span style="flex:1;">' + o + '</span>';
+            b.onclick = function() { handleOptionTap(o, b); };
+            grid.appendChild(b);
+          });
+          ansArea.appendChild(grid);
+        }
+
+        if (currentIdx === 0 && resonanceState().leaderScribes && !scribeMarked) {
+          scribeMarked = true;
+          setTimeout(function() { excludeWrong(1); }, 300);
+        }
+        applyQuestionAuras(q);
+        startEnemyAtbTimer();
+      };
+
+      // 🛠️ 修復 8：在每題結算面板 (#feedback-panel) 加入「🚩 回報題目異常」功能，直通 Google Sheets
+      var _v266OrigShowFeedback = showStandardFeedbackPanel;
+      showStandardFeedbackPanel = function(q, correct) {
+        _v266OrigShowFeedback(q, correct);
+        injectQuestionReportUI(q);
+      };
+
+      function injectQuestionReportUI(q) {
+        var fbContent = document.getElementById('feedbackContent');
+        if (!fbContent || document.getElementById('qReportBox')) return;
+        var qId = (q && (q.Question_ID || q.id)) || ("IDX_" + currentIdx);
+        var reportHtml =
+          '<div id="qReportBox" style="margin-top:10px; padding-top:8px; border-top:1px dashed rgba(255,255,255,0.12); display:flex; flex-direction:column; gap:6px;">' +
+            '<div style="display:flex; justify-content:space-between; align-items:center;">' +
+              '<span style="font-size:10px; color:#64748b; font-family:monospace;">ID: ' + qId + ' [' + currentBadge + ']</span>' +
+              '<button type="button" onclick="toggleReportDrawer()" style="background:rgba(255,51,102,0.12); border:1px solid rgba(255,51,102,0.45); color:#ff6b81; border-radius:6px; font-size:11px; padding:3px 8px; cursor:pointer; font-weight:bold;">🚩 回報題目問題</button>' +
+            '</div>' +
+            '<div id="qReportDrawer" style="display:none; background:rgba(0,0,0,0.55); border:1px solid rgba(255,51,102,0.4); border-radius:10px; padding:8px;">' +
+              '<div style="font-size:11px; color:#cbd5e1; margin-bottom:6px;">請點選此題目需要修正嘅地方（會直接記錄至導師試算表）：</div>' +
+              '<div style="display:grid; grid-template-columns:1fr 1fr; gap:5px; margin-bottom:6px;">' +
+                '<button type="button" class="voice-btn" style="font-size:11px; padding:5px;" onclick="submitQuestionReport(\'答案或解釋有誤\')">❓ 答案/解釋有誤</button>' +
+                '<button type="button" class="voice-btn" style="font-size:11px; padding:5px;" onclick="submitQuestionReport(\'題目說明與形式不符\')">📝 說明/形式不符</button>' +
+                '<button type="button" class="voice-btn" style="font-size:11px; padding:5px;" onclick="submitQuestionReport(\'語音或圖片異常\')">🔊 語音/圖片異常</button>' +
+                '<button type="button" class="voice-btn" style="font-size:11px; padding:5px;" onclick="submitQuestionReport(\'其他出題Bug\')">💻 其他顯示異常</button>' +
+              '</div>' +
+              '<input type="text" id="qReportCustomNote" class="input-field" style="margin:0; padding:6px 10px; font-size:12px;" placeholder="補充備註（選填，再點上方分類即可送出）">' +
+            '</div>' +
+          '</div>';
+        fbContent.insertAdjacentHTML('beforeend', reportHtml);
+      }
+
+      function toggleReportDrawer() {
+        playSFX('click');
+        var dr = document.getElementById('qReportDrawer');
+        if (dr) dr.style.display = (dr.style.display === 'none') ? 'block' : 'none';
+      }
+
+      function submitQuestionReport(issueType) {
+        playSFX('click');
+        var q = missionQueue[currentIdx] || {};
+        var noteEl = document.getElementById('qReportCustomNote');
+        var note = noteEl ? noteEl.value.trim() : "";
+        var qTextShown = document.getElementById('qText') ? document.getElementById('qText').innerText : "";
+        var instShown = document.getElementById('qInstruction') ? document.getElementById('qInstruction').innerText : "";
+
+        var box = document.getElementById('qReportBox');
+        if (box) box.innerHTML = '<div style="color:var(--accent-gold); font-size:12px; font-weight:bold; text-align:center; padding:4px;">📡 正在傳送回報至導師資料庫...</div>';
+
+        fetch(API_URL, {
+          method: 'POST', headers: { 'Content-Type': 'text/plain' },
+          body: JSON.stringify({
+            action: 'reportQuestionIssue',
+            studentId: currentUserData ? currentUserData.studentId : 'GUEST',
+            studentName: currentUserData ? currentUserData.name : 'Unknown',
+            missionType: currentMissionType,
+            badgeType: currentBadge,
+            questionId: q.Question_ID || q.id || ("IDX_" + currentIdx),
+            questionText: "[" + instShown + "] " + qTextShown,
+            targetAnswer: targetCurrentAnswer,
+            issueType: issueType,
+            note: note
+          })
+        }).then(function() {
+          if (box) box.innerHTML = '<div style="color:var(--accent-green); font-size:12px; font-weight:bold; text-align:center; padding:4px;">✅ 已記錄至試算表！感謝艦長協助完善題庫！</div>';
+        }).catch(function() {
+          if (box) box.innerHTML = '<div style="color:var(--accent-green); font-size:12px; font-weight:bold; text-align:center; padding:4px;">✅ 已記錄回報！感謝艦長！</div>';
+        });
+      }
+
+      // 🛠️ 修復 7：為作戰會議室 (#briefingRoom) 注入「📟 小隊戰術配置與技能總覽艙」，解決下半部空曠問題
+      function renderBriefingTacticalTelemetry() {
+        var room = document.getElementById('briefingRoom');
+        if (!room) return;
+        var box = document.getElementById('briefingTelemetryPod');
+        if (!box) {
+          box = document.createElement('div');
+          box.id = 'briefingTelemetryPod';
+          var anchor = document.getElementById('factionResonanceBar');
+          if (anchor) anchor.insertAdjacentElement('afterend', box);
+          else room.appendChild(box);
+        }
+
+        var activePresetNum = playerPresets.active || 1;
+        var skillRows = battleSquad.map(function(op, idx) {
+          var roleBadge = idx === 0 ? "👑隊長" : ("#" + (idx + 1));
+          return '<div style="display:flex; justify-content:space-between; align-items:center; padding:4px 0; border-bottom:1px dashed rgba(255,255,255,0.08); font-size:11px;">' +
+            '<span style="color:#fff; font-weight:bold;">' + roleBadge + ' ' + String(op.nameZh || "幹員").replace(/【.*?】/g, "") + '</span>' +
+            '<span style="color:var(--noah-cyan); font-family:monospace;">⚡' + (op.activeSkill || "戰術") + ' (' + effectiveSkillCost(op) + 'SP)' + (op.passiveSkill ? ' · 🔮' + op.passiveSkill : '') + '</span>' +
+          '</div>';
+        }).join("");
+
+        if (!skillRows) {
+          skillRows = '<div style="color:#888; font-size:12px; padding:8px; text-align:center;">尚未編入幹員，請點擊下方【小隊編成】配置出戰陣容。</div>';
+        }
+
+        box.innerHTML =
+          '<div style="background:rgba(4,12,22,0.85); border:1px solid rgba(0,229,255,0.28); border-radius:14px; padding:10px 12px; margin-bottom:10px; text-align:left;">' +
+            '<div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px; padding-bottom:4px; border-bottom:1px solid rgba(0,229,255,0.2);">' +
+              '<span style="font-size:11px; font-family:monospace; color:var(--accent-gold); font-weight:900;">📟 SQUAD TELEMETRY // 出戰技能與快速切換</span>' +
+              '<div style="display:flex; gap:4px;">' +
+                [1, 2, 3].map(function(n) {
+                  var isAct = (n === activePresetNum);
+                  return '<button type="button" onclick="quickSwitchBriefingPreset(' + n + ')" style="background:' + (isAct ? 'var(--accent-gold)' : 'rgba(255,255,255,0.08)') + '; color:' + (isAct ? '#000' : '#ccc') + '; border:1px solid ' + (isAct ? 'var(--accent-gold)' : '#444') + '; border-radius:6px; font-size:10px; font-weight:bold; padding:2px 7px; cursor:pointer;">小隊' + n + '</button>';
+                }).join("") +
+              '</div>' +
+            '</div>' +
+            skillRows +
+          '</div>';
+      }
+
+      function quickSwitchBriefingPreset(n) {
+        playSFX('click');
+        playerPresets.active = n;
+        buildActiveBattleSquad();
+        renderBriefingRoomSquad();
+        showSysMsg("⚡ 已切換至【小隊 " + n + "】出戰！", false);
+      }
 
       function initV265CockpitDOM() {
         var stageBox = document.getElementById('battleStageBox');
@@ -5631,7 +6228,6 @@
           if (dock && dock.parentElement !== stageBox) stageBox.appendChild(dock);
         }
 
-        // 🚀 修正：精準只修改數字上方嘅標題 sibling，絕不破壞 #dashCoins 標籤
         var dashCoinsEl = document.getElementById('dashCoins');
         if (dashCoinsEl && dashCoinsEl.parentElement && dashCoinsEl.parentElement.parentElement) {
           dashCoinsEl.parentElement.parentElement.classList.add('dash-compact-stats');
@@ -5671,7 +6267,7 @@
               '<div id="podIntelEx" style="font-size:11px; color:#94a3b8; font-style:italic;"></div>' +
             '</div>' +
             '<div style="display:flex; justify-content:space-between; font-size:10px; color:#64748b; font-family:monospace;">' +
-              '<span>🛰️ N.O.A.H. HUB v26.5</span>' +
+              '<span>🛰️ N.O.A.H. HUB v26.6</span>' +
               '<span>🎁 連登補給最高 +300 點/日</span>' +
             '</div>';
           loginScr.appendChild(pod);
@@ -5744,6 +6340,7 @@
           bindLongPress(el, (function(card){ return function(){ openOperatorDetailModal(card); }; })(op), (function(card){ return function(){ openOperatorDetailModal(card); }; })(op));
         }
         renderFactionResonance();
+        renderBriefingTacticalTelemetry();
       };
 
       triggerSquadBanter = function(eventType) {
@@ -5763,25 +6360,11 @@
         }, 3200);
       };
 
-      var _v265OrigRenderQuestion = renderQuestion;
-      renderQuestion = function() {
-        _v265OrigRenderQuestion();
-        var keys = ["A", "B", "C", "D", "E"];
-        var optBtns = document.querySelectorAll('#answerArea .options-grid .option-btn');
-        optBtns.forEach(function(btn, idx) {
-          if (btn.querySelector('.opt-key-badge')) return;
-          var rawText = btn.getAttribute("data-opt-val") || btn.innerText.trim();
-          btn.setAttribute("data-opt-val", rawText);
-          btn.classList.add("has-key-badge");
-          btn.innerHTML = '<span class="opt-key-badge">' + (keys[idx] || (idx + 1)) + '</span><span style="flex:1;">' + rawText + '</span>';
-        });
-      };
-
       initV265CockpitDOM();
       window.addEventListener("load", initV265CockpitDOM);
     </script>
 
-    <!-- 🎨 V26.5 機甲座艙獨立樣式表 (原生 <style> 標籤，GitHub 100% 彩色語法高亮) -->
+    <!-- 🎨 V26.6 機甲座艙與 iPad 自適應樣式表 -->
     <style id="v265-cockpit-styles">
       /* --- 1. 登入畫面：待機情報艙 --- */
       #loginStandbyPod {
@@ -5823,13 +6406,13 @@
       .dash-compact-stats > div > div:first-child { font-size: 10px !important; white-space: nowrap; }
       .dash-compact-stats > div > div:last-child { font-size: 16px !important; margin-top: 2px; }
 
-      /* --- 3. 作戰會議室：5 人直立式全身卡陣 --- */
+      /* --- 3. 作戰會議室：加高版 5 人直立式全身卡陣 --- */
       #briefingSquadPreview.squad-view {
         display: grid !important; grid-template-columns: repeat(5, 1fr) !important;
-        gap: 6px !important; margin: 10px 0 12px !important;
+        gap: 6px !important; margin: 8px 0 10px !important;
       }
       #briefingSquadPreview .squad-row { display: contents !important; }
-      #briefingSquadPreview .op-frame { height: 148px !important; border-radius: 10px !important; }
+      #briefingSquadPreview .op-frame { height: 182px !important; border-radius: 10px !important; }
       #briefingSquadPreview .op-frame.leader {
         border: 2px solid var(--accent-gold) !important;
         box-shadow: 0 0 14px rgba(241, 196, 15, 0.35);
@@ -5837,7 +6420,30 @@
       #briefingSquadPreview .op-frame img { object-fit: cover !important; object-position: center top !important; }
       #briefingSquadPreview .op-frame .bust-name { font-size: 9px !important; padding: 8px 2px 3px !important; line-height: 1.15; }
 
-      /* --- 4. 戰鬥舞台：右翼單列 5 人幹員槽 & HUD 全面整合 --- */
+      /* --- 4. 修復 iPad 抽卡結算畫面按鈕被裁切問題 --- */
+      #gachaStageReveal {
+        overflow-y: auto !important;
+        padding: 12px 12px calc(22px + env(safe-area-inset-bottom)) 12px !important;
+      }
+      .gacha-cards-container.layout-10 {
+        max-height: 62dvh !important;
+        max-width: min(430px, 88vw) !important;
+      }
+      .layout-single .gacha-card-wrapper {
+        height: min(54dvh, 330px) !important;
+        width: calc(min(54dvh, 330px) * 0.66) !important;
+      }
+      #gachaActionButtons {
+        position: sticky !important;
+        bottom: 4px !important;
+        flex-shrink: 0 !important;
+        background: rgba(4, 10, 18, 0.92) !important;
+        padding: 8px !important;
+        border-radius: 14px !important;
+        border: 1px solid rgba(0, 229, 255, 0.25) !important;
+      }
+
+      /* --- 5. 戰鬥舞台：右翼單列 5 人幹員槽 & HUD 全面整合 --- */
       #battleStageBox.q-image-box { height: 236px !important; margin-bottom: 10px !important; }
       #battleStageBox .enemy-sprite { left: 41% !important; bottom: 8px !important; max-width: 72% !important; }
       #battleStageBox .enemy-hp-plate { top: 8px !important; right: 64px !important; padding: 3px 8px !important; }
@@ -5902,7 +6508,7 @@
         padding: 5px 9px !important; font-size: 11px !important; transition: opacity 0.35s ease;
       }
 
-      /* --- 5. 答題選項 [A] [B] [C] [D] 戰術序號章 --- */
+      /* --- 6. 答題選項 [A] [B] [C] [D] 戰術序號章 --- */
       .opt-key-badge {
         display: inline-flex; align-items: center; justify-content: center;
         width: 22px; height: 22px; border-radius: 6px; margin-right: 8px;
