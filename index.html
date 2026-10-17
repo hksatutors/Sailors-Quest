@@ -1902,8 +1902,22 @@
         if(isBgmPlaying) { bgmPlayer.volume = isMissionActive ? 0.16 : 0.3; bgmPlayer.play().catch(function(){}); btn.innerText = "🔊"; } 
         else { bgmPlayer.pause(); btn.innerText = "🔇"; } 
       }
-      function duckBGM() { if(isBgmPlaying) bgmPlayer.volume = 0.02; }
-      function unduckBGM() { if(isBgmPlaying) bgmPlayer.volume = isMissionActive ? 0.16 : 0.3; }
+      function isTutorialShowing() {
+        var tut = document.getElementById('tutorialOverlay');
+        return tut && tut.style.display === 'flex';
+      }
+      function duckBGM() { 
+        if (isBgmPlaying) bgmPlayer.volume = 0.03; 
+      }
+      function unduckBGM() { 
+        if (!isBgmPlaying) return;
+        // 🚀 只要教學視窗仲開緊，全程保持 0.03 細聲，唔會播完一句就突然大聲返
+        if (isTutorialShowing()) {
+          bgmPlayer.volume = 0.03;
+        } else {
+          bgmPlayer.volume = isMissionActive ? 0.16 : 0.3; 
+        }
+      }
 
       function showSysMsg(msg, isError) { 
         sysMsgBox.style.display = "block";
@@ -2604,8 +2618,11 @@
         updateLobbyAdjutant();
         document.getElementById('tutPickKaelBtn').style.background = (navId === 'kael') ? 'rgba(0,229,255,0.25)' : 'rgba(255,255,255,0.05)';
         document.getElementById('tutPickLyraBtn').style.background = (navId === 'lyra') ? 'rgba(241,196,15,0.25)' : 'rgba(255,255,255,0.05)';
-        var nav = NAVIGATOR_POOL[navId];
-        playSpecificVoiceTTS(nav.quotes[0].en, nav.voiceId, nav.gender, false);
+        
+        var nav = NAVIGATOR_POOL[navId] || NAVIGATOR_POOL.lyra;
+        // 🚀 修正：直接調用 R2 預錄語音 (kael_quote_1.mp3 / lyra_quote_1.mp3)，唔再用網頁 TTS
+        playNavigatorClipOrTTS(nav.quotes[0].audioUrl, nav.quotes[0].en, nav);
+        
         showSysMsg("🎙️ 已選擇【" + nav.nameZh + "】作為你嘅主控台導航員！", false);
         checkTutorialFinalReady();
       }
@@ -2707,6 +2724,7 @@
       function finishTutorial() {
         localStorage.setItem('noah_tutorial_' + currentUserData.studentId, '1');
         document.getElementById('tutorialOverlay').style.display = 'none';
+        unduckBGM(); // 🚀 教學結束，恢復大廳正常 BGM 音量
         showSysMsg("🎉 歡迎就任！快去招募終端進行首次十連抽吧！", false);
         setTimeout(function() { claimDailySupply(); }, 600);
       }
