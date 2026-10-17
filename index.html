@@ -5631,16 +5631,23 @@
           if (dock && dock.parentElement !== stageBox) stageBox.appendChild(dock);
         }
 
+        // 🚀 修正：精準只修改數字上方嘅標題 sibling，絕不破壞 #dashCoins 標籤
         var dashCoinsEl = document.getElementById('dashCoins');
         if (dashCoinsEl && dashCoinsEl.parentElement && dashCoinsEl.parentElement.parentElement) {
-          var statsGrid = dashCoinsEl.parentElement.parentElement;
-          statsGrid.classList.add('dash-compact-stats');
-          var labels = statsGrid.querySelectorAll('div > div:first-child');
-          if (labels[0]) labels[0].innerText = "💰 信用點";
-          if (labels[1]) labels[1].innerText = "✨ 總 EXP";
-          if (labels[2]) labels[2].innerText = "🎯 任務數";
-          if (labels[3]) labels[3].innerText = "💾 數據量";
+          dashCoinsEl.parentElement.parentElement.classList.add('dash-compact-stats');
         }
+        var statPairs = [
+          { id: 'dashCoins', label: '💰 信用點' },
+          { id: 'dashExp', label: '✨ 總 EXP' },
+          { id: 'dashTotalMissions', label: '🎯 任務數' },
+          { id: 'dashTotalQuestions', label: '💾 數據量' }
+        ];
+        statPairs.forEach(function(pair) {
+          var valEl = document.getElementById(pair.id);
+          if (valEl && valEl.previousElementSibling) {
+            valEl.previousElementSibling.innerText = pair.label;
+          }
+        });
 
         var loginScr = document.getElementById('loginScreen');
         if (loginScr && !document.getElementById('loginStandbyPod')) {
