@@ -5603,7 +5603,7 @@
       });
 
       // ==========================================
-      // 🚀 V26.6 全方位除錯與機甲座艙升級補丁 (Fixes 1 - 8)
+      // 🚀 V26.7 語音全面修復 + 4大新題型 + 新教材特訓懸賞補丁
       // ==========================================
       var DAILY_INTEL_QUOTES = [
         { en: "Bite the bullet", zh: "硬著頭皮上；勇敢面對困難", ex: "I had to bite the bullet and finish the tough grammar drill." },
@@ -5616,45 +5616,56 @@
       ];
       var currentDailyIntelIdx = Math.floor(Math.random() * DAILY_INTEL_QUOTES.length);
       var banterFadeTimeout = null;
-      var voiceAudioCtx = null, voiceGainNode = null;
 
-      // 🛠️ 修復 6：Web Audio API 語音擴大器 (1.75x 音量增益) + 播音時徹底暫停 BGM 釋放硬件聲道
-      function ensureVoiceBooster() {
-        if (voiceAudioCtx) {
-          if (voiceAudioCtx.state === 'suspended') voiceAudioCtx.resume().catch(function(){});
-          return;
-        }
-        try {
-          var AudioCtx = window.AudioContext || window.webkitAudioContext;
-          if (!AudioCtx || !elevenPlayer) return;
-          elevenPlayer.crossOrigin = "anonymous";
-          voiceAudioCtx = new AudioCtx();
-          var source = voiceAudioCtx.createMediaElementSource(elevenPlayer);
-          voiceGainNode = voiceAudioCtx.createGain();
-          voiceGainNode.gain.value = 1.75; // 放大 175% 語音音量
-          source.connect(voiceGainNode);
-          voiceGainNode.connect(voiceAudioCtx.destination);
-        } catch (e) {}
+      // 🔊 修復 1：徹底移除會觸發 CORS 封鎖嘅 crossOrigin 與 createMediaElementSource！
+      // 確保 Cloudflare R2 MP3 及 ElevenLabs Base64 音檔 100% 原生順暢播放！
+      if (elevenPlayer) {
+        elevenPlayer.removeAttribute("crossorigin");
+        elevenPlayer.volume = 1.0;
       }
 
       duckBGM = function() {
-        elevenPlayer.volume = 1.0;
-        ensureVoiceBooster();
-        if (isBgmPlaying) {
+        if (elevenPlayer) elevenPlayer.volume = 1.0;
+        if (isBgmPlaying && bgmPlayer) {
           bgmPlayer.volume = 0.02;
-          bgmPlayer.pause(); // 暫停 BGM 防止 iOS/iPadOS 壓縮語音音量
+          bgmPlayer.pause(); // 播語音時暫停 BGM，讓 iOS/Android 將 100% 音量分配給語音
         }
       };
 
       unduckBGM = function() {
-        if (!isBgmPlaying) return;
+        if (!isBgmPlaying || !bgmPlayer) return;
         var tut = document.getElementById('tutorialOverlay');
         var isTut = tut && tut.style.display === 'flex';
         bgmPlayer.volume = isTut ? 0.03 : (isMissionActive ? 0.14 : 0.28);
         bgmPlayer.play().catch(function(){});
       };
 
-      // 🛠️ 修復 5：過濾無效差分網址，並在圖片載入失敗時自動退回標準立繪，杜絕「?」破圖
+      // 優先播放 R2 預錄檔，失敗時安全切換至後台 ElevenLabs
+      playNavigatorClipOrTTS = function(r2AudioUrl, fallbackText, navObj) {
+        var nav = navObj || NAVIGATOR_POOL[currentNavigatorId] || NAVIGATOR_POOL.lyra;
+        if (!r2AudioUrl) {
+          playSpecificVoiceTTS(fallbackText, nav.voiceId, nav.gender, false);
+          return;
+        }
+        duckBGM();
+        elevenPlayer.removeAttribute("crossorigin");
+        elevenPlayer.onerror = function() {
+          elevenPlayer.onerror = null;
+          playSpecificVoiceTTS(fallbackText, nav.voiceId, nav.gender, false);
+        };
+        elevenPlayer.onended = unduckBGM;
+        elevenPlayer.src = r2AudioUrl;
+        elevenPlayer.playbackRate = 1.0;
+        var p = elevenPlayer.play();
+        if (p && p.catch) {
+          p.catch(function() {
+            elevenPlayer.onerror = null;
+            playSpecificVoiceTTS(fallbackText, nav.voiceId, nav.gender, false);
+          });
+        }
+      };
+
+      // 🛠️ 過濾無效差分網址，杜絕「?」破圖
       function cleanValidAssetUrl(u, fallbackUrl) {
         var s = String(u || "").trim();
         if (!s || s === "?" || s === "-" || s.toLowerCase() === "none" || s.toLowerCase() === "n/a" || s.toLowerCase() === "null") {
@@ -5706,7 +5717,7 @@
         _v266OrigCastSkill(opIdx);
       };
 
-      // 🛠️ 修復 2：嚴格限制 excludeWrong 只作用於 #answerArea 內嘅選項，並修復航道分支鎖死問題
+      // 🛠️ 嚴格限制 excludeWrong 只作用於 #answerArea 內嘅選項，修復航道分支鎖死
       excludeWrong = function(n) {
         var wrong = Array.from(document.querySelectorAll("#answerArea .option-btn, #answerArea .tfng-stamp-btn, #answerArea .circuit-socket-btn, #answerArea .sniper-drone-target")).filter(function(b) {
           var val = b.getAttribute("data-opt-val") || b.innerText.trim();
@@ -5746,38 +5757,72 @@
         renderQuestion();
       };
 
-      // 🛠️ 修復 3：極限衝刺 (Time Rush) 繞過後台每日完成鎖定，無差別從生字＋文法全題庫抽題
+      // 🛠️ 升級：支援「⏱️ 極限衝刺 (time_rush)」與「🚨 本週新教材特訓 (latest_module_bounty)」
       var _v266OrigExecuteMission = executeMission;
       executeMission = function() {
-        if (currentMissionType !== 'time_rush') {
-          _v266OrigExecuteMission();
+        if (currentMissionType === 'time_rush') {
+          playSFX('click');
+          isTimeRushMode = true;
+          currentEnemyMode = 'vocab';
+          document.getElementById('loadingOverlay').style.display = 'flex';
+          var rushBypassId = (currentUserData ? currentUserData.studentId : "CAPTAIN") + "_RUSH_" + Math.floor(Math.random() * 9999);
+          Promise.all([
+            fetch(API_URL, { method: 'POST', headers: { 'Content-Type': 'text/plain' }, body: JSON.stringify({ action: 'fetchMissionData', studentId: rushBypassId, missionType: 'vocab_basic', pool: 'Vocab_Pool', count: 15, ignoreSRS: true }) }).then(function(r){ return r.json(); }).catch(function(){ return null; }),
+            fetch(API_URL, { method: 'POST', headers: { 'Content-Type': 'text/plain' }, body: JSON.stringify({ action: 'fetchMissionData', studentId: rushBypassId, missionType: 'grammar', pool: 'Grammar_Pool', count: 10, ignoreSRS: true }) }).then(function(r){ return r.json(); }).catch(function(){ return null; })
+          ]).then(function(arr) {
+            document.getElementById('loadingOverlay').style.display = 'none';
+            var combined = [];
+            if (arr[0] && arr[0].missionData) arr[0].missionData.forEach(function(item){ item._subMode = 'vocab_basic'; combined.push(item); });
+            if (arr[1] && arr[1].missionData) arr[1].missionData.forEach(function(item){ item._subMode = 'grammar'; combined.push(item); });
+            combined.sort(function(){ return 0.5 - Math.random(); });
+            if (combined.length > 0) startMissionWithQueue(combined.slice(0, 25));
+            else showSysMsg("⚠️ 無法載入極限衝刺題庫，請檢查網絡連線", true);
+          });
           return;
         }
-        playSFX('click');
-        isTimeRushMode = true;
-        currentEnemyMode = 'vocab';
-        document.getElementById('loadingOverlay').style.display = 'flex';
 
-        // 使用隨機虛擬 ID 查詢，令後台 GAS 100% 忽略已完成紀錄，抽出全題庫題目
-        var rushBypassId = (currentUserData ? currentUserData.studentId : "CAPTAIN") + "_RUSH_" + Math.floor(Math.random() * 9999);
-        Promise.all([
-          fetch(API_URL, { method: 'POST', headers: { 'Content-Type': 'text/plain' }, body: JSON.stringify({ action: 'fetchMissionData', studentId: rushBypassId, missionType: 'vocab_basic', pool: 'Vocab_Pool', count: 15, ignoreSRS: true }) }).then(function(r){ return r.json(); }).catch(function(){ return null; }),
-          fetch(API_URL, { method: 'POST', headers: { 'Content-Type': 'text/plain' }, body: JSON.stringify({ action: 'fetchMissionData', studentId: rushBypassId, missionType: 'grammar', pool: 'Grammar_Pool', count: 10, ignoreSRS: true }) }).then(function(r){ return r.json(); }).catch(function(){ return null; })
-        ]).then(function(arr) {
-          document.getElementById('loadingOverlay').style.display = 'none';
-          var combined = [];
-          if (arr[0] && arr[0].missionData) arr[0].missionData.forEach(function(item){ item._subMode = 'vocab_basic'; combined.push(item); });
-          if (arr[1] && arr[1].missionData) arr[1].missionData.forEach(function(item){ item._subMode = 'grammar'; combined.push(item); });
-          combined.sort(function(){ return 0.5 - Math.random(); });
-          if (combined.length > 0) {
-            startMissionWithQueue(combined.slice(0, 25));
-          } else {
-            showSysMsg("⚠️ 無法載入極限衝刺題庫，請檢查網絡連線", true);
-          }
-        });
+        if (currentMissionType === 'latest_bounty') {
+          playSFX('click');
+          isTimeRushMode = false;
+          document.getElementById('loadingOverlay').style.display = 'flex';
+          var bountyBypassId = (currentUserData ? currentUserData.studentId : "CAPTAIN") + "_BOUNTY_" + Math.floor(Math.random() * 9999);
+          Promise.all([
+            fetch(API_URL, { method: 'POST', headers: { 'Content-Type': 'text/plain' }, body: JSON.stringify({ action: 'fetchMissionData', studentId: bountyBypassId, missionType: 'vocab_basic', pool: 'Vocab_Pool', count: 25, ignoreSRS: true }) }).then(function(r){ return r.json(); }).catch(function(){ return null; }),
+            fetch(API_URL, { method: 'POST', headers: { 'Content-Type': 'text/plain' }, body: JSON.stringify({ action: 'fetchMissionData', studentId: bountyBypassId, missionType: 'grammar', pool: 'Grammar_Pool', count: 20, ignoreSRS: true }) }).then(function(r){ return r.json(); }).catch(function(){ return null; }),
+            fetch(API_URL, { method: 'POST', headers: { 'Content-Type': 'text/plain' }, body: JSON.stringify({ action: 'fetchMissionData', studentId: bountyBypassId, missionType: 'listening', pool: 'Listening_Pool', count: 15, ignoreSRS: true }) }).then(function(r){ return r.json(); }).catch(function(){ return null; })
+          ]).then(function(arr) {
+            document.getElementById('loadingOverlay').style.display = 'none';
+            // 自動挑選每個題庫最新入庫 (Question_ID 數值最大 / 最後生成之 Module) 的題目！
+            function pickNewestModuleItems(list, subMode, takeCount) {
+              if (!list || !list.length) return [];
+              var sorted = list.slice().sort(function(a, b) {
+                var idA = parseInt(String(a.Question_ID || a.id || "0").replace(/\D/g, ""), 10) || 0;
+                var idB = parseInt(String(b.Question_ID || b.id || "0").replace(/\D/g, ""), 10) || 0;
+                return idB - idA;
+              });
+              var newestMod = sorted[0].Modules || sorted[0].modules || "";
+              var modFiltered = newestMod ? sorted.filter(function(x){ return (x.Modules || x.modules) === newestMod; }) : sorted;
+              if (modFiltered.length < 3) modFiltered = sorted;
+              return modFiltered.slice(0, takeCount).map(function(x){ x._subMode = subMode; return x; });
+            }
+            var vItems = (arr[0] && arr[0].missionData) ? pickNewestModuleItems(arr[0].missionData, 'vocab_basic', 5) : [];
+            var gItems = (arr[1] && arr[1].missionData) ? pickNewestModuleItems(arr[1].missionData, 'grammar', 5) : [];
+            var lItems = (arr[2] && arr[2].missionData) ? pickNewestModuleItems(arr[2].missionData, 'listening', 2) : [];
+            var queue = vItems.concat(gItems).concat(lItems);
+            if (queue.length > 0) {
+              showSysMsg("🚨 已鎖定最新教材模組展開特訓！(過關享 +20% 懸賞加成)", false);
+              startMissionWithQueue(queue);
+            } else {
+              showSysMsg("⚠️ 無法載入最新教材特訓題庫", true);
+            }
+          });
+          return;
+        }
+
+        _v266OrigExecuteMission();
       };
 
-      // 🛠️ 修復 1：徹底重構 Grammar 與各題型渲染一致性（解決說明與實際形式不符、底線/除錯被變漏空問題）
+      // 🚀 支援 4 大新題型 (MINI_CLOZE, PARAPHRASE_MATCH, EXTRA_WORD_STRIKE, TONE_DETECTOR) 的題目渲染器
       renderQuestion = function() {
         if (currentIdx >= missionQueue.length) return finishMission();
         var q = missionQueue[currentIdx];
@@ -5787,7 +5832,7 @@
         var oldHint = document.getElementById("skillHintBar");
         if (oldHint) oldHint.remove();
 
-        var effectiveMode = q._subMode || (currentMissionType === 'time_rush' ? 'vocab_basic' : (currentMissionType === 'error_drill' ? (q._savedMode || 'vocab_basic') : currentMissionType));
+        var effectiveMode = q._subMode || (currentMissionType === 'time_rush' ? 'vocab_basic' : (currentMissionType === 'error_drill' ? (q._savedMode || 'vocab_basic') : (currentMissionType === 'latest_bounty' ? 'grammar' : currentMissionType)));
         currentEnemyMode = effectiveMode.startsWith('vocab') ? 'vocab' : (effectiveMode === 'grammar' ? 'grammar' : 'listening');
         atbWaitingForAudio = (currentEnemyMode === 'listening');
 
@@ -5895,10 +5940,9 @@
           targetCurrentAnswer = String(q.Answer || q.answer || "").trim();
           var hasDistractors = String(q.Distractors || q.distractors || "").trim().length > 0;
 
-          // 分離題幹自帶嘅英文指示前綴（例如 "Correct the underlined word: ..."）
           var colonIdxG = rawQuestionStr.indexOf(":");
           var extractedInst = "";
-          if (colonIdxG > 0 && colonIdxG < 52 && /correct|rewrite|combine|choose|complete|fill|identify|find|change|replace|rearrange|unscramble/i.test(rawQuestionStr.slice(0, colonIdxG))) {
+          if (colonIdxG > 0 && colonIdxG < 58 && /correct|rewrite|combine|choose|complete|fill|identify|find|change|replace|rearrange|unscramble|delete|remove|paraphrase|context/i.test(rawQuestionStr.slice(0, colonIdxG))) {
             extractedInst = rawQuestionStr.slice(0, colonIdxG + 1).trim();
             displayQ = rawQuestionStr.slice(colonIdxG + 1).trim();
           } else {
@@ -5908,10 +5952,11 @@
           var bMatch = displayQ.match(/\[(.*?)\]/);
           var bracketContent = bMatch ? bMatch[1].trim() : "";
 
-          if (rawType === 'BUG_HUNTER' && !isBossPhase) {
-            // 除錯題：保留括號內嘅錯字供點擊，絕不替換成 "..."
+          if ((rawType === 'BUG_HUNTER' || rawType === 'EXTRA_WORD_STRIKE') && !isBossPhase) {
             displayQ = displayQ.replace(/\[(.*?)\]/g, "$1");
-            instructionText = "🐞 點擊句子中語法錯誤的字詞 (Tap on the incorrect word in the sentence):";
+            instructionText = (rawType === 'EXTRA_WORD_STRIKE')
+              ? "✂️ 點擊並切除句子中多餘的 1 個贅字 (Tap to strike out the redundant extra word):"
+              : "🐞 點擊句子中語法錯誤的字詞 (Tap on the incorrect word in the sentence):";
             renderMode = "BUG_HUNTER";
           }
           else if (rawType === 'UNSCRAMBLE') {
@@ -5919,8 +5964,17 @@
             instructionText = "🧩 按正確語法順序點擊單字重組句子 (Rearrange the fragments in order):";
             renderMode = "UNSCRAMBLE";
           }
+          else if (rawType === 'PARAPHRASE_MATCH') {
+            isUnderlineCorrection = true;
+            instructionText = extractedInst || "🔄 選出與紅線字詞意思最相近的替換表達 (Select the closest paraphrase for the highlighted phrase):";
+            renderMode = "MCQ";
+          }
+          else if (rawType === 'MINI_CLOZE') {
+            displayQ = displayQ.replace(/\[.*?\]/g, "___");
+            instructionText = extractedInst || "📖 根據微型段落的上文下理與時間推進，選出正確語法形式 (Complete the mini-passage):";
+            renderMode = (hasDistractors || isBossPhase) ? "MCQ" : "INPUT";
+          }
           else if (bMatch && /[a-zA-Z]/.test(bracketContent) && bracketContent.toLowerCase() !== targetCurrentAnswer.toLowerCase()) {
-            // 括號內係「待修正嘅錯字或原形動詞」（如 He [go] to school）-> 渲染為紅色底線字！
             isUnderlineCorrection = true;
             if (hasDistractors || isBossPhase) {
               instructionText = extractedInst || "🔍 選出正確的語法形式替換紅線字詞 (Select the correct replacement for the underlined word):";
@@ -5931,7 +5985,6 @@
             }
           }
           else {
-            // 標準填空題或選擇題：將 [answer] 或 [...] 統一轉為 ___
             displayQ = displayQ.replace(/\[.*?\]/g, "___");
             if (hasDistractors || isBossPhase) {
               instructionText = extractedInst || "📐 選擇最佳語法選項完成句子 (Select the best option to complete the sentence):";
@@ -5975,6 +6028,12 @@
           } else if (currentBadge === 'SEQUENCE' && !isBossPhase) {
             instructionText = "🎧 聆聽錄音並按發生順序排列事件 (Tap events in chronological order):";
             renderMode = "UNSCRAMBLE";
+          } else if (currentBadge === 'TONE_DETECTOR') {
+            instructionText = "🎭 聆聽說話者的語氣與用詞，判斷其真實態度 (Identify the speaker's tone/attitude):";
+            renderMode = "MCQ";
+          } else if (currentBadge === 'PARAPHRASE_MATCH') {
+            instructionText = "🔄 聆聽錄音，選出與對話原意完全相符的同義轉述 (Select the matching paraphrase):";
+            renderMode = "MCQ";
           } else {
             var hasDistL = String(q.Distractors || q.distractors || "").trim().length > 0;
             instructionText = hasDistL ? "🎧 聆聽錄音並選出正確答案 (Listen and select the correct answer):" : "🎧 聆聽錄音並填入關鍵答案 (Listen and type the answer):";
@@ -5993,7 +6052,6 @@
           qTextEl.innerText = displayQ;
         }
 
-        // 若處於守門 Boss 階段（且非 UNSCRAMBLE 句子重組題），啟動專屬 Boss 破防介面並同步指示語
         if (isBossPhase && !isTimeRushMode && renderMode !== "UNSCRAMBLE") {
           renderSpecializedBossArena(effectiveMode, q, ansArea);
           applyBossPressure();
@@ -6096,7 +6154,7 @@
         startEnemyAtbTimer();
       };
 
-      // 🛠️ 修復 8：在每題結算面板 (#feedback-panel) 加入「🚩 回報題目異常」功能，直通 Google Sheets
+      // 🚩 題目異常回報
       var _v266OrigShowFeedback = showStandardFeedbackPanel;
       showStandardFeedbackPanel = function(q, correct) {
         _v266OrigShowFeedback(q, correct);
@@ -6165,7 +6223,6 @@
         });
       }
 
-      // 🛠️ 修復 7：為作戰會議室 (#briefingRoom) 注入「📟 小隊戰術配置與技能總覽艙」，解決下半部空曠問題
       function renderBriefingTacticalTelemetry() {
         var room = document.getElementById('briefingRoom');
         if (!room) return;
@@ -6214,6 +6271,11 @@
         showSysMsg("⚡ 已切換至【小隊 " + n + "】出戰！", false);
       }
 
+      // 🚨 點擊大廳懸賞橫幅：直接啟動「最新入庫教材 Module 特訓」
+      function launchLatestModuleBounty() {
+        openBriefingRoom('latest_bounty');
+      }
+
       function initV265CockpitDOM() {
         var stageBox = document.getElementById('battleStageBox');
         var dock = document.getElementById('tacticalSquadDock');
@@ -6226,6 +6288,15 @@
           if (stanceBar && stanceBar.parentElement !== stageBox) stageBox.appendChild(stanceBar);
           if (banter && banter.parentElement !== stageBox) stageBox.appendChild(banter);
           if (dock && dock.parentElement !== stageBox) stageBox.appendChild(dock);
+        }
+
+        // 將大廳頂部懸賞橫幅升級為可點擊的「🚨 本週新教材特訓懸賞」按鈕
+        var bountyBanner = document.getElementById('bountyBanner');
+        if (bountyBanner) {
+          bountyBanner.style.cursor = "pointer";
+          bountyBanner.onclick = launchLatestModuleBounty;
+          var bText = document.getElementById('bountyText');
+          if (bText) bText.innerHTML = "🚨 <strong>課堂新教材特訓懸賞</strong> (點擊直接挑戰最新入庫單元 · 獎勵 +20%) ➡️";
         }
 
         var dashCoinsEl = document.getElementById('dashCoins');
@@ -6267,7 +6338,7 @@
               '<div id="podIntelEx" style="font-size:11px; color:#94a3b8; font-style:italic;"></div>' +
             '</div>' +
             '<div style="display:flex; justify-content:space-between; font-size:10px; color:#64748b; font-family:monospace;">' +
-              '<span>🛰️ N.O.A.H. HUB v26.6</span>' +
+              '<span>🛰️ N.O.A.H. HUB v26.7</span>' +
               '<span>🎁 連登補給最高 +300 點/日</span>' +
             '</div>';
           loginScr.appendChild(pod);
